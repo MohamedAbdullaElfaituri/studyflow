@@ -1,0 +1,323 @@
+{
+  "@@locale": "tr",
+  "appName": "StudyFlow",
+  "splashSubtitle": "Odaklı üniversite yaşamı için premium çalışma planlaması.",
+  "genericNavigationError": "Bu ekran açılırken bir sorun oluştu.",
+  "genericErrorMessage": "Bir sorun oluştu. Lütfen tekrar deneyin.",
+  "errorStateTitle": "Küçük bir sorun oluştu",
+  "tryAgain": "Tekrar dene",
+  "validationRequired": "Bu alan zorunludur.",
+  "validationInvalidEmail": "Geçerli bir e-posta adresi girin.",
+  "validationMinLength": "En az {min} karakter kullanın.",
+  "@validationMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "errorUserNotFound": "Bu e-posta ile bir hesap bulamadık.",
+  "errorInvalidCredentials": "E-posta veya şifre yanlış.",
+  "errorDuplicateEmail": "Bu e-posta zaten kullanılıyor.",
+  "errorMissingUser": "İsteğinizi şu anda tamamlayamadık.",
+  "homeTab": "Ana sayfa",
+  "tasksTab": "Görevler",
+  "calendarTab": "Takvim",
+  "focusTab": "Odak",
+  "profileTab": "Profil",
+  "loginTitle": "Tekrar hoş geldin",
+  "loginSubtitle": "Derslerini, görevlerini, notlarını ve odak geçmişini birlikte tutmak için giriş yap.",
+  "emailLabel": "E-posta",
+  "passwordLabel": "Şifre",
+  "forgotPasswordAction": "Şifremi unuttum",
+  "loginAction": "Giriş yap",
+  "demoAccountTitle": "Sunuma hazır demo akışı",
+  "demoAccountDescription": "Sunum sırasında uygulamayı hızlıca göstermek için hazır bilgileri kullanın veya yeni bir hesap oluşturun.",
+  "noAccountPrompt": "Hesabın yok mu?",
+  "signUpAction": "Kayıt ol",
+  "signUpTitle": "Hesabını oluştur",
+  "signUpSubtitle": "Kendi çalışma sistemini tek ve zarif bir alanda kur.",
+  "fullNameLabel": "Ad soyad",
+  "confirmPasswordLabel": "Şifreyi doğrula",
+  "passwordsDoNotMatch": "Şifreler eşleşmiyor.",
+  "createAccountAction": "Hesap oluştur",
+  "forgotPasswordTitle": "Şifreni sıfırla",
+  "forgotPasswordSubtitle": "E-posta adresini gir, sana sıfırlama akışını hazırlayalım.",
+  "sendResetLinkAction": "Sıfırlama bağlantısı gönder",
+  "resetPasswordSentMessage": "Hesap varsa, sıfırlama akışı hazırlandı.",
+  "onboardingTitleOne": "Tüm derslerini tek akışta planla",
+  "onboardingSubtitleOne": "Dersleri, ödevleri, son tarihleri ve notları sakin bir mobil deneyimle takip et.",
+  "onboardingTitleTwo": "Akıllı içgörülerle odakta kal",
+  "onboardingSubtitleTwo": "Çalışma oturumlarını seri, hedef ve haftalık özetlerle ölçülebilir ilerlemeye dönüştür.",
+  "onboardingTitleThree": "Kapsayıcı, çok dilli ve özenli",
+  "onboardingSubtitleThree": "İngilizce, Türkçe ve Arapça arasında geçiş yap; Arapça için tam RTL desteği al.",
+  "skipAction": "Geç",
+  "nextAction": "İleri",
+  "finishAction": "Bitir",
+  "welcomeBack": "Tekrar hoş geldin, {name}",
+  "@welcomeBack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHeroSubtitle": "{date} için çalışma akışın burada.",
+  "@dashboardHeroSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyStudyMinutesLabel": "Bugünkü dakika",
+  "weeklyStudyMinutesLabel": "Haftalık dakika",
+  "completedTasksLabel": "Tamamlanan görev",
+  "streakLabel": "Seri",
+  "quickActionsTitle": "Hızlı işlemler",
+  "quickActionsSubtitle": "Şimdi önemli olana hemen geç.",
+  "quickTaskSubtitle": "Ödev ekle veya yönet",
+  "quickCourseSubtitle": "Derslerini düzenle",
+  "quickNoteSubtitle": "Ders notu yakala",
+  "quickAnalyticsSubtitle": "İlerlemeni incele",
+  "todayPlanTitle": "Bugünün planı",
+  "todayPlanSubtitle": "Gün bitmeden ilgilenmen gerekenler.",
+  "emptyTodayTitle": "Bugünün açık görünüyor",
+  "emptyTodayDescription": "İvme kazanmak için bir görev ekle veya odak oturumu planla.",
+  "goalProgressTitle": "Hedef ilerlemesi",
+  "goalProgressSubtitle": "Günlük, haftalık ve aylık hedefleri tek bakışta gör.",
+  "viewAllAction": "Tümünü gör",
+  "dailyGoalLabel": "Günlük hedef",
+  "weeklyGoalLabel": "Haftalık hedef",
+  "monthlyGoalLabel": "Aylık hedef",
+  "goalProgressValue": "{value}/{target} dk",
+  "@goalProgressValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "insightsTitle": "Üretkenlik içgörüleri",
+  "insightsSubtitle": "Son çalışma düzenine göre yardımcı gözlemler.",
+  "insightStreak": "{days} günlük bir seridesin. Düzenini koru ve en verimli saatlerini sahiplen.",
+  "@insightStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "insightPlanDay": "Bugünkü planında alan var. Kısa bir odak oturumu ritmini korumana yardım edebilir.",
+  "insightBoostFocus": "Haftalık hedefin hâlâ ulaşılabilir. İki odaklı oturum arayı kapatabilir.",
+  "insightStrongMomentum": "İlerlemen dengeli görünüyor. Odaklı çalışmayı gerçekçi görev planıyla sürdür.",
+  "achievementsTitle": "Başarılar",
+  "achievementsSubtitle": "Sürekliliği güçlendiren küçük kazanımlar.",
+  "recentActivityTitle": "Son etkinlik",
+  "recentActivitySubtitle": "En son çalışma oturumların ve ivme sinyallerin.",
+  "emptyActivityTitle": "Henüz son etkinlik yok",
+  "emptyActivityDescription": "Etkinlik geçmişini oluşturmaya başlamak için bir odak oturumu tamamla.",
+  "focusSessionSummary": "{minutes} dakikalık odak oturumu",
+  "@focusSessionSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tasksTitle": "Görevler",
+  "tasksSubtitle": "Çalışma yükünü arat, filtrele ve netlikle tamamla.",
+  "addTaskAction": "Görev ekle",
+  "addTaskTitle": "Görev oluştur",
+  "editTaskTitle": "Görevi düzenle",
+  "taskDetailTitle": "Görev detayları",
+  "searchTasksHint": "Görevlerde ara",
+  "sortByDueDate": "Teslim tarihine göre sırala",
+  "sortByPriority": "Önceliğe göre sırala",
+  "sortByCourse": "Derse göre sırala",
+  "filterAll": "Tümü",
+  "filterPending": "Bekliyor",
+  "filterInProgress": "Devam ediyor",
+  "filterCompleted": "Tamamlandı",
+  "archiveCompletedAction": "Tamamlananları arşivle",
+  "emptyTasksTitle": "Henüz görev yok",
+  "emptyTasksDescription": "Bugünkü planı oluşturmak için ilk görevini ekle.",
+  "taskNotFoundTitle": "Görev bulunamadı",
+  "taskNotFoundDescription": "Bu görev silinmiş olabilir veya artık mevcut değil.",
+  "statusLabel": "Durum",
+  "priorityLabel": "Öncelik",
+  "dueDateLabel": "Teslim tarihi",
+  "estimatedMinutesLabel": "Tahmini dakika",
+  "courseLabel": "Ders",
+  "linkedTasksTitle": "Bağlı görevler",
+  "linkedTasksSubtitle": "Bu dersle bağlantılı ödevler ve çalışma adımları.",
+  "emptyLinkedTasksTitle": "Henüz bağlı görev yok",
+  "emptyLinkedTasksDescription": "Bir görev ekleyip bu derse bağla.",
+  "subtasksTitle": "Alt görevler",
+  "emptySubtasksDescription": "İşi daha kolay ilerletmek için küçük adımlara böl.",
+  "deleteTaskAction": "Görevi sil",
+  "titleLabel": "Başlık",
+  "descriptionLabel": "Açıklama",
+  "optionalCourseLabel": "Ders bağlantısı yok",
+  "priorityLow": "Düşük",
+  "priorityMedium": "Orta",
+  "priorityHigh": "Yüksek",
+  "priorityUrgent": "Acil",
+  "pickDateAction": "Tarih seç",
+  "pickTimeAction": "Saat seç",
+  "subtaskLabel": "Alt görev {index}",
+  "@subtaskLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "addSubtaskAction": "Alt görev ekle",
+  "saveTaskAction": "Görevi kaydet",
+  "coursesTitle": "Dersler",
+  "addCourseAction": "Ders ekle",
+  "addCourseTitle": "Ders oluştur",
+  "editCourseTitle": "Dersi düzenle",
+  "courseDetailTitle": "Ders görünümü",
+  "emptyCoursesTitle": "Henüz ders yok",
+  "emptyCoursesDescription": "İlgili görevleri ve notları düzenlemek için bir ders oluştur.",
+  "courseTaskNoteSummary": "{taskCount} görev • {noteCount} not",
+  "@courseTaskNoteSummary": {
+    "placeholders": {
+      "taskCount": {
+        "type": "int"
+      },
+      "noteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "courseNotFoundTitle": "Ders bulunamadı",
+  "courseNotFoundDescription": "Bu ders yüklenemedi.",
+  "instructorLabel": "Öğretim üyesi",
+  "linkedNotesTitle": "Bağlı notlar",
+  "linkedNotesSubtitle": "Bu dersle ilişkili kısa notlar ve ders özetleri.",
+  "emptyLinkedNotesTitle": "Henüz bağlı not yok",
+  "emptyLinkedNotesDescription": "Bir not oluşturup bu derse bağla.",
+  "deleteCourseAction": "Dersi sil",
+  "courseColorLabel": "Ders rengi",
+  "saveCourseAction": "Dersi kaydet",
+  "notesTitle": "Notlar",
+  "addNoteAction": "Not ekle",
+  "addNoteTitle": "Not oluştur",
+  "editNoteTitle": "Notu düzenle",
+  "searchNotesHint": "Notlarda ara",
+  "emptyNotesTitle": "Henüz not yok",
+  "emptyNotesDescription": "İlk içgörünü, ders özetini veya tekrar kontrol listesini kaydet.",
+  "contentLabel": "İçerik",
+  "pinNoteLabel": "Bu notu sabitle",
+  "saveNoteAction": "Notu kaydet",
+  "calendarTitle": "Planlayıcı",
+  "calendarSubtitle": "Günlük ajanda ile aylık ve haftalık planlama.",
+  "monthFormatLabel": "Ay",
+  "weekFormatLabel": "Hafta",
+  "dailyAgendaTitle": "{date} için ajanda",
+  "@dailyAgendaTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAgendaDescription": "Bu gün için planlanmış görev veya odak oturumu yok.",
+  "focusTitle": "Odak modu",
+  "focusSubtitle": "Pomodoro tarzı oturumlarla bilinçli ve enerjik kal.",
+  "focusModeLabel": "Odak oturumu",
+  "breakModeLabel": "Mola oturumu",
+  "startAction": "Başlat",
+  "pauseAction": "Duraklat",
+  "resumeAction": "Sürdür",
+  "resetAction": "Sıfırla",
+  "customizeSessionTitle": "Oturumu özelleştir",
+  "focusDurationLabel": "Odak süresi: {minutes} dakika",
+  "@focusDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "breakDurationLabel": "Mola süresi: {minutes} dakika",
+  "@breakDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "linkCourseOptionalLabel": "Oturumu bir derse bağla",
+  "focusHistoryTitle": "Odak geçmişi",
+  "focusHistorySubtitle": "İlerleme zaman çizelgene kaydedilen son tamamlanan oturumlar.",
+  "emptyFocusHistoryTitle": "Henüz odak geçmişi yok",
+  "emptyFocusHistoryDescription": "Çalışma ritmini takip etmeye başlamak için bir oturum başlat.",
+  "focusSessionCompleteMessage": "Odak oturumu tamamlandı. Harika iş.",
+  "analyticsTitle": "Analitik",
+  "weeklyFocusChartTitle": "Son 7 gün",
+  "courseDistributionTitle": "Ders dağılımı",
+  "miscLabel": "Diğer",
+  "courseAnalyticsRow": "{course}: {minutes} dakika",
+  "@courseAnalyticsRow": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsTitle": "Hedefler",
+  "studyGoalsTitle": "Çalışma hedefleri",
+  "saveGoalsAction": "Hedefleri kaydet",
+  "goalsSavedMessage": "Hedeflerin güncellendi.",
+  "dailyCheckInTitle": "Günlük yoklama",
+  "dailyCheckInDescription": "Yoğun günlerde bile hedeflerinle bağını korumak için kısa bir oturum kaydet.",
+  "dailyCheckInAction": "Şimdi yoklama yap",
+  "dailyCheckInSuccessMessage": "Bugüne kısa bir yoklama oturumu eklendi.",
+  "weeklyReviewTitle": "Haftalık değerlendirme",
+  "weeklyReviewDescription": "Kısa bir değerlendirme ilerlemeyi görmene ve gelecek haftayı ayarlamana yardım eder.",
+  "weeklyReviewSummary": "Bu hafta {minutes} dakika çalıştın ve {tasks} görev tamamladın.",
+  "@weeklyReviewSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "profileFallbackName": "StudyFlow Öğrencisi",
+  "editProfileAction": "Profili düzenle",
+  "profileOverviewTitle": "Profil özeti",
+  "profileOverviewSubtitle": "Mevcut çalışma kimliğinin ve ivmenin kısa görünümü.",
+  "settingsTitle": "Ayarlar",
+  "logoutAction": "Çıkış yap",
+  "editProfileTitle": "Profili düzenle",
+  "saveProfileAction": "Profili kaydet",
+  "languageSectionTitle": "Dil",
+  "englishLabel": "İngilizce",
+  "turkishLabel": "Türkçe",
+  "arabicLabel": "Arapça",
+  "themeSectionTitle": "Tema",
+  "themeSystem": "Sistem",
+  "themeLight": "Açık",
+  "themeDark": "Koyu",
+  "taskRemindersLabel": "Görev hatırlatmaları",
+  "studyRemindersLabel": "Çalışma hatırlatmaları",
+  "dailyReminderLabel": "Günlük hatırlatma",
+  "notificationPreviewTitle": "StudyFlow hatırlatması",
+  "notificationPreviewBody": "Kısa bir odak oturumu bugünü ileri taşıyabilir.",
+  "previewNotificationAction": "Bildirimi önizle",
+  "accessibilityPlaceholderTitle": "Erişilebilirlik desteği",
+  "accessibilityPlaceholderDescription": "Daha büyük metin, azaltılmış hareket ve yardımcı teknolojiler için ayarlar burada genişletilebilir."
+}

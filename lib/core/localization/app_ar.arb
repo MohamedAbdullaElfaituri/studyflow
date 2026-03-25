@@ -1,0 +1,323 @@
+{
+  "@@locale": "ar",
+  "appName": "StudyFlow",
+  "splashSubtitle": "تخطيط دراسي مميز لحياة جامعية أكثر تركيزًا.",
+  "genericNavigationError": "حدثت مشكلة أثناء فتح هذه الشاشة.",
+  "genericErrorMessage": "حدث خطأ ما. حاول مرة أخرى.",
+  "errorStateTitle": "واجهنا مشكلة بسيطة",
+  "tryAgain": "حاول مرة أخرى",
+  "validationRequired": "هذا الحقل مطلوب.",
+  "validationInvalidEmail": "أدخل بريدًا إلكترونيًا صالحًا.",
+  "validationMinLength": "استخدم {min} أحرف على الأقل.",
+  "@validationMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "errorUserNotFound": "لم نعثر على حساب بهذا البريد الإلكتروني.",
+  "errorInvalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+  "errorDuplicateEmail": "هذا البريد الإلكتروني مستخدم بالفعل.",
+  "errorMissingUser": "تعذر إكمال طلبك الآن.",
+  "homeTab": "الرئيسية",
+  "tasksTab": "المهام",
+  "calendarTab": "التقويم",
+  "focusTab": "التركيز",
+  "profileTab": "الملف الشخصي",
+  "loginTitle": "مرحبًا بعودتك",
+  "loginSubtitle": "سجّل الدخول لتجعل الدورات والمهام والملاحظات وسجل التركيز في مكان واحد.",
+  "emailLabel": "البريد الإلكتروني",
+  "passwordLabel": "كلمة المرور",
+  "forgotPasswordAction": "نسيت كلمة المرور؟",
+  "loginAction": "تسجيل الدخول",
+  "demoAccountTitle": "عرض جاهز للمشروع",
+  "demoAccountDescription": "استخدم بيانات الدخول المعبأة مسبقًا أو أنشئ حسابًا جديدًا لاستعراض التطبيق بسرعة أثناء العرض.",
+  "noAccountPrompt": "ليس لديك حساب؟",
+  "signUpAction": "إنشاء حساب",
+  "signUpTitle": "أنشئ حسابك",
+  "signUpSubtitle": "ابنِ نظامك الدراسي الشخصي في مساحة أنيقة واحدة.",
+  "fullNameLabel": "الاسم الكامل",
+  "confirmPasswordLabel": "تأكيد كلمة المرور",
+  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+  "createAccountAction": "إنشاء الحساب",
+  "forgotPasswordTitle": "إعادة تعيين كلمة المرور",
+  "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وسنجهز لك مسار إعادة التعيين.",
+  "sendResetLinkAction": "إرسال رابط إعادة التعيين",
+  "resetPasswordSentMessage": "إذا كان الحساب موجودًا، فقد تم تجهيز مسار إعادة التعيين.",
+  "onboardingTitleOne": "خطط كل مقرراتك في تدفق واحد",
+  "onboardingSubtitleOne": "تابع المواد والواجبات والمواعيد النهائية والملاحظات بتجربة هادئة موجهة للهاتف.",
+  "onboardingTitleTwo": "ابقَ مركزًا مع رؤى ذكية",
+  "onboardingSubtitleTwo": "حوّل جلسات الدراسة إلى تقدم قابل للقياس عبر السلاسل والأهداف والملخصات الأسبوعية.",
+  "onboardingTitleThree": "شامل ومتعدد اللغات ومتقن",
+  "onboardingSubtitleThree": "بدّل بين الإنجليزية والتركية والعربية مع دعم RTL كامل للعربية.",
+  "skipAction": "تخطي",
+  "nextAction": "التالي",
+  "finishAction": "إنهاء",
+  "welcomeBack": "مرحبًا بعودتك يا {name}",
+  "@welcomeBack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHeroSubtitle": "إليك تدفق دراستك ليوم {date}.",
+  "@dashboardHeroSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyStudyMinutesLabel": "دقائق اليوم",
+  "weeklyStudyMinutesLabel": "دقائق الأسبوع",
+  "completedTasksLabel": "المهام المكتملة",
+  "streakLabel": "السلسلة",
+  "quickActionsTitle": "إجراءات سريعة",
+  "quickActionsSubtitle": "انتقل مباشرة إلى ما يهم الآن.",
+  "quickTaskSubtitle": "أضف الواجبات أو أدِرها",
+  "quickCourseSubtitle": "نظّم مقرراتك",
+  "quickNoteSubtitle": "دوّن ملاحظات المحاضرات",
+  "quickAnalyticsSubtitle": "راجع تقدمك",
+  "todayPlanTitle": "خطة اليوم",
+  "todayPlanSubtitle": "ما يحتاج إلى اهتمام قبل نهاية اليوم.",
+  "emptyTodayTitle": "يومك خفيف",
+  "emptyTodayDescription": "أضف مهمة أو خطط جلسة تركيز لبناء الزخم.",
+  "goalProgressTitle": "تقدم الأهداف",
+  "goalProgressSubtitle": "الأهداف اليومية والأسبوعية والشهرية في لمحة.",
+  "viewAllAction": "عرض الكل",
+  "dailyGoalLabel": "الهدف اليومي",
+  "weeklyGoalLabel": "الهدف الأسبوعي",
+  "monthlyGoalLabel": "الهدف الشهري",
+  "goalProgressValue": "{value}/{target} دقيقة",
+  "@goalProgressValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "insightsTitle": "رؤى الإنتاجية",
+  "insightsSubtitle": "ملاحظات مفيدة مبنية على أنماطك الأخيرة.",
+  "insightStreak": "أنت على سلسلة من {days} أيام. حافظ على الروتين واحمِ أفضل ساعات دراستك.",
+  "@insightStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "insightPlanDay": "لديك مساحة في خطة اليوم. جلسة تركيز قصيرة قد تحافظ على إيقاعك.",
+  "insightBoostFocus": "هدفك الأسبوعي ما يزال ممكنًا. جلستان مركزتان قد تغلقان الفجوة.",
+  "insightStrongMomentum": "تقدمك يبدو ثابتًا. واصل الجمع بين العمل المركز والتخطيط الواقعي للمهام.",
+  "achievementsTitle": "الإنجازات",
+  "achievementsSubtitle": "انتصارات صغيرة تعزز الاستمرارية.",
+  "recentActivityTitle": "النشاط الأخير",
+  "recentActivitySubtitle": "أحدث جلسات الدراسة وإشارات الزخم.",
+  "emptyActivityTitle": "لا يوجد نشاط حديث بعد",
+  "emptyActivityDescription": "أكمل جلسة تركيز لبدء بناء سجل نشاطك.",
+  "focusSessionSummary": "جلسة تركيز لمدة {minutes} دقيقة",
+  "@focusSessionSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tasksTitle": "المهام",
+  "tasksSubtitle": "ابحث وصفِّ وأكمل عبء الدراسة بوضوح.",
+  "addTaskAction": "إضافة مهمة",
+  "addTaskTitle": "إنشاء مهمة",
+  "editTaskTitle": "تعديل المهمة",
+  "taskDetailTitle": "تفاصيل المهمة",
+  "searchTasksHint": "ابحث في المهام",
+  "sortByDueDate": "ترتيب حسب تاريخ الاستحقاق",
+  "sortByPriority": "ترتيب حسب الأولوية",
+  "sortByCourse": "ترتيب حسب المقرر",
+  "filterAll": "الكل",
+  "filterPending": "قيد الانتظار",
+  "filterInProgress": "قيد التنفيذ",
+  "filterCompleted": "مكتملة",
+  "archiveCompletedAction": "أرشفة المهام المكتملة",
+  "emptyTasksTitle": "لا توجد مهام بعد",
+  "emptyTasksDescription": "أنشئ مهمتك الأولى لبناء خطة اليوم.",
+  "taskNotFoundTitle": "المهمة غير موجودة",
+  "taskNotFoundDescription": "قد تكون هذه المهمة حُذفت أو لم تعد متاحة.",
+  "statusLabel": "الحالة",
+  "priorityLabel": "الأولوية",
+  "dueDateLabel": "تاريخ الاستحقاق",
+  "estimatedMinutesLabel": "الدقائق المقدرة",
+  "courseLabel": "المقرر",
+  "linkedTasksTitle": "المهام المرتبطة",
+  "linkedTasksSubtitle": "الواجبات وخطوات الدراسة المرتبطة بهذا المقرر.",
+  "emptyLinkedTasksTitle": "لا توجد مهام مرتبطة بعد",
+  "emptyLinkedTasksDescription": "أضف مهمة واربطها بهذا المقرر.",
+  "subtasksTitle": "المهام الفرعية",
+  "emptySubtasksDescription": "قسّم هذا العمل إلى خطوات أصغر لتسهيل التقدم.",
+  "deleteTaskAction": "حذف المهمة",
+  "titleLabel": "العنوان",
+  "descriptionLabel": "الوصف",
+  "optionalCourseLabel": "بدون ربط بمقرر",
+  "priorityLow": "منخفضة",
+  "priorityMedium": "متوسطة",
+  "priorityHigh": "مرتفعة",
+  "priorityUrgent": "عاجلة",
+  "pickDateAction": "اختر التاريخ",
+  "pickTimeAction": "اختر الوقت",
+  "subtaskLabel": "مهمة فرعية {index}",
+  "@subtaskLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "addSubtaskAction": "إضافة مهمة فرعية",
+  "saveTaskAction": "حفظ المهمة",
+  "coursesTitle": "المقررات",
+  "addCourseAction": "إضافة مقرر",
+  "addCourseTitle": "إنشاء مقرر",
+  "editCourseTitle": "تعديل المقرر",
+  "courseDetailTitle": "نظرة عامة على المقرر",
+  "emptyCoursesTitle": "لا توجد مقررات بعد",
+  "emptyCoursesDescription": "أنشئ مقررًا لتنظيم المهام والملاحظات المرتبطة به.",
+  "courseTaskNoteSummary": "{taskCount} مهام • {noteCount} ملاحظات",
+  "@courseTaskNoteSummary": {
+    "placeholders": {
+      "taskCount": {
+        "type": "int"
+      },
+      "noteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "courseNotFoundTitle": "المقرر غير موجود",
+  "courseNotFoundDescription": "تعذر تحميل هذا المقرر.",
+  "instructorLabel": "المحاضر",
+  "linkedNotesTitle": "الملاحظات المرتبطة",
+  "linkedNotesSubtitle": "مراجع سريعة وملاحظات محاضرات مرتبطة بهذا المقرر.",
+  "emptyLinkedNotesTitle": "لا توجد ملاحظات مرتبطة بعد",
+  "emptyLinkedNotesDescription": "أنشئ ملاحظة واربطها بهذا المقرر.",
+  "deleteCourseAction": "حذف المقرر",
+  "courseColorLabel": "لون المقرر",
+  "saveCourseAction": "حفظ المقرر",
+  "notesTitle": "الملاحظات",
+  "addNoteAction": "إضافة ملاحظة",
+  "addNoteTitle": "إنشاء ملاحظة",
+  "editNoteTitle": "تعديل الملاحظة",
+  "searchNotesHint": "ابحث في الملاحظات",
+  "emptyNotesTitle": "لا توجد ملاحظات بعد",
+  "emptyNotesDescription": "سجّل أول فكرة أو ملخص محاضرة أو قائمة مراجعة.",
+  "contentLabel": "المحتوى",
+  "pinNoteLabel": "تثبيت هذه الملاحظة",
+  "saveNoteAction": "حفظ الملاحظة",
+  "calendarTitle": "المخطط",
+  "calendarSubtitle": "تخطيط شهري وأسبوعي مع أجندة يومية.",
+  "monthFormatLabel": "شهر",
+  "weekFormatLabel": "أسبوع",
+  "dailyAgendaTitle": "أجندة {date}",
+  "@dailyAgendaTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAgendaDescription": "لا توجد مهام أو جلسات تركيز مخططة لهذا اليوم.",
+  "focusTitle": "وضع التركيز",
+  "focusSubtitle": "استخدم جلسات بومودورو لتبقى مقصودًا ومتحفزًا.",
+  "focusModeLabel": "جلسة تركيز",
+  "breakModeLabel": "جلسة استراحة",
+  "startAction": "ابدأ",
+  "pauseAction": "إيقاف مؤقت",
+  "resumeAction": "استئناف",
+  "resetAction": "إعادة ضبط",
+  "customizeSessionTitle": "تخصيص الجلسة",
+  "focusDurationLabel": "مدة التركيز: {minutes} دقيقة",
+  "@focusDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "breakDurationLabel": "مدة الاستراحة: {minutes} دقيقة",
+  "@breakDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "linkCourseOptionalLabel": "اربط الجلسة بمقرر",
+  "focusHistoryTitle": "سجل التركيز",
+  "focusHistorySubtitle": "أحدث الجلسات المكتملة المحفوظة في خط تقدمك.",
+  "emptyFocusHistoryTitle": "لا يوجد سجل تركيز بعد",
+  "emptyFocusHistoryDescription": "ابدأ جلسة لتبدأ في تتبع إيقاع دراستك.",
+  "focusSessionCompleteMessage": "اكتملت جلسة التركيز. عمل رائع.",
+  "analyticsTitle": "التحليلات",
+  "weeklyFocusChartTitle": "آخر 7 أيام",
+  "courseDistributionTitle": "توزيع المقررات",
+  "miscLabel": "متفرقات",
+  "courseAnalyticsRow": "{course}: {minutes} دقيقة",
+  "@courseAnalyticsRow": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsTitle": "الأهداف",
+  "studyGoalsTitle": "أهداف الدراسة",
+  "saveGoalsAction": "حفظ الأهداف",
+  "goalsSavedMessage": "تم تحديث أهدافك.",
+  "dailyCheckInTitle": "تسجيل يومي",
+  "dailyCheckInDescription": "أضف جلسة قصيرة لتحافظ على اتصالك بأهدافك حتى في الأيام المزدحمة.",
+  "dailyCheckInAction": "سجّل الآن",
+  "dailyCheckInSuccessMessage": "تمت إضافة جلسة تسجيل سريعة إلى اليوم.",
+  "weeklyReviewTitle": "المراجعة الأسبوعية",
+  "weeklyReviewDescription": "مراجعة بسيطة تساعدك على ملاحظة التقدم وضبط خطة الأسبوع القادم.",
+  "weeklyReviewSummary": "درست هذا الأسبوع {minutes} دقيقة وأنجزت {tasks} مهام.",
+  "@weeklyReviewSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "profileFallbackName": "طالب StudyFlow",
+  "editProfileAction": "تعديل الملف الشخصي",
+  "profileOverviewTitle": "نظرة عامة على الملف الشخصي",
+  "profileOverviewSubtitle": "لقطة سريعة لهويتك الدراسية الحالية وزخمك.",
+  "settingsTitle": "الإعدادات",
+  "logoutAction": "تسجيل الخروج",
+  "editProfileTitle": "تعديل الملف الشخصي",
+  "saveProfileAction": "حفظ الملف الشخصي",
+  "languageSectionTitle": "اللغة",
+  "englishLabel": "الإنجليزية",
+  "turkishLabel": "التركية",
+  "arabicLabel": "العربية",
+  "themeSectionTitle": "المظهر",
+  "themeSystem": "النظام",
+  "themeLight": "فاتح",
+  "themeDark": "داكن",
+  "taskRemindersLabel": "تذكيرات المهام",
+  "studyRemindersLabel": "تذكيرات الدراسة",
+  "dailyReminderLabel": "تذكير يومي",
+  "notificationPreviewTitle": "تذكير StudyFlow",
+  "notificationPreviewBody": "جلسة تركيز قصيرة قد تدفع يومك إلى الأمام.",
+  "previewNotificationAction": "معاينة الإشعار",
+  "accessibilityPlaceholderTitle": "دعم إمكانية الوصول",
+  "accessibilityPlaceholderDescription": "يمكن توسيع هذا القسم لاحقًا لإعدادات النص الأكبر وتقليل الحركة ودعم التقنيات المساعدة."
+}

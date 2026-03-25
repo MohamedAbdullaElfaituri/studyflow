@@ -1,0 +1,323 @@
+{
+  "@@locale": "en",
+  "appName": "StudyFlow",
+  "splashSubtitle": "Premium study planning for focused university life.",
+  "genericNavigationError": "Something went wrong while opening this screen.",
+  "genericErrorMessage": "Something went wrong. Please try again.",
+  "errorStateTitle": "We hit a small issue",
+  "tryAgain": "Try again",
+  "validationRequired": "This field is required.",
+  "validationInvalidEmail": "Enter a valid email address.",
+  "validationMinLength": "Use at least {min} characters.",
+  "@validationMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "errorUserNotFound": "We could not find an account with that email.",
+  "errorInvalidCredentials": "Your email or password is incorrect.",
+  "errorDuplicateEmail": "This email is already in use.",
+  "errorMissingUser": "We could not complete your request right now.",
+  "homeTab": "Home",
+  "tasksTab": "Tasks",
+  "calendarTab": "Calendar",
+  "focusTab": "Focus",
+  "profileTab": "Profile",
+  "loginTitle": "Welcome back",
+  "loginSubtitle": "Sign in to keep your courses, tasks, notes, and focus history together.",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "forgotPasswordAction": "Forgot password?",
+  "loginAction": "Log in",
+  "demoAccountTitle": "Demo-ready project flow",
+  "demoAccountDescription": "Use the prefilled credentials or create a new account to explore the app quickly during your presentation.",
+  "noAccountPrompt": "Don’t have an account?",
+  "signUpAction": "Sign up",
+  "signUpTitle": "Create your account",
+  "signUpSubtitle": "Build your personal study system in one elegant workspace.",
+  "fullNameLabel": "Full name",
+  "confirmPasswordLabel": "Confirm password",
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "createAccountAction": "Create account",
+  "forgotPasswordTitle": "Reset your password",
+  "forgotPasswordSubtitle": "Enter your email and we will send you a reset link structure.",
+  "sendResetLinkAction": "Send reset link",
+  "resetPasswordSentMessage": "If the account exists, a reset flow has been prepared.",
+  "onboardingTitleOne": "Plan every course in one flow",
+  "onboardingSubtitleOne": "Track classes, assignments, deadlines, and notes with a calm mobile-first experience.",
+  "onboardingTitleTwo": "Stay focused with smart insights",
+  "onboardingSubtitleTwo": "Turn study sessions into measurable progress with streaks, goals, and weekly summaries.",
+  "onboardingTitleThree": "Inclusive, multilingual, and polished",
+  "onboardingSubtitleThree": "Switch between English, Turkish, and Arabic with full RTL support for Arabic.",
+  "skipAction": "Skip",
+  "nextAction": "Next",
+  "finishAction": "Finish",
+  "welcomeBack": "Welcome back, {name}",
+  "@welcomeBack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardHeroSubtitle": "Here is your study flow for {date}.",
+  "@dashboardHeroSubtitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyStudyMinutesLabel": "Today’s minutes",
+  "weeklyStudyMinutesLabel": "Weekly minutes",
+  "completedTasksLabel": "Completed tasks",
+  "streakLabel": "Streak",
+  "quickActionsTitle": "Quick actions",
+  "quickActionsSubtitle": "Jump into the next thing that matters.",
+  "quickTaskSubtitle": "Add or manage assignments",
+  "quickCourseSubtitle": "Organize your subjects",
+  "quickNoteSubtitle": "Capture class insights",
+  "quickAnalyticsSubtitle": "Review your momentum",
+  "todayPlanTitle": "Today’s plan",
+  "todayPlanSubtitle": "What needs attention before the day ends.",
+  "emptyTodayTitle": "Your day is clear",
+  "emptyTodayDescription": "Add a task or plan a focus block to build momentum.",
+  "goalProgressTitle": "Goal progress",
+  "goalProgressSubtitle": "Daily, weekly, and monthly targets at a glance.",
+  "viewAllAction": "View all",
+  "dailyGoalLabel": "Daily goal",
+  "weeklyGoalLabel": "Weekly goal",
+  "monthlyGoalLabel": "Monthly goal",
+  "goalProgressValue": "{value}/{target} min",
+  "@goalProgressValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "insightsTitle": "Productivity insights",
+  "insightsSubtitle": "Helpful observations based on your recent patterns.",
+  "insightStreak": "You are on a {days}-day streak. Keep the routine steady and protect your best study hours.",
+  "@insightStreak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "insightPlanDay": "You have room in today’s plan. A short focus session could keep your rhythm strong.",
+  "insightBoostFocus": "Your weekly target is still within reach. Two focused sessions can close the gap.",
+  "insightStrongMomentum": "Your progress looks steady. Keep pairing focused work with realistic task planning.",
+  "achievementsTitle": "Achievements",
+  "achievementsSubtitle": "Small wins that reinforce consistency.",
+  "recentActivityTitle": "Recent activity",
+  "recentActivitySubtitle": "Your latest study sessions and momentum signals.",
+  "emptyActivityTitle": "No recent activity yet",
+  "emptyActivityDescription": "Complete a focus session to begin building your activity history.",
+  "focusSessionSummary": "{minutes} minute focus session",
+  "@focusSessionSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tasksTitle": "Tasks",
+  "tasksSubtitle": "Search, filter, and complete your study workload with clarity.",
+  "addTaskAction": "Add task",
+  "addTaskTitle": "Create task",
+  "editTaskTitle": "Edit task",
+  "taskDetailTitle": "Task details",
+  "searchTasksHint": "Search tasks",
+  "sortByDueDate": "Sort by due date",
+  "sortByPriority": "Sort by priority",
+  "sortByCourse": "Sort by course",
+  "filterAll": "All",
+  "filterPending": "Pending",
+  "filterInProgress": "In progress",
+  "filterCompleted": "Completed",
+  "archiveCompletedAction": "Archive completed tasks",
+  "emptyTasksTitle": "No tasks yet",
+  "emptyTasksDescription": "Create your first task to build today’s plan.",
+  "taskNotFoundTitle": "Task not found",
+  "taskNotFoundDescription": "This task may have been deleted or is no longer available.",
+  "statusLabel": "Status",
+  "priorityLabel": "Priority",
+  "dueDateLabel": "Due date",
+  "estimatedMinutesLabel": "Estimated minutes",
+  "courseLabel": "Course",
+  "linkedTasksTitle": "Linked tasks",
+  "linkedTasksSubtitle": "Assignments and study actions connected to this course.",
+  "emptyLinkedTasksTitle": "No linked tasks yet",
+  "emptyLinkedTasksDescription": "Add a task and connect it to this course.",
+  "subtasksTitle": "Subtasks",
+  "emptySubtasksDescription": "Break this work into smaller steps for easier progress.",
+  "deleteTaskAction": "Delete task",
+  "titleLabel": "Title",
+  "descriptionLabel": "Description",
+  "optionalCourseLabel": "No course linked",
+  "priorityLow": "Low",
+  "priorityMedium": "Medium",
+  "priorityHigh": "High",
+  "priorityUrgent": "Urgent",
+  "pickDateAction": "Pick date",
+  "pickTimeAction": "Pick time",
+  "subtaskLabel": "Subtask {index}",
+  "@subtaskLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "addSubtaskAction": "Add subtask",
+  "saveTaskAction": "Save task",
+  "coursesTitle": "Courses",
+  "addCourseAction": "Add course",
+  "addCourseTitle": "Create course",
+  "editCourseTitle": "Edit course",
+  "courseDetailTitle": "Course overview",
+  "emptyCoursesTitle": "No courses yet",
+  "emptyCoursesDescription": "Create a course to organize related tasks and notes.",
+  "courseTaskNoteSummary": "{taskCount} tasks • {noteCount} notes",
+  "@courseTaskNoteSummary": {
+    "placeholders": {
+      "taskCount": {
+        "type": "int"
+      },
+      "noteCount": {
+        "type": "int"
+      }
+    }
+  },
+  "courseNotFoundTitle": "Course not found",
+  "courseNotFoundDescription": "This course could not be loaded.",
+  "instructorLabel": "Instructor",
+  "linkedNotesTitle": "Linked notes",
+  "linkedNotesSubtitle": "Quick references and class notes connected to this course.",
+  "emptyLinkedNotesTitle": "No linked notes yet",
+  "emptyLinkedNotesDescription": "Create a note and attach it to this course.",
+  "deleteCourseAction": "Delete course",
+  "courseColorLabel": "Course color",
+  "saveCourseAction": "Save course",
+  "notesTitle": "Notes",
+  "addNoteAction": "Add note",
+  "addNoteTitle": "Create note",
+  "editNoteTitle": "Edit note",
+  "searchNotesHint": "Search notes",
+  "emptyNotesTitle": "No notes yet",
+  "emptyNotesDescription": "Capture your first insight, lecture summary, or revision checklist.",
+  "contentLabel": "Content",
+  "pinNoteLabel": "Pin this note",
+  "saveNoteAction": "Save note",
+  "calendarTitle": "Planner",
+  "calendarSubtitle": "Monthly and weekly planning with a daily agenda.",
+  "monthFormatLabel": "Month",
+  "weekFormatLabel": "Week",
+  "dailyAgendaTitle": "Agenda for {date}",
+  "@dailyAgendaTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyAgendaDescription": "No tasks or focus sessions are planned for this day.",
+  "focusTitle": "Focus mode",
+  "focusSubtitle": "Use Pomodoro-style sessions to stay intentional and energized.",
+  "focusModeLabel": "Focus session",
+  "breakModeLabel": "Break session",
+  "startAction": "Start",
+  "pauseAction": "Pause",
+  "resumeAction": "Resume",
+  "resetAction": "Reset",
+  "customizeSessionTitle": "Customize session",
+  "focusDurationLabel": "Focus duration: {minutes} minutes",
+  "@focusDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "breakDurationLabel": "Break duration: {minutes} minutes",
+  "@breakDurationLabel": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "linkCourseOptionalLabel": "Link session to a course",
+  "focusHistoryTitle": "Focus history",
+  "focusHistorySubtitle": "Recent completed sessions saved to your progress timeline.",
+  "emptyFocusHistoryTitle": "No focus history yet",
+  "emptyFocusHistoryDescription": "Start a session to begin tracking your study rhythm.",
+  "focusSessionCompleteMessage": "Focus session completed. Great work.",
+  "analyticsTitle": "Analytics",
+  "weeklyFocusChartTitle": "Last 7 days",
+  "courseDistributionTitle": "Course distribution",
+  "miscLabel": "Misc",
+  "courseAnalyticsRow": "{course}: {minutes} minutes",
+  "@courseAnalyticsRow": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsTitle": "Goals",
+  "studyGoalsTitle": "Study targets",
+  "saveGoalsAction": "Save goals",
+  "goalsSavedMessage": "Your goals have been updated.",
+  "dailyCheckInTitle": "Daily check-in",
+  "dailyCheckInDescription": "Log a short session to stay connected to your goals, even on busy days.",
+  "dailyCheckInAction": "Check in now",
+  "dailyCheckInSuccessMessage": "A quick check-in session was added to today.",
+  "weeklyReviewTitle": "Weekly review",
+  "weeklyReviewDescription": "A simple reflection helps you notice progress and adjust next week’s plan.",
+  "weeklyReviewSummary": "This week you studied for {minutes} minutes and completed {tasks} tasks.",
+  "@weeklyReviewSummary": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "profileFallbackName": "StudyFlow Student",
+  "editProfileAction": "Edit profile",
+  "profileOverviewTitle": "Profile overview",
+  "profileOverviewSubtitle": "A snapshot of your current study identity and momentum.",
+  "settingsTitle": "Settings",
+  "logoutAction": "Log out",
+  "editProfileTitle": "Edit profile",
+  "saveProfileAction": "Save profile",
+  "languageSectionTitle": "Language",
+  "englishLabel": "English",
+  "turkishLabel": "Turkish",
+  "arabicLabel": "Arabic",
+  "themeSectionTitle": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "taskRemindersLabel": "Task reminders",
+  "studyRemindersLabel": "Study reminders",
+  "dailyReminderLabel": "Daily reminder",
+  "notificationPreviewTitle": "StudyFlow reminder",
+  "notificationPreviewBody": "A short focused session can move today forward.",
+  "previewNotificationAction": "Preview notification",
+  "accessibilityPlaceholderTitle": "Accessibility support",
+  "accessibilityPlaceholderDescription": "Accessibility-specific preferences can be expanded here for larger text, reduced motion, and assistive support."
+}
