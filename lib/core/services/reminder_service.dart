@@ -1,12 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ReminderService {
-  ReminderService(this._notifications);
+  ReminderService(
+    this._notifications, {
+    this.isSupported = true,
+  });
 
   final FlutterLocalNotificationsPlugin _notifications;
+  final bool isSupported;
 
   static Future<ReminderService> create() async {
     final notifications = FlutterLocalNotificationsPlugin();
+    if (kIsWeb) {
+      return ReminderService(notifications, isSupported: false);
+    }
+
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: ios);
@@ -15,6 +24,10 @@ class ReminderService {
   }
 
   Future<void> requestPermissions() async {
+    if (!isSupported) {
+      return;
+    }
+
     await _notifications
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -22,7 +35,7 @@ class ReminderService {
 
     await _notifications
         .resolvePlatformSpecificImplementation<
-            DarwinFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
           alert: true,
           badge: true,
@@ -46,6 +59,10 @@ class ReminderService {
     required String title,
     required String body,
   }) async {
+    if (!isSupported) {
+      return;
+    }
+
     await _notifications.show(id, title, body, _details);
   }
 
@@ -53,6 +70,10 @@ class ReminderService {
     required int id,
     required int minutes,
   }) async {
+    if (!isSupported) {
+      return;
+    }
+
     await _notifications.show(
       id,
       'Focus session complete',
@@ -66,6 +87,10 @@ class ReminderService {
     required String title,
     required int streak,
   }) async {
+    if (!isSupported) {
+      return;
+    }
+
     await _notifications.show(
       id,
       'Habit progress unlocked',

@@ -75,7 +75,7 @@ class ExamsScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
-                    const Icon(Icons.event_upcoming_rounded,
+                    const Icon(Icons.event_available_rounded,
                         size: 54, color: Colors.white),
                   ],
                 ),
