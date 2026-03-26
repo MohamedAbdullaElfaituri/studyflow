@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../core/errors/app_exception.dart';
+import '../../core/localization/app_copy.dart';
 import '../../core/localization/generated/app_localizations.dart';
 
 extension BuildContextX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this)!;
+  AppCopy get copy => AppCopy.of(Localizations.localeOf(this));
 
   void showAppSnackBar(String message) {
     ScaffoldMessenger.of(this)
@@ -12,9 +14,9 @@ extension BuildContextX on BuildContext {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  String validationMessage(String? code, {int minLength = 6}) {
+  String? validationMessage(String? code, {int minLength = 6}) {
     if (code == null) {
-      return '';
+      return null;
     }
 
     return switch (code) {

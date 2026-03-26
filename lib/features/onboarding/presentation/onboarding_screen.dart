@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,6 +30,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedLanguage = ref.watch(appLocalePreferenceProvider) ?? 'en';
     final slides = [
       (
         icon: Icons.auto_graph_rounded,
@@ -53,17 +55,47 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return AppPage(
       child: Column(
         children: [
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              onPressed: () async {
-                await ref.read(authControllerProvider.notifier).completeOnboarding();
-                if (!mounted) return;
-                context.go(LoginScreen.routePath);
-              },
-              child: Text(context.l10n.skipAction),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.copy.chooseLanguageTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await ref.read(authControllerProvider.notifier).completeOnboarding();
+                  if (!mounted) return;
+                  context.go(LoginScreen.routePath);
+                },
+                child: Text(context.l10n.skipAction),
+              ),
+            ],
           ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.copy.chooseLanguageSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SegmentedButton<String>(
+            segments: [
+              ButtonSegment(value: 'en', label: Text(context.l10n.englishLabel)),
+              ButtonSegment(value: 'tr', label: Text(context.l10n.turkishLabel)),
+              ButtonSegment(value: 'ar', label: Text(context.l10n.arabicLabel)),
+            ],
+            selected: {selectedLanguage},
+            onSelectionChanged: (selection) async {
+              HapticFeedback.selectionClick();
+              await ref
+                  .read(appLocalePreferenceProvider.notifier)
+                  .setLocale(selection.first);
+            },
+          ),
+          const SizedBox(height: AppSpacing.xl),
           Expanded(
             child: PageView.builder(
               controller: _controller,
@@ -74,21 +106,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 180,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            scheme.primaryContainer,
-                            scheme.tertiaryContainer,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                    GradientBanner(
+                      colors: [
+                        scheme.primary,
+                        scheme.secondary,
+                        scheme.tertiary,
+                      ],
+                      child: SizedBox(
+                        width: 240,
+                        height: 220,
+                        child: Center(
+                          child: Icon(slide.icon, size: 92, color: Colors.white),
                         ),
-                        borderRadius: BorderRadius.circular(40),
                       ),
-                      child: Icon(slide.icon, size: 72, color: scheme.primary),
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                     Text(
@@ -139,7 +169,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 context.go(LoginScreen.routePath);
               } else {
                 await _controller.nextPage(
-                  duration: const Duration(milliseconds: 260),
+                  duration: const Duration(milliseconds: 320),
                   curve: Curves.easeOutCubic,
                 );
               }

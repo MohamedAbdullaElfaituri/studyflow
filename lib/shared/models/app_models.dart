@@ -6,6 +6,10 @@ enum TaskStatus { pending, inProgress, completed }
 
 enum AppThemePreference { system, light, dark }
 
+enum ExamType { exam, assignment, quiz }
+
+enum HabitFrequency { daily, weekly }
+
 class AppUserModel {
   const AppUserModel({
     required this.id,
@@ -443,6 +447,189 @@ class StudySessionModel {
       endTime: DateTime.parse(json['end_time'] as String),
       durationMinutes: (json['duration_minutes'] as num?)?.toInt() ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+class ExamModel {
+  const ExamModel({
+    required this.id,
+    required this.userId,
+    required this.courseId,
+    required this.title,
+    required this.description,
+    required this.dateTime,
+    required this.type,
+    required this.priority,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String userId;
+  final String? courseId;
+  final String title;
+  final String description;
+  final DateTime dateTime;
+  final ExamType type;
+  final TaskPriority priority;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  ExamModel copyWith({
+    String? courseId,
+    String? title,
+    String? description,
+    DateTime? dateTime,
+    ExamType? type,
+    TaskPriority? priority,
+    DateTime? updatedAt,
+  }) {
+    return ExamModel(
+      id: id,
+      userId: userId,
+      courseId: courseId ?? this.courseId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dateTime: dateTime ?? this.dateTime,
+      type: type ?? this.type,
+      priority: priority ?? this.priority,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'course_id': courseId,
+      'title': title,
+      'description': description,
+      'date_time': dateTime.toIso8601String(),
+      'type': type.name,
+      'priority': priority.name,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory ExamModel.fromJson(Map<String, dynamic> json) {
+    return ExamModel(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      courseId: json['course_id'] as String?,
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      dateTime: DateTime.parse(json['date_time'] as String),
+      type: ExamType.values.firstWhere(
+        (value) => value.name == (json['type'] as String? ?? 'exam'),
+        orElse: () => ExamType.exam,
+      ),
+      priority: TaskPriority.values.firstWhere(
+        (value) => value.name == (json['priority'] as String? ?? 'high'),
+        orElse: () => TaskPriority.high,
+      ),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+}
+
+class HabitModel {
+  const HabitModel({
+    required this.id,
+    required this.userId,
+    required this.title,
+    required this.description,
+    required this.color,
+    required this.frequency,
+    required this.goalCount,
+    required this.completedCount,
+    required this.streakCount,
+    required this.lastCompletedAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String userId;
+  final String title;
+  final String description;
+  final int color;
+  final HabitFrequency frequency;
+  final int goalCount;
+  final int completedCount;
+  final int streakCount;
+  final DateTime? lastCompletedAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  HabitModel copyWith({
+    String? title,
+    String? description,
+    int? color,
+    HabitFrequency? frequency,
+    int? goalCount,
+    int? completedCount,
+    int? streakCount,
+    DateTime? lastCompletedAt,
+    DateTime? updatedAt,
+  }) {
+    return HabitModel(
+      id: id,
+      userId: userId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      color: color ?? this.color,
+      frequency: frequency ?? this.frequency,
+      goalCount: goalCount ?? this.goalCount,
+      completedCount: completedCount ?? this.completedCount,
+      streakCount: streakCount ?? this.streakCount,
+      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  bool get isCompleted => completedCount >= goalCount;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'title': title,
+      'description': description,
+      'color': color,
+      'frequency': frequency.name,
+      'goal_count': goalCount,
+      'completed_count': completedCount,
+      'streak_count': streakCount,
+      'last_completed_at': lastCompletedAt?.toIso8601String(),
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory HabitModel.fromJson(Map<String, dynamic> json) {
+    return HabitModel(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      color: (json['color'] as num?)?.toInt() ?? 0xFF2BAE9A,
+      frequency: HabitFrequency.values.firstWhere(
+        (value) => value.name == (json['frequency'] as String? ?? 'daily'),
+        orElse: () => HabitFrequency.daily,
+      ),
+      goalCount: (json['goal_count'] as num?)?.toInt() ?? 1,
+      completedCount: (json['completed_count'] as num?)?.toInt() ?? 0,
+      streakCount: (json['streak_count'] as num?)?.toInt() ?? 0,
+      lastCompletedAt: json['last_completed_at'] == null
+          ? null
+          : DateTime.parse(json['last_completed_at'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 }

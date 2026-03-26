@@ -42,6 +42,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     DateTimeUtils.isSameDay(task.dueDateTime!, _selectedDay),
               )
               .toList();
+          final examsForDay = studyData.exams
+              .where((exam) => DateTimeUtils.isSameDay(exam.dateTime, _selectedDay))
+              .toList();
           final sessionsForDay = studyData.sessions
               .where(
                 (session) => DateTimeUtils.isSameDay(session.startTime, _selectedDay),
@@ -81,6 +84,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         (session) => DateTimeUtils.isSameDay(session.startTime, day),
                       ),
                     );
+                    items.addAll(
+                      studyData.exams.where(
+                        (exam) => DateTimeUtils.isSameDay(exam.dateTime, day),
+                      ),
+                    );
                     return items;
                   },
                   onDaySelected: (selectedDay, focusedDay) {
@@ -105,9 +113,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    if (tasksForDay.isEmpty && sessionsForDay.isEmpty)
+                    if (tasksForDay.isEmpty &&
+                        sessionsForDay.isEmpty &&
+                        examsForDay.isEmpty)
                       Text(context.l10n.emptyAgendaDescription)
                     else ...[
+                      ...examsForDay.map(
+                        (exam) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.event_note_rounded),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(child: Text(exam.title)),
+                              Text(DateTimeUtils.time(exam.dateTime, locale)),
+                            ],
+                          ),
+                        ),
+                      ),
                       ...tasksForDay.map(
                         (task) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),

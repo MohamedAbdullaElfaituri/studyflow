@@ -179,6 +179,100 @@ class DemoSeedService {
     ];
   }
 
+  static List<ExamModel> examsFor(String userId, List<CourseModel> courses) {
+    final now = DateTime.now();
+
+    return [
+      ExamModel(
+        id: _uuid.v4(),
+        userId: userId,
+        courseId: courses.first.id,
+        title: 'HCI midterm presentation',
+        description:
+            'Present usability findings, accessibility issues, and the revised mobile flow.',
+        dateTime: now.add(const Duration(days: 3, hours: 4)),
+        type: ExamType.exam,
+        priority: TaskPriority.urgent,
+        createdAt: now.subtract(const Duration(days: 7)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+      ExamModel(
+        id: _uuid.v4(),
+        userId: userId,
+        courseId: courses[1].id,
+        title: 'Supabase schema assignment',
+        description:
+            'Upload the SQL schema, RLS policies, and validation notes before the lab closes.',
+        dateTime: now.add(const Duration(days: 1, hours: 6)),
+        type: ExamType.assignment,
+        priority: TaskPriority.high,
+        createdAt: now.subtract(const Duration(days: 5)),
+        updatedAt: now.subtract(const Duration(hours: 10)),
+      ),
+      ExamModel(
+        id: _uuid.v4(),
+        userId: userId,
+        courseId: courses[2].id,
+        title: 'Sprint planning quiz',
+        description: 'Review agile ceremonies, story points, and estimation trade-offs.',
+        dateTime: now.add(const Duration(days: 6, hours: 2)),
+        type: ExamType.quiz,
+        priority: TaskPriority.medium,
+        createdAt: now.subtract(const Duration(days: 3)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+    ];
+  }
+
+  static List<HabitModel> habitsFor(String userId) {
+    final now = DateTime.now();
+
+    return [
+      HabitModel(
+        id: _uuid.v4(),
+        userId: userId,
+        title: 'Morning planning',
+        description: 'Review the day and lock the first focus block before 09:00.',
+        color: 0xFF1F6FEB,
+        frequency: HabitFrequency.daily,
+        goalCount: 1,
+        completedCount: 1,
+        streakCount: 4,
+        lastCompletedAt: now.subtract(const Duration(hours: 2)),
+        createdAt: now.subtract(const Duration(days: 20)),
+        updatedAt: now.subtract(const Duration(hours: 2)),
+      ),
+      HabitModel(
+        id: _uuid.v4(),
+        userId: userId,
+        title: 'Pomodoro pair',
+        description: 'Complete at least two focused sessions on active study days.',
+        color: 0xFF24A19C,
+        frequency: HabitFrequency.daily,
+        goalCount: 2,
+        completedCount: 1,
+        streakCount: 2,
+        lastCompletedAt: now.subtract(const Duration(hours: 6)),
+        createdAt: now.subtract(const Duration(days: 15)),
+        updatedAt: now.subtract(const Duration(hours: 6)),
+      ),
+      HabitModel(
+        id: _uuid.v4(),
+        userId: userId,
+        title: 'Weekly review',
+        description: 'Summarize wins, blockers, and next week priorities every Sunday.',
+        color: 0xFFF4A261,
+        frequency: HabitFrequency.weekly,
+        goalCount: 1,
+        completedCount: 0,
+        streakCount: 3,
+        lastCompletedAt: now.subtract(const Duration(days: 7)),
+        createdAt: now.subtract(const Duration(days: 28)),
+        updatedAt: now.subtract(const Duration(days: 7)),
+      ),
+    ];
+  }
+
   static List<StudySessionModel> sessionsFor(
     String userId,
     List<CourseModel> courses,

@@ -8,6 +8,8 @@ import '../../../core/widgets/app_widgets.dart';
 import '../../../shared/extensions/build_context_x.dart';
 import '../../../shared/providers/app_providers.dart';
 import '../../auth/presentation/auth_screens.dart';
+import '../../exams/presentation/exams_screens.dart';
+import '../../habits/presentation/habits_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -68,17 +70,17 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: MetricTile(
-                    label: context.l10n.coursesTitle,
-                    value: '${studyData.courses.length}',
-                    icon: Icons.menu_book_rounded,
+                    label: context.copy.levelLabel,
+                    value: '${studyData.level}',
+                    icon: Icons.workspace_premium_rounded,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: MetricTile(
-                    label: context.l10n.notesTitle,
-                    value: '${studyData.notes.length}',
-                    icon: Icons.note_alt_rounded,
+                    label: context.copy.xpLabel,
+                    value: '${studyData.totalXp}',
+                    icon: Icons.auto_graph_rounded,
                   ),
                 ),
               ],
@@ -107,6 +109,20 @@ class ProfileScreen extends ConsumerWidget {
             SectionCard(
               child: Column(
                 children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.event_note_outlined),
+                    title: Text(context.copy.examsTitle),
+                    onTap: () => context.push(ExamsScreen.routePath),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.repeat_rounded),
+                    title: Text(context.copy.habitsTitle),
+                    onTap: () => context.push(HabitsScreen.routePath),
+                  ),
+                  const Divider(),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.settings_outlined),

@@ -26,32 +26,63 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? const [Color(0xFF0B1323), Color(0xFF111A2D)]
-              : const [Color(0xFFF8FBFF), Color(0xFFF1F5FB)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: appBar,
-        floatingActionButton: floatingActionButton,
-        bottomNavigationBar: bottomNavigationBar,
-        body: SafeArea(
-          child: Padding(
-            padding: padding ??
-                const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-            child: child,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? const [Color(0xFF081120), Color(0xFF101C30), Color(0xFF132543)]
+                    : const [Color(0xFFF8FBFF), Color(0xFFF1F5FB), Color(0xFFE9F2FF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
         ),
-      ),
+        PositionedDirectional(
+          top: -40,
+          start: -20,
+          child: _AmbientOrb(
+            color: (isDark ? AppColors.secondary : AppColors.seed)
+                .withValues(alpha: 0.16),
+            size: 160,
+          ),
+        ),
+        PositionedDirectional(
+          top: 180,
+          end: -30,
+          child: _AmbientOrb(
+            color: AppColors.tertiary.withValues(alpha: 0.12),
+            size: 180,
+          ),
+        ),
+        PositionedDirectional(
+          bottom: 90,
+          start: 24,
+          child: _AmbientOrb(
+            color: AppColors.success.withValues(alpha: 0.1),
+            size: 120,
+          ),
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: appBar,
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: bottomNavigationBar,
+          body: SafeArea(
+            child: Padding(
+              padding: padding ??
+                  const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+              child: child,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -68,45 +99,92 @@ class MainNavigationShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard_rounded),
-            label: l10n.homeTab,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: Theme.of(context).brightness == Brightness.dark
+                    ? const [Color(0xFF081120), Color(0xFF101C30), Color(0xFF132543)]
+                    : const [Color(0xFFF8FBFF), Color(0xFFF1F5FB), Color(0xFFE9F2FF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.checklist_rtl_outlined),
-            selectedIcon: const Icon(Icons.checklist_rtl_rounded),
-            label: l10n.tasksTab,
+        ),
+        PositionedDirectional(
+          top: -40,
+          start: -20,
+          child: _AmbientOrb(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
+            size: 160,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.calendar_month_outlined),
-            selectedIcon: const Icon(Icons.calendar_month_rounded),
-            label: l10n.calendarTab,
+        ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          body: navigationShell,
+          bottomNavigationBar: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 28,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: NavigationBar(
+                backgroundColor: Colors.transparent,
+                selectedIndex: navigationShell.currentIndex,
+                onDestinationSelected: (index) {
+                  navigationShell.goBranch(
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
+                  );
+                },
+                destinations: [
+                  NavigationDestination(
+                    icon: const Icon(Icons.dashboard_outlined),
+                    selectedIcon: const Icon(Icons.dashboard_rounded),
+                    label: l10n.homeTab,
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.checklist_rtl_outlined),
+                    selectedIcon: const Icon(Icons.checklist_rtl_rounded),
+                    label: l10n.tasksTab,
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    selectedIcon: const Icon(Icons.calendar_month_rounded),
+                    label: l10n.calendarTab,
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.timer_outlined),
+                    selectedIcon: const Icon(Icons.timer_rounded),
+                    label: l10n.focusTab,
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.person_outline_rounded),
+                    selectedIcon: const Icon(Icons.person_rounded),
+                    label: l10n.profileTab,
+                  ),
+                ],
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.timer_outlined),
-            selectedIcon: const Icon(Icons.timer_rounded),
-            label: l10n.focusTab,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline_rounded),
-            selectedIcon: const Icon(Icons.person_rounded),
-            label: l10n.profileTab,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -123,9 +201,127 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.86),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.45),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
       child: Padding(
         padding: padding,
+        child: child,
+      ),
+    );
+  }
+}
+
+class HeroMetricCard extends StatelessWidget {
+  const HeroMetricCard({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.icon,
+    super.key,
+    this.accent,
+  });
+
+  final String title;
+  final String value;
+  final String subtitle;
+  final IconData icon;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = accent ?? scheme.primary;
+
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: color.withValues(alpha: 0.16),
+                child: Icon(icon, color: color),
+              ),
+              const Spacer(),
+              Icon(Icons.north_east_rounded, color: color),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GradientBanner extends StatelessWidget {
+  const GradientBanner({
+    required this.child,
+    super.key,
+    this.colors,
+  });
+
+  final Widget child;
+  final List<Color>? colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: LinearGradient(
+          colors: colors ??
+              [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary,
+                Theme.of(context).colorScheme.tertiary,
+              ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: child,
       ),
     );
@@ -518,5 +714,31 @@ Color statusColor(TaskStatus status) {
       return AppColors.secondary;
     case TaskStatus.completed:
       return AppColors.success;
+  }
+}
+
+class _AmbientOrb extends StatelessWidget {
+  const _AmbientOrb({
+    required this.color,
+    required this.size,
+  });
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [color, color.withValues(alpha: 0)],
+          ),
+        ),
+      ),
+    );
   }
 }

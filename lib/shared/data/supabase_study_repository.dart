@@ -109,6 +109,52 @@ class SupabaseStudyRepository implements StudyRepository {
   }
 
   @override
+  Future<List<ExamModel>> getExams(String userId) async {
+    final data = await _client
+        .from('exams')
+        .select()
+        .eq('user_id', userId)
+        .order('date_time');
+
+    return (data as List<dynamic>)
+        .map((item) => ExamModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  @override
+  Future<void> saveExam(ExamModel exam) async {
+    await _client.from('exams').upsert(exam.toJson());
+  }
+
+  @override
+  Future<void> deleteExam(String userId, String examId) async {
+    await _client.from('exams').delete().eq('id', examId).eq('user_id', userId);
+  }
+
+  @override
+  Future<List<HabitModel>> getHabits(String userId) async {
+    final data = await _client
+        .from('habits')
+        .select()
+        .eq('user_id', userId)
+        .order('created_at');
+
+    return (data as List<dynamic>)
+        .map((item) => HabitModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  @override
+  Future<void> saveHabit(HabitModel habit) async {
+    await _client.from('habits').upsert(habit.toJson());
+  }
+
+  @override
+  Future<void> deleteHabit(String userId, String habitId) async {
+    await _client.from('habits').delete().eq('id', habitId).eq('user_id', userId);
+  }
+
+  @override
   Future<List<StudySessionModel>> getStudySessions(String userId) async {
     final data = await _client
         .from('study_sessions')

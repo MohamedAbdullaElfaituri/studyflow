@@ -66,6 +66,34 @@ create table if not exists public.notes (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.exams (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  course_id uuid references public.courses (id) on delete set null,
+  title text not null,
+  description text not null default '',
+  date_time timestamptz not null,
+  type text not null default 'exam' check (type in ('exam', 'assignment', 'quiz')),
+  priority text not null default 'high' check (priority in ('low', 'medium', 'high', 'urgent')),
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.habits (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  title text not null,
+  description text not null default '',
+  color bigint not null default 2863098,
+  frequency text not null default 'daily' check (frequency in ('daily', 'weekly')),
+  goal_count integer not null default 1,
+  completed_count integer not null default 0,
+  streak_count integer not null default 0,
+  last_completed_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.study_sessions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -112,6 +140,9 @@ create index if not exists courses_user_id_idx on public.courses (user_id);
 create index if not exists tasks_user_id_idx on public.tasks (user_id);
 create index if not exists tasks_course_id_idx on public.tasks (course_id);
 create index if not exists notes_user_id_idx on public.notes (user_id);
+create index if not exists exams_user_id_idx on public.exams (user_id);
+create index if not exists exams_course_id_idx on public.exams (course_id);
+create index if not exists habits_user_id_idx on public.habits (user_id);
 create index if not exists study_sessions_user_id_idx on public.study_sessions (user_id);
 create index if not exists subtasks_task_id_idx on public.subtasks (task_id);
 
@@ -135,6 +166,16 @@ create trigger notes_set_updated_at
 before update on public.notes
 for each row execute function public.set_updated_at();
 
+drop trigger if exists exams_set_updated_at on public.exams;
+create trigger exams_set_updated_at
+before update on public.exams
+for each row execute function public.set_updated_at();
+
+drop trigger if exists habits_set_updated_at on public.habits;
+create trigger habits_set_updated_at
+before update on public.habits
+for each row execute function public.set_updated_at();
+
 drop trigger if exists goals_set_updated_at on public.goals;
 create trigger goals_set_updated_at
 before update on public.goals
@@ -155,6 +196,8 @@ alter table public.courses enable row level security;
 alter table public.tasks enable row level security;
 alter table public.subtasks enable row level security;
 alter table public.notes enable row level security;
+alter table public.exams enable row level security;
+alter table public.habits enable row level security;
 alter table public.study_sessions enable row level security;
 alter table public.goals enable row level security;
 alter table public.user_settings enable row level security;
@@ -187,6 +230,12 @@ for all using (
 );
 
 create policy "notes_own_all" on public.notes
+for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "exams_own_all" on public.exams
+for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "habits_own_all" on public.habits
 for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create policy "sessions_own_all" on public.study_sessions

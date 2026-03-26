@@ -6,12 +6,15 @@ import '../features/analytics/presentation/analytics_screen.dart';
 import '../features/auth/presentation/auth_screens.dart';
 import '../features/calendar/presentation/calendar_screen.dart';
 import '../features/courses/presentation/courses_screens.dart';
+import '../features/exams/presentation/exams_screens.dart';
 import '../features/focus/presentation/focus_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
+import '../features/habits/presentation/habits_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/notes/presentation/notes_screens.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/profile/presentation/profile_screens.dart';
+import '../features/search/presentation/search_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/tasks/presentation/tasks_screens.dart';
 import '../shared/extensions/build_context_x.dart';
@@ -117,6 +120,28 @@ class AppRouter {
         GoRoute(
           path: NotesScreen.routePath,
           builder: (context, state) => const NotesScreen(),
+        ),
+        GoRoute(
+          path: ExamsScreen.routePath,
+          builder: (context, state) => const ExamsScreen(),
+        ),
+        GoRoute(
+          path: ExamEditorScreen.routePath,
+          builder: (context, state) =>
+              ExamEditorScreen(examId: state.uri.queryParameters['examId']),
+        ),
+        GoRoute(
+          path: HabitsScreen.routePath,
+          builder: (context, state) => const HabitsScreen(),
+        ),
+        GoRoute(
+          path: HabitEditorScreen.routePath,
+          builder: (context, state) =>
+              HabitEditorScreen(habitId: state.uri.queryParameters['habitId']),
+        ),
+        GoRoute(
+          path: SearchScreen.routePath,
+          builder: (context, state) => const SearchScreen(),
         ),
         GoRoute(
           path: NoteEditorScreen.routePath,

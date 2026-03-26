@@ -29,6 +29,7 @@ class LocalAuthRepository implements AuthRepository {
 
   final LocalStorageService _storage;
   final Uuid _uuid = const Uuid();
+  static const _demoUserId = 'demo-studyflow-user';
 
   @override
   Future<AppUserModel?> currentUser() async {
@@ -91,12 +92,14 @@ class LocalAuthRepository implements AuthRepository {
     }
 
     final now = DateTime.now();
+    final preferredLanguage =
+        _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
     final user = AppUserModel(
       id: _uuid.v4(),
       fullName: fullName.trim(),
       email: normalizedEmail,
       avatarUrl: null,
-      preferredLanguage: 'en',
+      preferredLanguage: preferredLanguage,
       themeMode: 'system',
       createdAt: now,
       updatedAt: now,
@@ -145,16 +148,40 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   List<AppUserModel> get _profiles {
-    return decodeCollection(_storage.readString(AppConstants.profilesKey))
+    final stored = decodeCollection(_storage.readString(AppConstants.profilesKey))
         .map(AppUserModel.fromJson)
         .toList();
+    return stored.isEmpty ? [_demoUser] : stored;
   }
 
   List<AuthCredentialModel> get _credentials {
-    return decodeCollection(_storage.readString(AppConstants.authCredentialsKey))
-        .map(AuthCredentialModel.fromJson)
-        .toList();
+    final stored =
+        decodeCollection(_storage.readString(AppConstants.authCredentialsKey))
+            .map(AuthCredentialModel.fromJson)
+            .toList();
+    return stored.isEmpty ? [_demoCredential] : stored;
   }
+
+  AppUserModel get _demoUser {
+    final now = DateTime.now();
+    return AppUserModel(
+      id: _demoUserId,
+      fullName: 'StudyFlow Student',
+      email: 'student@studyflow.app',
+      avatarUrl: null,
+      preferredLanguage:
+          _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
+      themeMode: 'system',
+      createdAt: now.subtract(const Duration(days: 30)),
+      updatedAt: now.subtract(const Duration(days: 1)),
+    );
+  }
+
+  AuthCredentialModel get _demoCredential => const AuthCredentialModel(
+        userId: _demoUserId,
+        email: 'student@studyflow.app',
+        password: 'studyflow123',
+      );
 
   Future<void> _writeProfiles(List<AppUserModel> profiles) async {
     await _storage.writeString(
@@ -233,12 +260,14 @@ class SupabaseAuthRepository implements AuthRepository {
     }
 
     final now = DateTime.now();
+    final preferredLanguage =
+        _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
     final profile = AppUserModel(
       id: user.id,
       fullName: fullName.trim(),
       email: email.trim(),
       avatarUrl: null,
-      preferredLanguage: 'en',
+      preferredLanguage: preferredLanguage,
       themeMode: 'system',
       createdAt: now,
       updatedAt: now,
@@ -278,7 +307,8 @@ class SupabaseAuthRepository implements AuthRepository {
         fullName: (user.userMetadata?['full_name'] as String?) ?? '',
         email: user.email ?? '',
         avatarUrl: null,
-        preferredLanguage: 'en',
+        preferredLanguage:
+            _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
         themeMode: 'system',
         createdAt: now,
         updatedAt: now,

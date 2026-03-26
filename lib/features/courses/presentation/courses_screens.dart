@@ -148,6 +148,7 @@ class CourseDetailScreen extends ConsumerWidget {
 
           final tasks = studyData.tasksForCourse(courseId);
           final notes = studyData.notesForCourse(courseId);
+          final exams = studyData.examsForCourse(courseId);
 
           return ListView(
             children: [
@@ -244,6 +245,27 @@ class CourseDetailScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.md),
                     child: SectionCard(
                       child: Text(note.title),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionHeader(
+                title: context.copy.examsTitle,
+                subtitle: context.copy.examsSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (exams.isEmpty)
+                EmptyState(
+                  title: context.copy.emptyExamsTitle,
+                  description: context.copy.emptyExamsDescription,
+                  icon: Icons.event_note_rounded,
+                )
+              else
+                ...exams.map(
+                  (exam) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: SectionCard(
+                      child: Text(exam.title),
                     ),
                   ),
                 ),

@@ -1,249 +1,647 @@
 # StudyFlow
 
-StudyFlow is a premium, multilingual, mobile-first Flutter productivity app for university students. It brings courses, tasks, study sessions, calendar planning, notes, goals, reminders, analytics, and profile/settings into one polished Android and iOS experience.
+Premium, multilingual, RTL-aware study planner built with Flutter for Android and iOS.
 
-## Project Overview
+## 1. Project Summary
 
-This project was designed as a Human-Computer Interaction / Computer Interaction course application with strong emphasis on:
+StudyFlow is a polished mobile productivity app for students. It combines:
 
-- elegant mobile UX
-- inclusive and accessible interaction patterns
-- multilingual design for English, Turkish, and Arabic
-- RTL-aware layout support for Arabic
-- clean architecture and scalable folder organization
-- Supabase-ready backend structure with local demo mode for presentation
+- onboarding and authentication
+- dashboard and planner
+- tasks, notes, courses, exams, and assignments
+- Pomodoro focus mode
+- local notifications
+- analytics and streaks
+- habit tracking and lightweight gamification
+- Turkish, English, and Arabic support with RTL readiness
+- local-first demo mode with Supabase-ready architecture
 
-## Target Platforms
+The app is designed for an HCI / Human-Computer Interaction course submission, but the codebase is structured to feel much closer to a real product than a simple classroom demo.
 
-- Android
-- iOS
+## 2. Technology Stack And Packages
 
-The implementation is mobile-first and intentionally avoids web-specific or desktop-specific app logic.
+- `flutter`
+- `flutter_riverpod`
+- `go_router`
+- `shared_preferences`
+- `supabase_flutter`
+- `flutter_local_notifications`
+- `fl_chart`
+- `table_calendar`
+- `google_fonts`
+- `intl`
+- `uuid`
 
-## Key Features
+### Architectural choices
 
-- Authentication: sign up, login, logout, forgot password structure, persistent session
-- Onboarding: feature introduction with skip / next / finish flow
-- Home dashboard: welcome hero, today plan, progress, quick actions, achievements, recent activity
-- Courses: create, edit, delete, color assignment, instructor field, course detail
-- Tasks: create, edit, delete, subtasks, search, filters, sorting, status updates, archive completed
-- Calendar / planner: monthly and weekly calendar formats with daily agenda
-- Focus mode: Pomodoro timer with custom focus and break durations and saved session history
-- Notes: create, edit, delete, pin, search, optional course linking
-- Goals: daily / weekly / monthly study goals with progress management
-- Analytics: study minutes, completed tasks, streaks, focus history, course distribution chart
-- Notifications structure: local notification preview flow and reminder preference settings
-- Profile and settings: edit profile, language switcher, theme mode selector, reminder toggles
+- Null safety enabled
+- Feature-oriented clean structure
+- Repository pattern
+- Riverpod for state and dependency injection
+- GoRouter for navigation
+- SharedPreferences-backed demo mode
+- Supabase-ready repositories and SQL migration
 
-## Screenshots
+## 3. Full Feature List
 
-Add project screenshots here during presentation prep:
+### Core
 
-- `docs/screenshots/splash.png`
-- `docs/screenshots/onboarding.png`
-- `docs/screenshots/dashboard.png`
-- `docs/screenshots/tasks.png`
-- `docs/screenshots/calendar.png`
-- `docs/screenshots/focus.png`
-- `docs/screenshots/analytics.png`
+- Splash flow
+- Onboarding with first-launch language selection
+- Login, sign up, forgot password
+- Demo account flow for presentation use
+- Dashboard with XP, level, streak, goals, habits, deadlines, and recent activity
+- Daily, weekly, and monthly progress views
 
-## Technologies Used
+### Planning
 
-- Flutter
-- Riverpod
-- GoRouter
-- Supabase
-- Shared Preferences
-- Material 3
-- Flutter internationalization (`gen_l10n`)
-- Table Calendar
-- FL Chart
-- Flutter Local Notifications
+- Course management
+- Task management with subtasks, priority, status, due date, filters, search, and sorting
+- Calendar-based planner with tasks, focus sessions, and exams in agenda
+- Exams and assignments tracking with countdowns
+- Notes with pinning and course linking
+- Habit tracker
+- Smart search across courses, tasks, notes, and exams
 
-## Architecture Summary
+### Productivity
 
-StudyFlow uses a clean, modular, feature-oriented structure:
+- Pomodoro / focus mode
+- Study session logging
+- Goal tracking
+- Weekly challenge messaging
+- Motivation quotes
+- XP and level system
+- Achievement cards
 
-- `core/`: constants, theme, localization, services, utilities, common widgets
-- `shared/`: shared models, providers, repository abstractions, extensions
-- `features/`: presentation modules for auth, onboarding, home, courses, tasks, calendar, focus, notes, analytics, goals, profile, and settings
+### Product polish
 
-The app runs in two modes:
+- Light and dark themes
+- Premium gradient and glass-like surfaces
+- Micro-interaction friendly components
+- Empty, loading, and error states
+- Haptic feedback hooks
+- Local notification preview and permission flow
+- Supabase sync-ready status
 
-1. Demo/local mode
-   Uses Shared Preferences-backed repositories and seeded sample data so the app is runnable without backend credentials.
-2. Supabase mode
-   Uses Supabase auth and data repositories when `SUPABASE_URL` and `SUPABASE_ANON_KEY` are provided.
+## 4. UI / UX Approach
 
-## Folder Structure Summary
+The visual direction aims for a premium mobile product rather than a generic student app.
+
+- Layered background gradients and ambient color orbs
+- Soft glass-inspired cards with depth and rounded geometry
+- Strong dashboard hero section with progress and level system
+- Calm but vivid palette: deep navy, cyan, amber, coral accents
+- Arabic-aware typography with `Noto Sans Arabic`
+- Latin-focused premium typography with `Plus Jakarta Sans`
+- High-contrast layout and large tap targets
+- Consistent spacing, card hierarchy, and feedback patterns
+- Lightweight motion through animated page transitions, progress, and segmented flows
+
+## 5. File / Folder Tree
 
 ```text
-lib/
-  app/
-  core/
-    constants/
-    errors/
-    localization/
-    services/
-    theme/
-    utils/
-    widgets/
-  shared/
-    data/
-    extensions/
-    models/
-    providers/
-  features/
-    analytics/
-    auth/
-    calendar/
-    courses/
-    focus/
-    goals/
-    home/
-    notes/
-    onboarding/
-    profile/
-    settings/
-    tasks/
-supabase/
-  migrations/
+studyflow/
+  android/
+  ios/
+  assets/
+    animations/
+      README.md
+    branding/
+      README.md
+    illustrations/
+      README.md
+  lib/
+    app/
+      app.dart
+      app_router.dart
+    core/
+      constants/
+        app_constants.dart
+      errors/
+        app_exception.dart
+      localization/
+        app_en.arb
+        app_tr.arb
+        app_ar.arb
+        app_copy.dart
+        generated/
+          app_localizations.dart
+          app_localizations_en.dart
+          app_localizations_tr.dart
+          app_localizations_ar.dart
+      services/
+        demo_seed_service.dart
+        local_storage_service.dart
+        reminder_service.dart
+        supabase_service.dart
+      theme/
+        app_colors.dart
+        app_spacing.dart
+        app_theme.dart
+      utils/
+        date_time_utils.dart
+        validators.dart
+      widgets/
+        app_widgets.dart
+    features/
+      analytics/presentation/analytics_screen.dart
+      auth/presentation/auth_screens.dart
+      calendar/presentation/calendar_screen.dart
+      courses/presentation/courses_screens.dart
+      exams/presentation/exams_screens.dart
+      focus/presentation/focus_screen.dart
+      goals/presentation/goals_screen.dart
+      habits/presentation/habits_screen.dart
+      home/presentation/home_screen.dart
+      notes/presentation/notes_screens.dart
+      onboarding/presentation/onboarding_screen.dart
+      profile/presentation/profile_screens.dart
+      search/presentation/search_screen.dart
+      settings/presentation/settings_screen.dart
+      tasks/presentation/tasks_screens.dart
+    shared/
+      data/
+        auth_repository.dart
+        study_repository.dart
+        supabase_study_repository.dart
+      extensions/
+        build_context_x.dart
+      models/
+        app_models.dart
+      providers/
+        app_providers.dart
+    main.dart
+  supabase/
+    migrations/
+      001_initial_schema.sql
+  test/
+    widget_test.dart
+  .env.example
+  pubspec.yaml
+  l10n.yaml
 ```
 
-## Localization Support
+## 6. pubspec.yaml
 
-StudyFlow supports:
+Main dependencies already configured in [`pubspec.yaml`](/c:/Users/moham/studyflow/pubspec.yaml).
 
-- English (`en`)
-- Turkish (`tr`)
-- Arabic (`ar`)
+Highlights:
 
-All visible interface text is sourced through Flutter localization files in:
+- localization generation enabled
+- branding / illustration / animation asset folders registered
+- chart, calendar, notifications, routing, and state management packages included
 
-- `lib/core/localization/app_en.arb`
-- `lib/core/localization/app_tr.arb`
-- `lib/core/localization/app_ar.arb`
+## 7. Main Flutter Entry Files
 
-## RTL Support for Arabic
+- App entry: [`main.dart`](/c:/Users/moham/studyflow/lib/main.dart)
+- Root app: [`app.dart`](/c:/Users/moham/studyflow/lib/app/app.dart)
+- Routing: [`app_router.dart`](/c:/Users/moham/studyflow/lib/app/app_router.dart)
+- Theme system: [`app_theme.dart`](/c:/Users/moham/studyflow/lib/core/theme/app_theme.dart)
+- Shared widgets: [`app_widgets.dart`](/c:/Users/moham/studyflow/lib/core/widgets/app_widgets.dart)
+- App state: [`app_providers.dart`](/c:/Users/moham/studyflow/lib/shared/providers/app_providers.dart)
+- Models: [`app_models.dart`](/c:/Users/moham/studyflow/lib/shared/models/app_models.dart)
 
-Arabic support is designed for full RTL usage:
+## 8. Important Screens
 
-- Flutter locale-based directionality is enabled automatically
-- navigation, alignment, and component flow respect RTL layout
-- labels and action text are localized
-- settings allow switching language at runtime
+### Main user flows
 
-## Accessibility Support Summary
+- Onboarding: [`onboarding_screen.dart`](/c:/Users/moham/studyflow/lib/features/onboarding/presentation/onboarding_screen.dart)
+- Auth: [`auth_screens.dart`](/c:/Users/moham/studyflow/lib/features/auth/presentation/auth_screens.dart)
+- Dashboard: [`home_screen.dart`](/c:/Users/moham/studyflow/lib/features/home/presentation/home_screen.dart)
+- Tasks: [`tasks_screens.dart`](/c:/Users/moham/studyflow/lib/features/tasks/presentation/tasks_screens.dart)
+- Planner: [`calendar_screen.dart`](/c:/Users/moham/studyflow/lib/features/calendar/presentation/calendar_screen.dart)
+- Focus mode: [`focus_screen.dart`](/c:/Users/moham/studyflow/lib/features/focus/presentation/focus_screen.dart)
+- Analytics: [`analytics_screen.dart`](/c:/Users/moham/studyflow/lib/features/analytics/presentation/analytics_screen.dart)
+- Profile: [`profile_screens.dart`](/c:/Users/moham/studyflow/lib/features/profile/presentation/profile_screens.dart)
+- Settings: [`settings_screen.dart`](/c:/Users/moham/studyflow/lib/features/settings/presentation/settings_screen.dart)
 
-The current implementation includes:
+### Extra modules
 
-- large touch-friendly buttons and cards
-- scalable Material typography
-- readable spacing and contrast
-- validation messages for forms
-- empty, loading, and error states
-- icons paired with labels instead of color-only meaning
-- mobile-friendly hierarchy and structure suitable for beginner users
+- Exams & assignments: [`exams_screens.dart`](/c:/Users/moham/studyflow/lib/features/exams/presentation/exams_screens.dart)
+- Habit tracker: [`habits_screen.dart`](/c:/Users/moham/studyflow/lib/features/habits/presentation/habits_screen.dart)
+- Smart search: [`search_screen.dart`](/c:/Users/moham/studyflow/lib/features/search/presentation/search_screen.dart)
 
-## Setup Requirements
+## 9. Localization Structure And Example Files
 
-- Flutter SDK `>=3.3.0 <4.0.0`
-- Dart SDK compatible with the Flutter version above
-- Android Studio and/or Xcode for mobile builds
-- Supabase project if backend mode is desired
+Primary localization files:
 
-## Supabase Setup
+- [`app_en.arb`](/c:/Users/moham/studyflow/lib/core/localization/app_en.arb)
+- [`app_tr.arb`](/c:/Users/moham/studyflow/lib/core/localization/app_tr.arb)
+- [`app_ar.arb`](/c:/Users/moham/studyflow/lib/core/localization/app_ar.arb)
 
-1. Create a Supabase project.
-2. Open the SQL migration file:
-   - `supabase/migrations/001_initial_schema.sql`
-3. Run the migration in the Supabase SQL editor.
-4. Enable Email authentication in Supabase Auth.
-5. Provide the app with:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
+Generated delegates:
 
-Example run command:
+- [`app_localizations.dart`](/c:/Users/moham/studyflow/lib/core/localization/generated/app_localizations.dart)
+- [`app_localizations_en.dart`](/c:/Users/moham/studyflow/lib/core/localization/generated/app_localizations_en.dart)
+- [`app_localizations_tr.dart`](/c:/Users/moham/studyflow/lib/core/localization/generated/app_localizations_tr.dart)
+- [`app_localizations_ar.dart`](/c:/Users/moham/studyflow/lib/core/localization/generated/app_localizations_ar.dart)
+
+Supplemental localized copy used by newly added premium modules:
+
+- [`app_copy.dart`](/c:/Users/moham/studyflow/lib/core/localization/app_copy.dart)
+
+Runtime locale sources:
+
+1. Authenticated user settings
+2. Current user profile preference
+3. First-launch local language preference stored in local storage
+
+## 10. RTL Support Details
+
+Arabic support is handled at app level.
+
+- Supported locale includes `Locale('ar')`
+- Material directionality switches automatically for Arabic
+- Theme typography swaps to `Noto Sans Arabic`
+- Onboarding and settings can change language at runtime
+- Navigation, segmented controls, cards, and list layouts use directional alignment
+- Calendar, date, and time formatting rely on `intl`
+
+## 11. Notification System
+
+Notification service:
+
+- [`reminder_service.dart`](/c:/Users/moham/studyflow/lib/core/services/reminder_service.dart)
+
+Current infrastructure includes:
+
+- initialization for Android and iOS
+- notification permission request flow
+- preview notification action
+- focus completion notification hook
+- ready extension points for task, exam, daily briefing, and evening review reminders
+
+Recommended next production step:
+
+- add timezone-aware scheduled notifications with `zonedSchedule`
+
+## 12. Theme System
+
+Theme system files:
+
+- [`app_colors.dart`](/c:/Users/moham/studyflow/lib/core/theme/app_colors.dart)
+- [`app_spacing.dart`](/c:/Users/moham/studyflow/lib/core/theme/app_spacing.dart)
+- [`app_theme.dart`](/c:/Users/moham/studyflow/lib/core/theme/app_theme.dart)
+
+Included:
+
+- light mode
+- dark mode
+- premium color palette
+- adaptive typography for Arabic vs non-Arabic
+- Material 3 configuration
+- rounded controls and cards
+- floating-style navigation shell
+
+## 13. State Management
+
+Riverpod state lives mainly in:
+
+- [`app_providers.dart`](/c:/Users/moham/studyflow/lib/shared/providers/app_providers.dart)
+
+Key providers:
+
+- auth repository provider
+- study repository provider
+- router provider
+- locale preference provider
+- auth controller
+- study data controller
+- locale provider
+- theme mode provider
+
+The `StudyDataController` is the main app state aggregator. It loads:
+
+- courses
+- tasks
+- notes
+- exams
+- habits
+- sessions
+- goals
+- settings
+- reminder preferences
+
+## 14. Supabase Integration Infrastructure
+
+Supabase-ready files:
+
+- client bootstrap: [`supabase_service.dart`](/c:/Users/moham/studyflow/lib/core/services/supabase_service.dart)
+- auth repository: [`auth_repository.dart`](/c:/Users/moham/studyflow/lib/shared/data/auth_repository.dart)
+- data repository abstraction: [`study_repository.dart`](/c:/Users/moham/studyflow/lib/shared/data/study_repository.dart)
+- Supabase data repository: [`supabase_study_repository.dart`](/c:/Users/moham/studyflow/lib/shared/data/supabase_study_repository.dart)
+- SQL migration: [`001_initial_schema.sql`](/c:/Users/moham/studyflow/supabase/migrations/001_initial_schema.sql)
+
+Current Supabase-ready tables:
+
+- `profiles`
+- `courses`
+- `tasks`
+- `subtasks`
+- `notes`
+- `exams`
+- `habits`
+- `study_sessions`
+- `goals`
+- `user_settings`
+- `reminder_preferences`
+
+## 15. Supabase Setup Guide Step By Step
+
+### 1. Create a Supabase account
+
+- Go to `https://supabase.com`
+- Create an account or sign in
+
+### 2. Create a new project
+
+- Click `New project`
+- Choose organization
+- Set project name, database password, and region
+- Wait for provisioning to finish
+
+### 3. Get the Project URL
+
+- Open the project dashboard
+- Go to `Project Settings > API`
+- Copy `Project URL`
+
+### 4. Get the anon key
+
+- In the same API page
+- Copy the `anon public` key
+
+### 5. Add it to Flutter
+
+StudyFlow reads Supabase values from compile-time environment:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+The bootstrap file is [`supabase_service.dart`](/c:/Users/moham/studyflow/lib/core/services/supabase_service.dart).
+
+### 6. Configure env values
+
+Reference file:
+
+- [`.env.example`](/c:/Users/moham/studyflow/.env.example)
+- [`.env.json.example`](/c:/Users/moham/studyflow/.env.json.example)
+
+Recommended workflow:
+
+1. Copy `.env.example` to `.env` for local reference
+2. Create a Flutter-friendly define file such as `.env.json`
+3. Run the app with `--dart-define` or `--dart-define-from-file`
+
+Example `.env.json`:
+
+```json
+{
+  "SUPABASE_URL": "https://your-project-ref.supabase.co",
+  "SUPABASE_ANON_KEY": "your_anon_key_here"
+}
+```
+
+### 7. Install packages
+
+Already present in `pubspec.yaml`:
+
+- `supabase_flutter`
+
+If needed manually:
 
 ```bash
-flutter run \
-  --dart-define=SUPABASE_URL=YOUR_URL \
-  --dart-define=SUPABASE_ANON_KEY=YOUR_KEY
+flutter pub get
 ```
 
-If these values are not provided, the app falls back to local demo mode automatically.
+### 8. Initialize Supabase
 
-## Environment and Configuration Notes
+Initialization happens in [`main.dart`](/c:/Users/moham/studyflow/lib/main.dart):
 
-- Demo mode persists session and app data locally with Shared Preferences.
-- Supabase mode is available through the repository layer without changing the UI architecture.
-- Notification scheduling is scaffolded through `ReminderService`; deeper scheduling and permission polishing can be extended per platform.
+```dart
+await SupabaseService.initialize();
+```
 
-## How to Run the Project
+### 9. Enable auth tables and custom tables
+
+- Enable Email auth in `Authentication > Providers`
+- Run the SQL migration in the SQL editor
+
+### 10. SQL table creation examples
+
+The full SQL file is here:
+
+- [`001_initial_schema.sql`](/c:/Users/moham/studyflow/supabase/migrations/001_initial_schema.sql)
+
+Example:
+
+```sql
+create table if not exists public.tasks (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  title text not null,
+  description text not null default '',
+  due_date_time timestamptz,
+  priority text not null default 'medium',
+  status text not null default 'pending'
+);
+```
+
+### 11. Enable Row Level Security
+
+RLS is enabled in the migration for all core tables.
+
+### 12. Write policies
+
+Example policy pattern:
+
+```sql
+create policy "tasks_own_all" on public.tasks
+for all using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+```
+
+### 13. Use storage if needed
+
+If later you add avatars or note attachments:
+
+- go to `Storage`
+- create a bucket such as `public-assets`
+- upload or sign URLs
+- store returned URL inside `profiles.avatar_url` or note attachment metadata
+
+### 14. Test the connection
+
+1. Add your environment values
+2. Run the app
+3. Register a user
+4. Confirm `profiles`, `goals`, `user_settings`, and `reminder_preferences` rows are created
+5. Create tasks or notes and confirm they appear in Supabase tables
+
+### 15. Troubleshooting checklist
+
+- Wrong URL or anon key
+- Email auth not enabled
+- RLS policy blocking insert or select
+- Profile trigger missing
+- Migration not fully executed
+- Device has no internet access
+- Table names differ from repository code
+
+### 16. Android and iOS concerns
+
+- verify internet permission defaults
+- verify auth deep link / reset flow if you later add full email redirect handling
+- verify notification permissions separately per platform
+
+### 17. Test on a real device
+
+- run Android and iOS on physical devices
+- confirm login, session restore, notifications, and language switching
+
+### 18. Before production build
+
+- replace placeholder legal copy
+- replace placeholder brand assets
+- set real launcher icons and splash assets
+- verify store-safe package name and bundle identifier
+- verify RLS and remove any temporary dev policies
+- run full analyzer, widget tests, and release build checks
+
+## 16. Android Configuration Notes
+
+Relevant files:
+
+- [`AndroidManifest.xml`](/c:/Users/moham/studyflow/android/app/src/main/AndroidManifest.xml)
+- [`build.gradle.kts`](/c:/Users/moham/studyflow/android/app/build.gradle.kts)
+
+Notes:
+
+- `POST_NOTIFICATIONS` permission added
+- app label updated to `StudyFlow`
+- Java 17 / desugaring already configured
+- `adjustResize` already enabled for keyboard handling
+
+Recommended next steps:
+
+- add launcher icon with `flutter_launcher_icons`
+- add branded splash with `flutter_native_splash`
+- verify package name if publishing
+
+## 17. iOS Configuration Notes
+
+Relevant files:
+
+- [`Info.plist`](/c:/Users/moham/studyflow/ios/Runner/Info.plist)
+- [`AppDelegate.swift`](/c:/Users/moham/studyflow/ios/Runner/AppDelegate.swift)
+
+Notes:
+
+- display name updated to `StudyFlow`
+- `CFBundleLocalizations` includes `en`, `tr`, and `ar`
+- scene-based app lifecycle already in place
+
+Recommended next steps:
+
+- configure bundle identifier in Xcode
+- verify notification permission prompts on real device
+- test Arabic RTL layout on iPhone sizes
+
+## 18. How To Run
+
+### Demo mode
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-For a specific device:
+Demo credentials:
+
+- email: `student@studyflow.app`
+- password: `studyflow123`
+
+### Supabase mode
+
+With individual defines:
 
 ```bash
-flutter run -d android
-flutter run -d ios
+flutter run \
+  --dart-define=SUPABASE_URL=https://your-project-ref.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
-## How to Change App Name and Package / Bundle Identifiers
+With JSON define file:
 
-### App name
+```bash
+flutter run --dart-define-from-file=.env.json
+```
 
-- Update `AppConstants.appName` in `lib/core/constants/app_constants.dart`
-- Update platform-level app display names in:
-  - `android/app/src/main/AndroidManifest.xml`
-  - `ios/Runner/Info.plist`
+## 19. Build Commands
 
-### Android package name
+### Android APK
 
-- Change `applicationId` in `android/app/build.gradle.kts` or `build.gradle`
-- Rename Kotlin package folders if needed
+```bash
+flutter build apk --release
+```
 
-### iOS bundle identifier
+### Android App Bundle
 
-- Open the iOS project in Xcode
-- Update the Bundle Identifier under the Runner target
+```bash
+flutter build appbundle --release
+```
 
-## Demo Credentials
+### iOS release
 
-The login screen is prefilled for presentation flow:
+```bash
+flutter build ios --release
+```
 
-- Email: `student@studyflow.app`
-- Password: `studyflow123`
+For App Store submission, archive in Xcode after a successful iOS release build.
 
-You can also create a new account from the sign-up flow.
+## 20. Common Errors And Fixes
 
-## Known Limitations
+### Flutter localization not updating
 
-- Local demo mode is the default until Supabase keys are supplied
-- Notification scheduling is preview-ready rather than fully production-scheduled
-- Native platform branding assets and store metadata are not yet customized
-- Some premium extensions, such as a dedicated global search screen and more advanced achievements, can be expanded further
+- run `flutter gen-l10n`
+- ensure `l10n.yaml` matches the correct ARB folder
 
-## Future Improvements
+### App starts in demo mode unexpectedly
 
-- real scheduled notifications with full permission onboarding
-- richer accessibility preferences such as reduced motion and larger layout presets
-- file attachments for notes
-- recurring tasks and smarter planner suggestions
-- real-time sync indicators and offline conflict resolution
-- richer onboarding illustrations and branded asset pack
-- unit, widget, and integration tests
+- verify `SUPABASE_URL` and `SUPABASE_ANON_KEY` were passed correctly
+- confirm they are available as compile-time defines
 
-## Course Project Presentation Summary
+### Login works but data is empty
 
-StudyFlow can be presented as a mobile HCI project focused on:
+- local demo mode may need seeded data, which happens automatically after sign-in
+- Supabase mode needs migration and RLS setup
 
-- reducing student overload through information architecture and visual hierarchy
-- supporting multilingual and RTL-first inclusive design
-- balancing premium aesthetics with practical productivity workflows
-- using clean architecture to keep the project scalable beyond a course demo
-- demonstrating both frontend polish and backend readiness with Supabase
+### Notifications do not appear
+
+- grant permission manually in device settings
+- test on a real device
+- confirm Android 13+ notification permission is accepted
+
+### Arabic layout looks wrong
+
+- switch app language to Arabic from onboarding or settings
+- confirm locale changed at app level
+- test on a physical device and multiple screen sizes
+
+### Forms overflow on smaller devices
+
+- most screens already use `SingleChildScrollView` or `ListView`
+- if you expand forms further, keep `SafeArea` and scroll containers
+
+### Release build fails on iOS
+
+- verify signing in Xcode
+- verify bundle identifier
+- run `pod install` if native dependencies changed
+
+## Key Implementation Notes
+
+- The app is runnable without Supabase because local repositories seed demo content automatically.
+- Supabase support is not a mock. Repository contracts and migration are already aligned for real backend use.
+- `.env.example` is included as reference, but the current secure runtime path uses Flutter compile-time defines.
+- Extra modules added in this version: exams, habits, smart search, onboarding language selection, app-level locale persistence, and improved dashboard design.

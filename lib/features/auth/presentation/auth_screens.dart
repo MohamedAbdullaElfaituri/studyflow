@@ -124,19 +124,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              context.l10n.loginTitle,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              context.l10n.loginSubtitle,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(height: AppSpacing.lg),
+            GradientBanner(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.loginTitle,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(color: Colors.white),
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    context.l10n.loginSubtitle,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.84),
+                        ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.xl),
             SectionCard(
               child: Form(
                 key: _formKey,
@@ -201,6 +211,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Text(context.copy.authDivider),
+                ),
+                Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _SocialAuthButtons(
+              googleLabel: context.copy.continueWithGoogle,
+              appleLabel: context.copy.continueWithApple,
             ),
             const SizedBox(height: AppSpacing.lg),
             SectionCard(
@@ -383,6 +409,22 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: AppSpacing.lg),
+            Row(
+              children: [
+                Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Text(context.copy.authDivider),
+                ),
+                Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _SocialAuthButtons(
+              googleLabel: context.copy.continueWithGoogle,
+              appleLabel: context.copy.continueWithApple,
+            ),
           ],
         ),
       ),
@@ -489,6 +531,39 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SocialAuthButtons extends StatelessWidget {
+  const _SocialAuthButtons({
+    required this.googleLabel,
+    required this.appleLabel,
+  });
+
+  final String googleLabel;
+  final String appleLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.g_mobiledata_rounded),
+            label: Text(googleLabel),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.apple_rounded),
+            label: Text(appleLabel),
+          ),
+        ),
+      ],
     );
   }
 }

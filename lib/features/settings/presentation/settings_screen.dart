@@ -103,6 +103,16 @@ class SettingsScreen extends ConsumerWidget {
             SectionCard(
               child: Column(
                 children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.notifications_active_outlined),
+                    title: Text(context.copy.notificationPermissionsAction),
+                    subtitle: Text(context.copy.notificationPermissionsHint),
+                    onTap: () async {
+                      await ref.read(reminderServiceProvider).requestPermissions();
+                    },
+                  ),
+                  const Divider(),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: studyData.reminders.tasksEnabled,
@@ -166,6 +176,49 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
+            SectionCard(
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.sync_rounded),
+                    title: Text(context.copy.syncStatusTitle),
+                    subtitle: Text(context.copy.syncReadyLabel),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.info_outline_rounded),
+                    title: Text(context.copy.aboutLabel),
+                    onTap: () => _showPlaceholderSheet(
+                      context,
+                      context.copy.aboutLabel,
+                    ),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.shield_outlined),
+                    title: Text(context.copy.privacyLabel),
+                    onTap: () => _showPlaceholderSheet(
+                      context,
+                      context.copy.privacyLabel,
+                    ),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.description_outlined),
+                    title: Text(context.copy.termsLabel),
+                    onTap: () => _showPlaceholderSheet(
+                      context,
+                      context.copy.termsLabel,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             OutlinedButton(
               onPressed: () async {
                 await ref.read(authControllerProvider.notifier).signOut();
@@ -180,4 +233,25 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _showPlaceholderSheet(BuildContext context, String title) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            context.copy.placeholderLegalBody,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    ),
+  );
 }

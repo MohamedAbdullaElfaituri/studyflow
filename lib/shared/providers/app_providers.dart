@@ -1,10 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../app/app_router.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/services/reminder_service.dart';
 import '../../core/services/supabase_service.dart';
@@ -38,6 +40,27 @@ final studyRepositoryProvider = Provider<StudyRepository>((ref) {
 });
 
 final routerProvider = Provider<GoRouter>((ref) => AppRouter.build());
+
+class AppLocalePreferenceController extends Notifier<String?> {
+  @override
+  String? build() {
+    return ref
+        .watch(localStorageServiceProvider)
+        .readString(AppConstants.localePreferenceKey);
+  }
+
+  Future<void> setLocale(String code) async {
+    state = code;
+    await ref
+        .read(localStorageServiceProvider)
+        .writeString(AppConstants.localePreferenceKey, code);
+  }
+}
+
+final appLocalePreferenceProvider =
+    NotifierProvider<AppLocalePreferenceController, String?>(
+  AppLocalePreferenceController.new,
+);
 
 class AuthViewState {
   const AuthViewState({
@@ -150,6 +173,8 @@ class StudyDataState {
     required this.courses,
     required this.tasks,
     required this.notes,
+    required this.exams,
+    required this.habits,
     required this.sessions,
     required this.goals,
     required this.settings,
@@ -159,6 +184,8 @@ class StudyDataState {
   final List<CourseModel> courses;
   final List<TaskModel> tasks;
   final List<NoteModel> notes;
+  final List<ExamModel> exams;
+  final List<HabitModel> habits;
   final List<StudySessionModel> sessions;
   final GoalSettingsModel goals;
   final UserSettingsModel settings;
@@ -170,6 +197,8 @@ class StudyDataState {
       courses: const [],
       tasks: const [],
       notes: const [],
+      exams: const [],
+      habits: const [],
       sessions: const [],
       goals: GoalSettingsModel(
         id: 'empty',
@@ -238,6 +267,27 @@ class StudyDataState {
 
   List<NoteModel> get pinnedNotes => notes.where((item) => item.isPinned).toList();
 
+  List<ExamModel> get upcomingExams {
+    final now = DateTime.now();
+    return exams.where((item) => item.dateTime.isAfter(now)).toList()
+      ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+  }
+
+  List<ExamModel> get criticalExams {
+    final now = DateTime.now();
+    final threshold = now.add(const Duration(days: 7));
+    return upcomingExams
+        .where((item) => item.dateTime.isBefore(threshold))
+        .take(4)
+        .toList();
+  }
+
+  List<HabitModel> get activeHabits =>
+      habits.toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+  List<HabitModel> get completedHabits =>
+      habits.where((item) => item.isCompleted).toList();
+
   int get dailyStudyMinutes {
     final now = DateTime.now();
     return sessions
@@ -299,6 +349,26 @@ class StudyDataState {
     return streak;
   }
 
+  int get totalXp =>
+      completedTasks.length * 25 +
+      sessions.length * 40 +
+      completedHabits.length * 18 +
+      upcomingExams.where((item) => item.priority == TaskPriority.urgent).length * 12;
+
+  int get level => (totalXp ~/ 180) + 1;
+
+  double get levelProgress {
+    final progress = (totalXp % 180) / 180;
+    return progress.clamp(0, 1).toDouble();
+  }
+
+  double get habitConsistency {
+    if (habits.isEmpty) {
+      return 0;
+    }
+    return completedHabits.length / habits.length;
+  }
+
   CourseModel? courseById(String? id) =>
       courses.firstWhereOrNull((course) => course.id == id);
 
@@ -306,11 +376,19 @@ class StudyDataState {
 
   NoteModel? noteById(String id) => notes.firstWhereOrNull((note) => note.id == id);
 
+  ExamModel? examById(String id) => exams.firstWhereOrNull((exam) => exam.id == id);
+
+  HabitModel? habitById(String id) =>
+      habits.firstWhereOrNull((habit) => habit.id == id);
+
   List<TaskModel> tasksForCourse(String courseId) =>
       tasks.where((task) => task.courseId == courseId).toList();
 
   List<NoteModel> notesForCourse(String courseId) =>
       notes.where((note) => note.courseId == courseId).toList();
+
+  List<ExamModel> examsForCourse(String courseId) =>
+      exams.where((exam) => exam.courseId == courseId).toList();
 
   List<StudySessionModel> sessionsForCourse(String courseId) =>
       sessions.where((session) => session.courseId == courseId).toList();
@@ -340,6 +418,14 @@ class StudyDataState {
           target: 4,
           icon: 'local_fire_department',
         ),
+        AchievementModel(
+          id: 'habit',
+          title: 'Ritual Builder',
+          description: 'Complete 3 habits in one day',
+          progress: completedHabits.length,
+          target: 3,
+          icon: 'repeat',
+        ),
       ];
 }
 
@@ -362,6 +448,8 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       repository.getCourses(userId),
       repository.getTasks(userId),
       repository.getNotes(userId),
+      repository.getExams(userId),
+      repository.getHabits(userId),
       repository.getStudySessions(userId),
       repository.getGoals(userId),
       repository.getUserSettings(userId),
@@ -372,10 +460,12 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       courses: results[0] as List<CourseModel>,
       tasks: results[1] as List<TaskModel>,
       notes: results[2] as List<NoteModel>,
-      sessions: results[3] as List<StudySessionModel>,
-      goals: results[4] as GoalSettingsModel,
-      settings: results[5] as UserSettingsModel,
-      reminders: results[6] as ReminderPreferencesModel,
+      exams: results[3] as List<ExamModel>,
+      habits: results[4] as List<HabitModel>,
+      sessions: results[5] as List<StudySessionModel>,
+      goals: results[6] as GoalSettingsModel,
+      settings: results[7] as UserSettingsModel,
+      reminders: results[8] as ReminderPreferencesModel,
     );
   }
 
@@ -465,6 +555,46 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     await _softRefresh();
   }
 
+  Future<void> saveExam(ExamModel exam) async {
+    await ref.read(studyRepositoryProvider).saveExam(exam);
+    await _softRefresh();
+  }
+
+  Future<void> deleteExam(String examId) async {
+    final user = _currentUser;
+    if (user == null) return;
+    await ref.read(studyRepositoryProvider).deleteExam(user.id, examId);
+    await _softRefresh();
+  }
+
+  Future<void> saveHabit(HabitModel habit) async {
+    await ref.read(studyRepositoryProvider).saveHabit(habit);
+    await _softRefresh();
+  }
+
+  Future<void> deleteHabit(String habitId) async {
+    final user = _currentUser;
+    if (user == null) return;
+    await ref.read(studyRepositoryProvider).deleteHabit(user.id, habitId);
+    await _softRefresh();
+  }
+
+  Future<void> completeHabit(HabitModel habit) async {
+    final nextCompleted = (habit.completedCount + 1).clamp(0, habit.goalCount);
+    await ref.read(studyRepositoryProvider).saveHabit(
+          habit.copyWith(
+            completedCount: nextCompleted,
+            streakCount: nextCompleted >= habit.goalCount
+                ? habit.streakCount + 1
+                : habit.streakCount,
+            lastCompletedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+    HapticFeedback.lightImpact();
+    await _softRefresh();
+  }
+
   Future<void> addStudySession({
     String? courseId,
     String? taskId,
@@ -485,6 +615,7 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       createdAt: now,
     );
     await ref.read(studyRepositoryProvider).addStudySession(session);
+    HapticFeedback.mediumImpact();
     await _softRefresh();
   }
 
@@ -497,6 +628,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     final repository = ref.read(studyRepositoryProvider);
     final authState = ref.read(authControllerProvider).valueOrNull;
     await repository.saveUserSettings(settings);
+    await ref
+        .read(appLocalePreferenceProvider.notifier)
+        .setLocale(settings.languageCode);
 
     if (authState?.user != null) {
       await ref.read(authControllerProvider.notifier).updateProfile(
@@ -537,8 +671,9 @@ final currentUserProvider = Provider<AppUserModel?>(
 
 final localeProvider = Provider<Locale?>((ref) {
   final data = ref.watch(studyDataControllerProvider).valueOrNull;
-  final code =
-      data?.settings.languageCode ?? ref.watch(currentUserProvider)?.preferredLanguage;
+  final code = data?.settings.languageCode ??
+      ref.watch(currentUserProvider)?.preferredLanguage ??
+      ref.watch(appLocalePreferenceProvider);
   if (code == null || code.isEmpty) {
     return null;
   }

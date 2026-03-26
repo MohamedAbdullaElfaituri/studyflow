@@ -107,6 +107,26 @@ class AnalyticsScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: MetricTile(
+                      label: context.copy.habitsTitle,
+                      value: '${(studyData.habitConsistency * 100).round()}%',
+                      icon: Icons.repeat_rounded,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: MetricTile(
+                      label: context.copy.examsTitle,
+                      value: '${studyData.criticalExams.length}',
+                      icon: Icons.event_note_rounded,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: MetricTile(
                       label: context.l10n.completedTasksLabel,
                       value: '${studyData.completedTasks.length}',
                       icon: Icons.check_circle_rounded,

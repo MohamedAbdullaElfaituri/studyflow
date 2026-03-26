@@ -18,8 +18,8 @@ class StudyFlowApp extends ConsumerWidget {
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(locale),
+      darkTheme: AppTheme.dark(locale),
       themeMode: themeMode,
       locale: locale,
       supportedLocales: AppConstants.supportedLocales,

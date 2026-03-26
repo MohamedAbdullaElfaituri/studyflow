@@ -236,6 +236,11 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 courseId: _courseId,
                 durationMinutes: _focusMinutes,
               );
+          await ref.read(reminderServiceProvider).showPreview(
+                id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                title: context.l10n.notificationPreviewTitle,
+                body: context.l10n.focusSessionCompleteMessage,
+              );
           if (mounted) {
             context.showAppSnackBar(context.l10n.focusSessionCompleteMessage);
           }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData light() {
+  static ThemeData light([Locale? locale]) {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.seed,
       brightness: Brightness.light,
@@ -18,10 +18,10 @@ class AppTheme {
       onSurface: AppColors.neutral900,
     );
 
-    return _buildTheme(scheme, Brightness.light);
+    return _buildTheme(scheme, Brightness.light, locale);
   }
 
-  static ThemeData dark() {
+  static ThemeData dark([Locale? locale]) {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.seed,
       brightness: Brightness.dark,
@@ -35,18 +35,44 @@ class AppTheme {
       onSurface: Colors.white,
     );
 
-    return _buildTheme(scheme, Brightness.dark);
+    return _buildTheme(scheme, Brightness.dark, locale);
   }
 
-  static ThemeData _buildTheme(ColorScheme scheme, Brightness brightness) {
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme().copyWith(
-      headlineMedium:
-          GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-      titleLarge: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-      titleMedium: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-      bodyLarge: GoogleFonts.plusJakartaSans(height: 1.4),
-      bodyMedium: GoogleFonts.plusJakartaSans(height: 1.4),
-      labelLarge: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+  static ThemeData _buildTheme(
+    ColorScheme scheme,
+    Brightness brightness,
+    Locale? locale,
+  ) {
+    final isArabic = locale?.languageCode == 'ar';
+    final baseTextTheme = isArabic
+        ? GoogleFonts.notoSansArabicTextTheme()
+        : GoogleFonts.plusJakartaSansTextTheme();
+
+    final textTheme = baseTextTheme.copyWith(
+      headlineMedium: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(fontWeight: FontWeight.w700),
+      titleLarge: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(fontWeight: FontWeight.w700),
+      titleMedium: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(fontWeight: FontWeight.w600),
+      bodyLarge: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(height: 1.4),
+      bodyMedium: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(height: 1.4),
+      labelLarge: (isArabic
+              ? GoogleFonts.notoSansArabic()
+              : GoogleFonts.plusJakartaSans())
+          .copyWith(fontWeight: FontWeight.w600),
     );
 
     return ThemeData(
@@ -138,6 +164,12 @@ class AppTheme {
         titleTextStyle: textTheme.titleLarge?.copyWith(
           color: scheme.onSurface,
         ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
       ),
     );
   }

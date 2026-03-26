@@ -16,6 +16,12 @@ abstract class StudyRepository {
   Future<List<NoteModel>> getNotes(String userId);
   Future<void> saveNote(NoteModel note);
   Future<void> deleteNote(String userId, String noteId);
+  Future<List<ExamModel>> getExams(String userId);
+  Future<void> saveExam(ExamModel exam);
+  Future<void> deleteExam(String userId, String examId);
+  Future<List<HabitModel>> getHabits(String userId);
+  Future<void> saveHabit(HabitModel habit);
+  Future<void> deleteHabit(String userId, String habitId);
   Future<List<StudySessionModel>> getStudySessions(String userId);
   Future<void> addStudySession(StudySessionModel session);
   Future<GoalSettingsModel> getGoals(String userId);
@@ -34,13 +40,11 @@ class LocalStudyRepository implements StudyRepository {
 
   @override
   Future<void> ensureSeeded(AppUserModel user) async {
-    if (_storage.containsKey(AppConstants.coursesKey(user.id))) {
-      return;
-    }
-
     final courses = DemoSeedService.coursesFor(user.id);
     final tasks = DemoSeedService.tasksFor(user.id, courses);
     final notes = DemoSeedService.notesFor(user.id, courses);
+    final exams = DemoSeedService.examsFor(user.id, courses);
+    final habits = DemoSeedService.habitsFor(user.id);
     final sessions = DemoSeedService.sessionsFor(user.id, courses, tasks);
     final goals = DemoSeedService.goalsFor(user.id);
     final settings = DemoSeedService.settingsFor(user.id).copyWith(
@@ -49,34 +53,60 @@ class LocalStudyRepository implements StudyRepository {
     );
     final reminders = DemoSeedService.remindersFor(user.id);
 
-    await _writeCollection(
-      AppConstants.coursesKey(user.id),
-      courses.map((item) => item.toJson()).toList(),
-    );
-    await _writeCollection(
-      AppConstants.tasksKey(user.id),
-      tasks.map((item) => item.toJson()).toList(),
-    );
-    await _writeCollection(
-      AppConstants.notesKey(user.id),
-      notes.map((item) => item.toJson()).toList(),
-    );
-    await _writeCollection(
-      AppConstants.sessionsKey(user.id),
-      sessions.map((item) => item.toJson()).toList(),
-    );
-    await _storage.writeString(
-      AppConstants.goalsKey(user.id),
-      encodeCollection([goals.toJson()]),
-    );
-    await _storage.writeString(
-      AppConstants.settingsKey(user.id),
-      encodeCollection([settings.toJson()]),
-    );
-    await _storage.writeString(
-      AppConstants.remindersKey(user.id),
-      encodeCollection([reminders.toJson()]),
-    );
+    if (!_storage.containsKey(AppConstants.coursesKey(user.id))) {
+      await _writeCollection(
+        AppConstants.coursesKey(user.id),
+        courses.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.tasksKey(user.id))) {
+      await _writeCollection(
+        AppConstants.tasksKey(user.id),
+        tasks.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.notesKey(user.id))) {
+      await _writeCollection(
+        AppConstants.notesKey(user.id),
+        notes.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.examsKey(user.id))) {
+      await _writeCollection(
+        AppConstants.examsKey(user.id),
+        exams.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.habitsKey(user.id))) {
+      await _writeCollection(
+        AppConstants.habitsKey(user.id),
+        habits.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.sessionsKey(user.id))) {
+      await _writeCollection(
+        AppConstants.sessionsKey(user.id),
+        sessions.map((item) => item.toJson()).toList(),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.goalsKey(user.id))) {
+      await _storage.writeString(
+        AppConstants.goalsKey(user.id),
+        encodeCollection([goals.toJson()]),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.settingsKey(user.id))) {
+      await _storage.writeString(
+        AppConstants.settingsKey(user.id),
+        encodeCollection([settings.toJson()]),
+      );
+    }
+    if (!_storage.containsKey(AppConstants.remindersKey(user.id))) {
+      await _storage.writeString(
+        AppConstants.remindersKey(user.id),
+        encodeCollection([reminders.toJson()]),
+      );
+    }
   }
 
   @override
@@ -174,6 +204,56 @@ class LocalStudyRepository implements StudyRepository {
     await _writeCollection(
       AppConstants.notesKey(userId),
       notes.map((item) => item.toJson()).toList(),
+    );
+  }
+
+  @override
+  Future<List<ExamModel>> getExams(String userId) async {
+    return _readCollection(AppConstants.examsKey(userId), ExamModel.fromJson);
+  }
+
+  @override
+  Future<void> saveExam(ExamModel exam) async {
+    final exams = await getExams(exam.userId);
+    final updated = _upsert(exams, exam, (item) => item.id);
+    await _writeCollection(
+      AppConstants.examsKey(exam.userId),
+      updated.map((item) => item.toJson()).toList(),
+    );
+  }
+
+  @override
+  Future<void> deleteExam(String userId, String examId) async {
+    final exams =
+        (await getExams(userId)).where((item) => item.id != examId).toList();
+    await _writeCollection(
+      AppConstants.examsKey(userId),
+      exams.map((item) => item.toJson()).toList(),
+    );
+  }
+
+  @override
+  Future<List<HabitModel>> getHabits(String userId) async {
+    return _readCollection(AppConstants.habitsKey(userId), HabitModel.fromJson);
+  }
+
+  @override
+  Future<void> saveHabit(HabitModel habit) async {
+    final habits = await getHabits(habit.userId);
+    final updated = _upsert(habits, habit, (item) => item.id);
+    await _writeCollection(
+      AppConstants.habitsKey(habit.userId),
+      updated.map((item) => item.toJson()).toList(),
+    );
+  }
+
+  @override
+  Future<void> deleteHabit(String userId, String habitId) async {
+    final habits =
+        (await getHabits(userId)).where((item) => item.id != habitId).toList();
+    await _writeCollection(
+      AppConstants.habitsKey(userId),
+      habits.map((item) => item.toJson()).toList(),
     );
   }
 
