@@ -29,125 +29,150 @@ class ProfileScreen extends ConsumerWidget {
           message: context.resolveError(error),
           onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
-        data: (studyData) => ListView(
-          children: [
-            SectionCard(
-              child: Column(
+        data: (studyData) {
+          final avatarLetter = _avatarLetter(auth?.fullName, auth?.email);
+          final displayName = _displayName(auth?.fullName, context);
+
+          return ListView(
+            children: [
+              SectionCard(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 42,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      child: Text(
+                        avatarLetter,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      displayName,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(auth?.email ?? ''),
+                    const SizedBox(height: AppSpacing.md),
+                    FilledButton.tonal(
+                      onPressed: () => context.push(ProfileEditScreen.routePath),
+                      child: Text(context.l10n.editProfileAction),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionHeader(
+                title: context.l10n.profileOverviewTitle,
+                subtitle: context.l10n.profileOverviewSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
                 children: [
-                  CircleAvatar(
-                    radius: 42,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    child: Text(
-                      ((auth?.fullName.isNotEmpty ?? false)
-                              ? auth!.fullName.trim()[0]
-                              : 'S')
-                          .toUpperCase(),
-                      style: Theme.of(context).textTheme.headlineMedium,
+                  Expanded(
+                    child: MetricTile(
+                      label: context.copy.levelLabel,
+                      value: '${studyData.level}',
+                      icon: Icons.workspace_premium_rounded,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    auth?.fullName ?? context.l10n.profileFallbackName,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(auth?.email ?? ''),
-                  const SizedBox(height: AppSpacing.md),
-                  FilledButton.tonal(
-                    onPressed: () => context.push(ProfileEditScreen.routePath),
-                    child: Text(context.l10n.editProfileAction),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: MetricTile(
+                      label: context.copy.xpLabel,
+                      value: '${studyData.totalXp}',
+                      icon: Icons.auto_graph_rounded,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SectionHeader(
-              title: context.l10n.profileOverviewTitle,
-              subtitle: context.l10n.profileOverviewSubtitle,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricTile(
-                    label: context.copy.levelLabel,
-                    value: '${studyData.level}',
-                    icon: Icons.workspace_premium_rounded,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: MetricTile(
-                    label: context.copy.xpLabel,
-                    value: '${studyData.totalXp}',
-                    icon: Icons.auto_graph_rounded,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricTile(
-                    label: context.l10n.streakLabel,
-                    value: '${studyData.streakCount}',
-                    icon: Icons.local_fire_department_rounded,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: MetricTile(
-                    label: context.l10n.focusHistoryTitle,
-                    value: '${studyData.sessions.length}',
-                    icon: Icons.timer_rounded,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SectionCard(
-              child: Column(
+              const SizedBox(height: AppSpacing.md),
+              Row(
                 children: [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.event_note_outlined),
-                    title: Text(context.copy.examsTitle),
-                    onTap: () => context.push(ExamsScreen.routePath),
+                  Expanded(
+                    child: MetricTile(
+                      label: context.l10n.streakLabel,
+                      value: '${studyData.streakCount}',
+                      icon: Icons.local_fire_department_rounded,
+                    ),
                   ),
-                  const Divider(),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.repeat_rounded),
-                    title: Text(context.copy.habitsTitle),
-                    onTap: () => context.push(HabitsScreen.routePath),
-                  ),
-                  const Divider(),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.settings_outlined),
-                    title: Text(context.l10n.settingsTitle),
-                    onTap: () => context.push(SettingsScreen.routePath),
-                  ),
-                  const Divider(),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.logout_rounded),
-                    title: Text(context.l10n.logoutAction),
-                    onTap: () async {
-                      await ref.read(authControllerProvider.notifier).signOut();
-                      if (context.mounted) {
-                        context.go(LoginScreen.routePath);
-                      }
-                    },
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: MetricTile(
+                      label: context.l10n.focusHistoryTitle,
+                      value: '${studyData.sessions.length}',
+                      icon: Icons.timer_rounded,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.event_note_outlined),
+                      title: Text(context.copy.examsTitle),
+                      onTap: () => context.push(ExamsScreen.routePath),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.repeat_rounded),
+                      title: Text(context.copy.habitsTitle),
+                      onTap: () => context.push(HabitsScreen.routePath),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.settings_outlined),
+                      title: Text(context.l10n.settingsTitle),
+                      onTap: () => context.push(SettingsScreen.routePath),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.logout_rounded),
+                      title: Text(context.l10n.logoutAction),
+                      onTap: () async {
+                        await ref.read(authControllerProvider.notifier).signOut();
+                        if (context.mounted) {
+                          context.go(LoginScreen.routePath);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  String _avatarLetter(String? fullName, String? email) {
+    final trimmedName = fullName?.trim() ?? '';
+    if (trimmedName.isNotEmpty) {
+      return trimmedName.substring(0, 1).toUpperCase();
+    }
+
+    final trimmedEmail = email?.trim() ?? '';
+    if (trimmedEmail.isNotEmpty) {
+      return trimmedEmail.substring(0, 1).toUpperCase();
+    }
+
+    return 'S';
+  }
+
+  String _displayName(String? fullName, BuildContext context) {
+    final trimmedName = fullName?.trim() ?? '';
+    if (trimmedName.isNotEmpty) {
+      return trimmedName;
+    }
+
+    return context.l10n.profileFallbackName;
   }
 }
 

@@ -14,7 +14,6 @@ class AppTheme {
       tertiary: AppColors.tertiary,
       error: AppColors.danger,
       surface: Colors.white,
-      surfaceContainerHighest: const Color(0xFFEFF4F9),
       onSurface: AppColors.neutral900,
     );
 
@@ -31,7 +30,6 @@ class AppTheme {
       tertiary: const Color(0xFFF6C77A),
       error: const Color(0xFFFFB4A0),
       surface: AppColors.darkSurface,
-      surfaceContainerHighest: const Color(0xFF1C2740),
       onSurface: Colors.white,
     );
 

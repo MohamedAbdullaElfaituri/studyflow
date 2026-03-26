@@ -425,6 +425,11 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
           final existing = widget.taskId == null
               ? null
               : studyData.taskById(widget.taskId!);
+          final selectedCourseId = studyData.courses.any(
+            (course) => course.id == _courseId,
+          )
+              ? _courseId
+              : null;
 
           if (!_initialized) {
             _initialized = true;
@@ -492,7 +497,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
-                        initialValue: _courseId,
+                        initialValue: selectedCourseId,
                         decoration:
                             InputDecoration(labelText: context.l10n.courseLabel),
                         items: [
@@ -689,7 +694,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                           final task = TaskModel(
                             id: existing?.id ?? const Uuid().v4(),
                             userId: user.id,
-                            courseId: _courseId,
+                            courseId: selectedCourseId,
                             title: _titleController.text.trim(),
                             description: _descriptionController.text.trim(),
                             dueDateTime: dueDateTime,

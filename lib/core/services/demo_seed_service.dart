@@ -7,6 +7,20 @@ class DemoSeedService {
 
   static final _uuid = const Uuid();
 
+  static String? _courseIdAt(List<CourseModel> courses, int index) {
+    if (courses.isEmpty) {
+      return null;
+    }
+    return courses[index % courses.length].id;
+  }
+
+  static String? _taskIdAt(List<TaskModel> tasks, int index) {
+    if (tasks.isEmpty) {
+      return null;
+    }
+    return tasks[index % tasks.length].id;
+  }
+
   static List<CourseModel> coursesFor(String userId) {
     final now = DateTime.now();
 
@@ -46,9 +60,9 @@ class DemoSeedService {
 
   static List<TaskModel> tasksFor(String userId, List<CourseModel> courses) {
     final now = DateTime.now();
-    final hci = courses.first.id;
-    final db = courses[1].id;
-    final se = courses[2].id;
+    final hci = _courseIdAt(courses, 0);
+    final db = _courseIdAt(courses, 1);
+    final se = _courseIdAt(courses, 2);
 
     return [
       TaskModel(
@@ -146,7 +160,7 @@ class DemoSeedService {
       NoteModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses.first.id,
+        courseId: _courseIdAt(courses, 0),
         title: 'Inclusive design reminders',
         content:
             'Use large touch targets, clear labels, and multiple feedback cues.',
@@ -157,7 +171,7 @@ class DemoSeedService {
       NoteModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses[1].id,
+        courseId: _courseIdAt(courses, 1),
         title: 'Supabase setup checklist',
         content:
             'Create project, enable email auth, add tables, configure RLS, seed demo data.',
@@ -168,7 +182,7 @@ class DemoSeedService {
       NoteModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses[2].id,
+        courseId: _courseIdAt(courses, 2),
         title: 'Presentation narrative',
         content:
             'Lead with student pain points, then show premium design and analytics.',
@@ -186,7 +200,7 @@ class DemoSeedService {
       ExamModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses.first.id,
+        courseId: _courseIdAt(courses, 0),
         title: 'HCI midterm presentation',
         description:
             'Present usability findings, accessibility issues, and the revised mobile flow.',
@@ -199,7 +213,7 @@ class DemoSeedService {
       ExamModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses[1].id,
+        courseId: _courseIdAt(courses, 1),
         title: 'Supabase schema assignment',
         description:
             'Upload the SQL schema, RLS policies, and validation notes before the lab closes.',
@@ -212,7 +226,7 @@ class DemoSeedService {
       ExamModel(
         id: _uuid.v4(),
         userId: userId,
-        courseId: courses[2].id,
+        courseId: _courseIdAt(courses, 2),
         title: 'Sprint planning quiz',
         description: 'Review agile ceremonies, story points, and estimation trade-offs.',
         dateTime: now.add(const Duration(days: 6, hours: 2)),
@@ -284,8 +298,8 @@ class DemoSeedService {
       StudySessionModel(
         id: _uuid.v4(),
         userId: userId,
-        taskId: tasks.first.id,
-        courseId: courses.first.id,
+        taskId: _taskIdAt(tasks, 0),
+        courseId: _courseIdAt(courses, 0),
         startTime: now.subtract(const Duration(days: 1, hours: 3)),
         endTime: now.subtract(const Duration(days: 1, hours: 2, minutes: 10)),
         durationMinutes: 50,
@@ -294,8 +308,8 @@ class DemoSeedService {
       StudySessionModel(
         id: _uuid.v4(),
         userId: userId,
-        taskId: tasks[1].id,
-        courseId: courses[1].id,
+        taskId: _taskIdAt(tasks, 1),
+        courseId: _courseIdAt(courses, 1),
         startTime: now.subtract(const Duration(days: 2, hours: 4)),
         endTime: now.subtract(const Duration(days: 2, hours: 3, minutes: 15)),
         durationMinutes: 45,
@@ -304,8 +318,8 @@ class DemoSeedService {
       StudySessionModel(
         id: _uuid.v4(),
         userId: userId,
-        taskId: tasks[2].id,
-        courseId: courses[2].id,
+        taskId: _taskIdAt(tasks, 2),
+        courseId: _courseIdAt(courses, 2),
         startTime: now.subtract(const Duration(days: 4, hours: 5)),
         endTime: now.subtract(const Duration(days: 4, hours: 4, minutes: 5)),
         durationMinutes: 55,
@@ -315,7 +329,7 @@ class DemoSeedService {
         id: _uuid.v4(),
         userId: userId,
         taskId: null,
-        courseId: courses.first.id,
+        courseId: _courseIdAt(courses, 0),
         startTime: now.subtract(const Duration(hours: 7)),
         endTime: now.subtract(const Duration(hours: 6, minutes: 30)),
         durationMinutes: 30,

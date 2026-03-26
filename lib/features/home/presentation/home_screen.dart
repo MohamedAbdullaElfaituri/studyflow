@@ -37,6 +37,7 @@ class HomeScreen extends ConsumerWidget {
           onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
+          final firstName = _firstName(auth?.fullName, auth?.email);
           final completionRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
@@ -58,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           Text(
                             context.l10n.welcomeBack(
-                              auth?.fullName.split(' ').first ?? '',
+                              firstName,
                             ),
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
@@ -527,6 +528,20 @@ class HomeScreen extends ConsumerWidget {
     };
 
     return quotes[data.totalXp % quotes.length];
+  }
+
+  String _firstName(String? fullName, String? email) {
+    final trimmedName = fullName?.trim() ?? '';
+    if (trimmedName.isNotEmpty) {
+      return trimmedName.split(RegExp(r'\s+')).first;
+    }
+
+    final mail = email?.trim() ?? '';
+    if (mail.isNotEmpty && mail.contains('@')) {
+      return mail.split('@').first;
+    }
+
+    return 'Student';
   }
 
   void _showQuickAddSheet(BuildContext context) {

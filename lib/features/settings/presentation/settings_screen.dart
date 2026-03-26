@@ -24,8 +24,22 @@ class SettingsScreen extends ConsumerWidget {
           message: context.resolveError(error),
           onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
-        data: (studyData) => ListView(
-          children: [
+        data: (studyData) {
+          const supportedLanguages = {'en', 'tr', 'ar'};
+          const supportedThemes = {'system', 'light', 'dark'};
+          final selectedLanguage = supportedLanguages.contains(
+            studyData.settings.languageCode,
+          )
+              ? studyData.settings.languageCode
+              : 'en';
+          final selectedTheme = supportedThemes.contains(
+            studyData.settings.themeMode,
+          )
+              ? studyData.settings.themeMode
+              : 'system';
+
+          return ListView(
+            children: [
             Row(
               children: [
                 IconButton(
@@ -57,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
                       ButtonSegment(value: 'tr', label: Text(context.l10n.turkishLabel)),
                       ButtonSegment(value: 'ar', label: Text(context.l10n.arabicLabel)),
                     ],
-                    selected: {studyData.settings.languageCode},
+                    selected: {selectedLanguage},
                     onSelectionChanged: (selection) async {
                       await ref.read(studyDataControllerProvider.notifier).updateSettings(
                             studyData.settings.copyWith(
@@ -86,7 +100,7 @@ class SettingsScreen extends ConsumerWidget {
                       ButtonSegment(value: 'light', label: Text(context.l10n.themeLight)),
                       ButtonSegment(value: 'dark', label: Text(context.l10n.themeDark)),
                     ],
-                    selected: {studyData.settings.themeMode},
+                    selected: {selectedTheme},
                     onSelectionChanged: (selection) async {
                       await ref.read(studyDataControllerProvider.notifier).updateSettings(
                             studyData.settings.copyWith(
@@ -229,7 +243,8 @@ class SettingsScreen extends ConsumerWidget {
               child: Text(context.l10n.logoutAction),
             ),
           ],
-        ),
+          );
+        },
       ),
     );
   }

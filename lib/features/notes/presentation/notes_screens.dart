@@ -195,6 +195,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         data: (studyData) {
           final existing =
               widget.noteId == null ? null : studyData.noteById(widget.noteId!);
+          final selectedCourseId = studyData.courses.any(
+            (course) => course.id == _courseId,
+          )
+              ? _courseId
+              : null;
 
           if (!_initialized) {
             _initialized = true;
@@ -252,7 +257,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
-                        initialValue: _courseId,
+                        initialValue: selectedCourseId,
                         decoration:
                             InputDecoration(labelText: context.l10n.courseLabel),
                         items: [
@@ -300,7 +305,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                           final note = NoteModel(
                             id: existing?.id ?? const Uuid().v4(),
                             userId: user.id,
-                            courseId: _courseId,
+                            courseId: selectedCourseId,
                             title: _titleController.text.trim(),
                             content: _contentController.text.trim(),
                             isPinned: _isPinned,

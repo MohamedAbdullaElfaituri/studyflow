@@ -30,7 +30,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedLanguage = ref.watch(appLocalePreferenceProvider) ?? 'en';
+    const supportedLanguageCodes = {'en', 'tr', 'ar'};
+    final rawLanguage = ref.watch(appLocalePreferenceProvider) ?? 'en';
+    final selectedLanguage =
+        supportedLanguageCodes.contains(rawLanguage) ? rawLanguage : 'en';
     final slides = [
       (
         icon: Icons.auto_graph_rounded,

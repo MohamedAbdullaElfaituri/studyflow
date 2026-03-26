@@ -10,6 +10,8 @@ enum ExamType { exam, assignment, quiz }
 
 enum HabitFrequency { daily, weekly }
 
+const Object _unset = Object();
+
 class AppUserModel {
   const AppUserModel({
     required this.id,
@@ -34,7 +36,7 @@ class AppUserModel {
   AppUserModel copyWith({
     String? fullName,
     String? email,
-    String? avatarUrl,
+    Object? avatarUrl = _unset,
     String? preferredLanguage,
     String? themeMode,
     DateTime? updatedAt,
@@ -43,7 +45,8 @@ class AppUserModel {
       id: id,
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      avatarUrl:
+          identical(avatarUrl, _unset) ? this.avatarUrl : avatarUrl as String?,
       preferredLanguage: preferredLanguage ?? this.preferredLanguage,
       themeMode: themeMode ?? this.themeMode,
       createdAt: createdAt,
@@ -130,7 +133,7 @@ class CourseModel {
   CourseModel copyWith({
     String? title,
     String? description,
-    String? instructorName,
+    Object? instructorName = _unset,
     int? color,
     DateTime? updatedAt,
   }) {
@@ -139,7 +142,9 @@ class CourseModel {
       userId: userId,
       title: title ?? this.title,
       description: description ?? this.description,
-      instructorName: instructorName ?? this.instructorName,
+      instructorName: identical(instructorName, _unset)
+          ? this.instructorName
+          : instructorName as String?,
       color: color ?? this.color,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -255,10 +260,10 @@ class TaskModel {
   final DateTime updatedAt;
 
   TaskModel copyWith({
-    String? courseId,
+    Object? courseId = _unset,
     String? title,
     String? description,
-    DateTime? dueDateTime,
+    Object? dueDateTime = _unset,
     TaskPriority? priority,
     TaskStatus? status,
     int? estimatedMinutes,
@@ -269,10 +274,12 @@ class TaskModel {
     return TaskModel(
       id: id,
       userId: userId,
-      courseId: courseId ?? this.courseId,
+      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       description: description ?? this.description,
-      dueDateTime: dueDateTime ?? this.dueDateTime,
+      dueDateTime: identical(dueDateTime, _unset)
+          ? this.dueDateTime
+          : dueDateTime as DateTime?,
       priority: priority ?? this.priority,
       status: status ?? this.status,
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
@@ -358,7 +365,7 @@ class NoteModel {
   final DateTime updatedAt;
 
   NoteModel copyWith({
-    String? courseId,
+    Object? courseId = _unset,
     String? title,
     String? content,
     bool? isPinned,
@@ -367,7 +374,7 @@ class NoteModel {
     return NoteModel(
       id: id,
       userId: userId,
-      courseId: courseId ?? this.courseId,
+      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       content: content ?? this.content,
       isPinned: isPinned ?? this.isPinned,
@@ -477,7 +484,7 @@ class ExamModel {
   final DateTime updatedAt;
 
   ExamModel copyWith({
-    String? courseId,
+    Object? courseId = _unset,
     String? title,
     String? description,
     DateTime? dateTime,
@@ -488,7 +495,7 @@ class ExamModel {
     return ExamModel(
       id: id,
       userId: userId,
-      courseId: courseId ?? this.courseId,
+      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       description: description ?? this.description,
       dateTime: dateTime ?? this.dateTime,
@@ -573,7 +580,7 @@ class HabitModel {
     int? goalCount,
     int? completedCount,
     int? streakCount,
-    DateTime? lastCompletedAt,
+    Object? lastCompletedAt = _unset,
     DateTime? updatedAt,
   }) {
     return HabitModel(
@@ -586,7 +593,9 @@ class HabitModel {
       goalCount: goalCount ?? this.goalCount,
       completedCount: completedCount ?? this.completedCount,
       streakCount: streakCount ?? this.streakCount,
-      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
+      lastCompletedAt: identical(lastCompletedAt, _unset)
+          ? this.lastCompletedAt
+          : lastCompletedAt as DateTime?,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

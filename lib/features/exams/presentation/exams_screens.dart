@@ -210,6 +210,11 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
         data: (studyData) {
           final existing =
               widget.examId == null ? null : studyData.examById(widget.examId!);
+          final selectedCourseId = studyData.courses.any(
+            (course) => course.id == _courseId,
+          )
+              ? _courseId
+              : null;
 
           if (!_initialized) {
             _initialized = true;
@@ -278,7 +283,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
-                        initialValue: _courseId,
+                        initialValue: selectedCourseId,
                         decoration:
                             InputDecoration(labelText: context.l10n.courseLabel),
                         items: [
@@ -384,7 +389,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                           final exam = ExamModel(
                             id: existing?.id ?? const Uuid().v4(),
                             userId: user.id,
-                            courseId: _courseId,
+                            courseId: selectedCourseId,
                             title: _titleController.text.trim(),
                             description: _descriptionController.text.trim(),
                             dateTime: _dateTime,

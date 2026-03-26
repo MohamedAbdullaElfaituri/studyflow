@@ -45,8 +45,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
           message: context.resolveError(error),
           onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
-        data: (studyData) => ListView(
-          children: [
+        data: (studyData) {
+          final selectedCourseId = studyData.courses.any(
+            (course) => course.id == _courseId,
+          )
+              ? _courseId
+              : null;
+
+          return ListView(
+            children: [
             SectionHeader(
               title: context.l10n.focusTitle,
               subtitle: context.l10n.focusSubtitle,
@@ -145,7 +152,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<String?>(
-                    initialValue: _courseId,
+                    initialValue: selectedCourseId,
                     decoration: InputDecoration(
                       labelText: context.l10n.linkCourseOptionalLabel,
                     ),
@@ -190,7 +197,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 ),
               ),
           ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -232,8 +240,15 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
         timer.cancel();
 
         if (!_isBreak) {
+          final studyData = ref.read(studyDataControllerProvider).valueOrNull;
+          final selectedCourseId = studyData?.courses.any(
+                    (course) => course.id == _courseId,
+                  ) ==
+                  true
+              ? _courseId
+              : null;
           await ref.read(studyDataControllerProvider.notifier).addStudySession(
-                courseId: _courseId,
+                courseId: selectedCourseId,
                 durationMinutes: _focusMinutes,
               );
           await ref.read(reminderServiceProvider).showPreview(
