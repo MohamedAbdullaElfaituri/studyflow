@@ -140,7 +140,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     context.l10n.loginSubtitle,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.84),
+                          color: Colors.white.withOpacity(0.84),
                         ),
                   ),
                 ],

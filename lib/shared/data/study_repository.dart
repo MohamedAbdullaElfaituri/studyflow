@@ -40,8 +40,18 @@ class LocalStudyRepository implements StudyRepository {
 
   @override
   Future<void> ensureSeeded(AppUserModel user) async {
-    final courses = DemoSeedService.coursesFor(user.id);
-    final tasks = DemoSeedService.tasksFor(user.id, courses);
+    final seededCourses = DemoSeedService.coursesFor(user.id);
+    final existingCourses = _storage.containsKey(AppConstants.coursesKey(user.id))
+        ? await getCourses(user.id)
+        : <CourseModel>[];
+    final courses = existingCourses.isEmpty ? seededCourses : existingCourses;
+
+    final seededTasks = DemoSeedService.tasksFor(user.id, courses);
+    final existingTasks = _storage.containsKey(AppConstants.tasksKey(user.id))
+        ? await getTasks(user.id)
+        : <TaskModel>[];
+    final tasks = existingTasks.isEmpty ? seededTasks : existingTasks;
+
     final notes = DemoSeedService.notesFor(user.id, courses);
     final exams = DemoSeedService.examsFor(user.id, courses);
     final habits = DemoSeedService.habitsFor(user.id);
@@ -142,6 +152,29 @@ class LocalStudyRepository implements StudyRepository {
               : note,
         )
         .toList();
+    final exams = (await getExams(userId))
+        .map(
+          (exam) => exam.courseId == courseId
+              ? exam.copyWith(courseId: null, updatedAt: DateTime.now())
+              : exam,
+        )
+        .toList();
+    final sessions = (await getStudySessions(userId))
+        .map(
+          (session) => session.courseId == courseId
+              ? StudySessionModel(
+                  id: session.id,
+                  userId: session.userId,
+                  taskId: session.taskId,
+                  courseId: null,
+                  startTime: session.startTime,
+                  endTime: session.endTime,
+                  durationMinutes: session.durationMinutes,
+                  createdAt: session.createdAt,
+                )
+              : session,
+        )
+        .toList();
 
     await _writeCollection(
       AppConstants.coursesKey(userId),
@@ -154,6 +187,14 @@ class LocalStudyRepository implements StudyRepository {
     await _writeCollection(
       AppConstants.notesKey(userId),
       notes.map((item) => item.toJson()).toList(),
+    );
+    await _writeCollection(
+      AppConstants.examsKey(userId),
+      exams.map((item) => item.toJson()).toList(),
+    );
+    await _writeCollection(
+      AppConstants.sessionsKey(userId),
+      sessions.map((item) => item.toJson()).toList(),
     );
   }
 
@@ -176,9 +217,29 @@ class LocalStudyRepository implements StudyRepository {
   Future<void> deleteTask(String userId, String taskId) async {
     final tasks =
         (await getTasks(userId)).where((item) => item.id != taskId).toList();
+    final sessions = (await getStudySessions(userId))
+        .map(
+          (session) => session.taskId == taskId
+              ? StudySessionModel(
+                  id: session.id,
+                  userId: session.userId,
+                  taskId: null,
+                  courseId: session.courseId,
+                  startTime: session.startTime,
+                  endTime: session.endTime,
+                  durationMinutes: session.durationMinutes,
+                  createdAt: session.createdAt,
+                )
+              : session,
+        )
+        .toList();
     await _writeCollection(
       AppConstants.tasksKey(userId),
       tasks.map((item) => item.toJson()).toList(),
+    );
+    await _writeCollection(
+      AppConstants.sessionsKey(userId),
+      sessions.map((item) => item.toJson()).toList(),
     );
   }
 

@@ -53,7 +53,7 @@ class ExamsScreen extends ConsumerWidget {
                           Text(
                             context.copy.examsQuickCardTitle,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.88),
+                                  color: Colors.white.withOpacity(0.88),
                                 ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
@@ -68,7 +68,7 @@ class ExamsScreen extends ConsumerWidget {
                           Text(
                             context.copy.examsQuickCardSubtitle,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
+                                  color: Colors.white.withOpacity(0.82),
                                 ),
                           ),
                         ],

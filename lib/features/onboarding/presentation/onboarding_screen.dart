@@ -154,7 +154,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 decoration: BoxDecoration(
                   color: _index == index
                       ? scheme.primary
-                      : scheme.outlineVariant.withValues(alpha: 0.5),
+                      : scheme.outlineVariant.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),

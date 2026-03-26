@@ -46,7 +46,7 @@ class AppPage extends StatelessWidget {
           start: -20,
           child: _AmbientOrb(
             color: (isDark ? AppColors.secondary : AppColors.seed)
-                .withValues(alpha: 0.16),
+                .withOpacity(0.16),
             size: 160,
           ),
         ),
@@ -54,7 +54,7 @@ class AppPage extends StatelessWidget {
           top: 180,
           end: -30,
           child: _AmbientOrb(
-            color: AppColors.tertiary.withValues(alpha: 0.12),
+            color: AppColors.tertiary.withOpacity(0.12),
             size: 180,
           ),
         ),
@@ -62,7 +62,7 @@ class AppPage extends StatelessWidget {
           bottom: 90,
           start: 24,
           child: _AmbientOrb(
-            color: AppColors.success.withValues(alpha: 0.1),
+            color: AppColors.success.withOpacity(0.1),
             size: 120,
           ),
         ),
@@ -118,7 +118,7 @@ class MainNavigationShell extends StatelessWidget {
           top: -40,
           start: -20,
           child: _AmbientOrb(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.16),
             size: 160,
           ),
         ),
@@ -134,11 +134,11 @@ class MainNavigationShell extends StatelessWidget {
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.92),
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withOpacity(0.08),
                     blurRadius: 28,
                     offset: const Offset(0, 12),
                   ),
@@ -206,18 +206,18 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
-            Theme.of(context).colorScheme.surface.withValues(alpha: 0.86),
+            Theme.of(context).colorScheme.surface.withOpacity(0.95),
+            Theme.of(context).colorScheme.surface.withOpacity(0.86),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.45),
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.45),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -260,7 +260,7 @@ class HeroMetricCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: color.withValues(alpha: 0.16),
+                backgroundColor: color.withOpacity(0.16),
                 child: Icon(icon, color: color),
               ),
               const Spacer(),
@@ -314,7 +314,7 @@ class GradientBanner extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.28),
             blurRadius: 30,
             offset: const Offset(0, 16),
           ),
@@ -391,7 +391,7 @@ class MetricTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: (color ?? scheme.primary).withValues(alpha: 0.14),
+            backgroundColor: (color ?? scheme.primary).withOpacity(0.14),
             child: Icon(icon, color: color ?? scheme.primary),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -574,7 +574,7 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -624,9 +624,9 @@ class CourseAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: size / 2,
-      backgroundColor: Color(course.color).withValues(alpha: 0.15),
+      backgroundColor: Color(course.color).withOpacity(0.15),
       child: Text(
-        course.title.characters.first.toUpperCase(),
+        (course.title.isEmpty ? '?' : course.title.substring(0, 1)).toUpperCase(),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Color(course.color),
               fontWeight: FontWeight.w700,
@@ -664,7 +664,7 @@ class QuickActionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+            border: Border.all(color: scheme.outlineVariant.withOpacity(0.6)),
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -735,7 +735,7 @@ class _AmbientOrb extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            colors: [color, color.withValues(alpha: 0)],
+            colors: [color, color.withOpacity(0)],
           ),
         ),
       ),

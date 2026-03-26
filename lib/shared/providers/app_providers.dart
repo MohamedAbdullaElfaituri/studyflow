@@ -580,7 +580,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
   }
 
   Future<void> completeHabit(HabitModel habit) async {
-    final nextCompleted = (habit.completedCount + 1).clamp(0, habit.goalCount);
+    final nextCompleted = habit.completedCount + 1 > habit.goalCount
+        ? habit.goalCount
+        : habit.completedCount + 1;
     await ref.read(studyRepositoryProvider).saveHabit(
           habit.copyWith(
             completedCount: nextCompleted,
@@ -671,7 +673,9 @@ final currentUserProvider = Provider<AppUserModel?>(
 
 final localeProvider = Provider<Locale?>((ref) {
   final data = ref.watch(studyDataControllerProvider).valueOrNull;
-  final code = data?.settings.languageCode ??
+  final persistedSettingsLanguage =
+      data?.settings.userId.isNotEmpty == true ? data?.settings.languageCode : null;
+  final code = persistedSettingsLanguage ??
       ref.watch(currentUserProvider)?.preferredLanguage ??
       ref.watch(appLocalePreferenceProvider);
   if (code == null || code.isEmpty) {

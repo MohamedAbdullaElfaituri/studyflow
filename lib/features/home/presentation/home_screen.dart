@@ -105,7 +105,7 @@ class HomeScreen extends ConsumerWidget {
                                       .textTheme
                                       .bodyMedium
                                       ?.copyWith(
-                                        color: Colors.white.withValues(alpha: 0.82),
+                                        color: Colors.white.withOpacity(0.82),
                                       ),
                                 ),
                               ],
@@ -116,7 +116,7 @@ class HomeScreen extends ConsumerWidget {
                             width: 72,
                             height: 72,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.16),
+                              color: Colors.white.withOpacity(0.16),
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: const Icon(
@@ -153,7 +153,7 @@ class HomeScreen extends ConsumerWidget {
                           value: studyData.levelProgress,
                           minHeight: 10,
                           color: Colors.white,
-                          backgroundColor: Colors.white.withValues(alpha: 0.16),
+                          backgroundColor: Colors.white.withOpacity(0.16),
                         ),
                       ),
                     ],
@@ -311,7 +311,7 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             CircleAvatar(
                               backgroundColor: priorityColor(exam.priority)
-                                  .withValues(alpha: 0.16),
+                                  .withOpacity(0.16),
                               child: Icon(
                                 Icons.event_note_rounded,
                                 color: priorityColor(exam.priority),
@@ -593,7 +593,7 @@ class _HeroPill extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
+        color: Colors.white.withOpacity(0.16),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

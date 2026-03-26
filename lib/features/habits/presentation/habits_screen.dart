@@ -94,7 +94,7 @@ class HabitsScreen extends ConsumerWidget {
                                 children: [
                                   CircleAvatar(
                                     backgroundColor:
-                                        Color(habit.color).withValues(alpha: 0.14),
+                                        Color(habit.color).withOpacity(0.14),
                                     child: Icon(
                                       Icons.repeat_rounded,
                                       color: Color(habit.color),
@@ -124,14 +124,13 @@ class HabitsScreen extends ConsumerWidget {
                                       ],
                                     ),
                                   ),
-                                  FilledButton.tonalIcon(
+                                  FilledButton.tonal(
                                     onPressed: habit.isCompleted
                                         ? null
                                         : () => ref
                                             .read(studyDataControllerProvider.notifier)
                                             .completeHabit(habit),
-                                    icon: const Icon(Icons.check_rounded),
-                                    label: Text(context.l10n.finishAction),
+                                    child: Text(context.l10n.finishAction),
                                   ),
                                 ],
                               ),

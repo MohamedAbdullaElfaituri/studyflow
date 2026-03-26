@@ -193,58 +193,68 @@ class AnalyticsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.courseDistributionTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    SizedBox(
-                      height: 220,
-                      child: PieChart(
-                        PieChartData(
-                          sectionsSpace: 3,
-                          centerSpaceRadius: 42,
-                          sections: courseMinutes.entries.toList().asMap().entries.map(
-                            (entry) {
-                              final colors = [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.secondary,
-                                Theme.of(context).colorScheme.tertiary,
-                                Theme.of(context).colorScheme.error,
-                              ];
-                              return PieChartSectionData(
-                                title: entry.value.key.substring(
-                                  0,
-                                  entry.value.key.length.clamp(0, 3),
-                                ),
-                                value: entry.value.value,
-                                color: colors[entry.key % colors.length],
-                                radius: 74,
-                              );
-                            },
-                          ).toList(),
-                        ),
+              if (courseMinutes.isEmpty)
+                EmptyState(
+                  title: context.l10n.emptyActivityTitle,
+                  description: context.l10n.emptyActivityDescription,
+                  icon: Icons.pie_chart_outline_rounded,
+                )
+              else
+                SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.courseDistributionTitle,
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    ...courseMinutes.entries.map(
-                      (entry) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Text(
-                          context.l10n.courseAnalyticsRow(
-                            entry.key,
-                            entry.value.round(),
+                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(
+                        height: 220,
+                        child: PieChart(
+                          PieChartData(
+                            sectionsSpace: 3,
+                            centerSpaceRadius: 42,
+                            sections:
+                                courseMinutes.entries.toList().asMap().entries.map(
+                              (entry) {
+                                final colors = [
+                                  Theme.of(context).colorScheme.primary,
+                                  Theme.of(context).colorScheme.secondary,
+                                  Theme.of(context).colorScheme.tertiary,
+                                  Theme.of(context).colorScheme.error,
+                                ];
+                                return PieChartSectionData(
+                                  title: entry.value.key.substring(
+                                    0,
+                                    entry.value.key.length > 3
+                                        ? 3
+                                        : entry.value.key.length,
+                                  ),
+                                  value: entry.value.value,
+                                  color: colors[entry.key % colors.length],
+                                  radius: 74,
+                                );
+                              },
+                            ).toList(),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.md),
+                      ...courseMinutes.entries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: Text(
+                            context.l10n.courseAnalyticsRow(
+                              entry.key,
+                              entry.value.round(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           );
         },
