@@ -7,6 +7,11 @@ class AppConstants {
 
   static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const supabaseAuthRedirectScheme = 'com.mohamedahmet.studyflow';
+  static const supabaseAuthRedirectHost = 'login-callback';
+
+  static String get supabaseAuthRedirectUrl =>
+      '$supabaseAuthRedirectScheme://$supabaseAuthRedirectHost/';
 
   static const supportedLocales = [
     Locale('en'),

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -33,8 +35,16 @@ class AppPage extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDark
-                    ? const [Color(0xFF081120), Color(0xFF101C30), Color(0xFF132543)]
-                    : const [Color(0xFFF8FBFF), Color(0xFFF1F5FB), Color(0xFFE9F2FF)],
+                    ? const [
+                        Color(0xFF06101F),
+                        Color(0xFF0C162A),
+                        Color(0xFF132546),
+                      ]
+                    : const [
+                        Color(0xFFF9FBFF),
+                        Color(0xFFF0F4FF),
+                        Color(0xFFE7F1FF),
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -64,6 +74,14 @@ class AppPage extends StatelessWidget {
           child: _AmbientOrb(
             color: AppColors.success.withOpacity(0.1),
             size: 120,
+          ),
+        ),
+        PositionedDirectional(
+          top: 260,
+          start: 110,
+          child: _AmbientOrb(
+            color: AppColors.seed.withOpacity(isDark ? 0.08 : 0.06),
+            size: 110,
           ),
         ),
         Scaffold(
@@ -106,8 +124,16 @@ class MainNavigationShell extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: Theme.of(context).brightness == Brightness.dark
-                    ? const [Color(0xFF081120), Color(0xFF101C30), Color(0xFF132543)]
-                    : const [Color(0xFFF8FBFF), Color(0xFFF1F5FB), Color(0xFFE9F2FF)],
+                    ? const [
+                        Color(0xFF06101F),
+                        Color(0xFF0C162A),
+                        Color(0xFF132546),
+                      ]
+                    : const [
+                        Color(0xFFF9FBFF),
+                        Color(0xFFF0F4FF),
+                        Color(0xFFE7F1FF),
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -206,20 +232,27 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.surface.withOpacity(0.95),
-            Theme.of(context).colorScheme.surface.withOpacity(0.86),
+            Theme.of(context).colorScheme.surface.withOpacity(0.98),
+            Theme.of(context).colorScheme.surface.withOpacity(0.88),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.45),
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.38),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: Colors.black.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.07,
+            ),
+            blurRadius: 32,
+            offset: const Offset(0, 18),
+          ),
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            blurRadius: 22,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -693,6 +726,208 @@ class QuickActionTile extends StatelessWidget {
   }
 }
 
+class RevealOnBuild extends StatefulWidget {
+  const RevealOnBuild({
+    required this.child,
+    super.key,
+    this.delay = Duration.zero,
+    this.offset = const Offset(0, 0.04),
+  });
+
+  final Widget child;
+  final Duration delay;
+  final Offset offset;
+
+  @override
+  State<RevealOnBuild> createState() => _RevealOnBuildState();
+}
+
+class _RevealOnBuildState extends State<RevealOnBuild> {
+  var _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (mounted) {
+        setState(() => _visible = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 650),
+      curve: Curves.easeOutCubic,
+      offset: _visible ? Offset.zero : widget.offset,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+        opacity: _visible ? 1 : 0,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class AnimatedMetricValue extends StatelessWidget {
+  const AnimatedMetricValue({
+    required this.value,
+    super.key,
+    this.decimals = 0,
+    this.suffix = '',
+    this.style,
+  });
+
+  final double value;
+  final int decimals;
+  final String suffix;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: value),
+      duration: const Duration(milliseconds: 950),
+      curve: Curves.easeOutCubic,
+      builder: (context, animatedValue, _) {
+        final display = decimals == 0
+            ? animatedValue.round().toString()
+            : animatedValue.toStringAsFixed(decimals);
+        return Text('$display$suffix', style: style);
+      },
+    );
+  }
+}
+
+class ProgressRing extends StatelessWidget {
+  const ProgressRing({
+    required this.progress,
+    required this.label,
+    required this.valueText,
+    super.key,
+    this.accent,
+    this.size = 132,
+  });
+
+  final double progress;
+  final String label;
+  final String valueText;
+  final Color? accent;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = accent ?? scheme.primary;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: progress.clamp(0, 1).toDouble()),
+            duration: const Duration(milliseconds: 1100),
+            curve: Curves.easeOutCubic,
+            builder: (context, animatedProgress, _) {
+              return CustomPaint(
+                size: Size.square(size),
+                painter: _ProgressRingPainter(
+                  progress: animatedProgress,
+                  accent: color,
+                  track: scheme.outlineVariant.withOpacity(0.2),
+                ),
+              );
+            },
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                valueText,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WeekSparkBars extends StatelessWidget {
+  const WeekSparkBars({
+    required this.values,
+    super.key,
+    this.accent,
+  });
+
+  final List<double> values;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = accent ?? scheme.primary;
+    final maxValue = values.isEmpty ? 1.0 : math.max(values.reduce(math.max), 1.0);
+    const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: List.generate(values.length, (index) {
+        final value = values[index];
+        final ratio = (value / maxValue).clamp(0.14, 1.0).toDouble();
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: index == values.length - 1 ? 0 : 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 360 + (index * 70)),
+                  curve: Curves.easeOutCubic,
+                  height: 18 + (82 * ratio),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        color.withOpacity(0.92),
+                        color.withOpacity(0.26),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  index < labels.length ? labels[index] : '',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
 Color priorityColor(TaskPriority priority) {
   switch (priority) {
     case TaskPriority.low:
@@ -740,5 +975,61 @@ class _AmbientOrb extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ProgressRingPainter extends CustomPainter {
+  const _ProgressRingPainter({
+    required this.progress,
+    required this.accent,
+    required this.track,
+  });
+
+  final double progress;
+  final Color accent;
+  final Color track;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final strokeWidth = size.width * 0.11;
+    final center = size.center(Offset.zero);
+    final radius = (size.width - strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final trackPaint = Paint()
+      ..color = track
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final progressPaint = Paint()
+      ..shader = SweepGradient(
+        startAngle: -math.pi / 2,
+        endAngle: (math.pi * 2) - (math.pi / 2),
+        colors: [
+          accent.withOpacity(0.22),
+          accent.withOpacity(0.78),
+          accent,
+        ],
+      ).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(rect, 0, math.pi * 2, false, trackPaint);
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      math.pi * 2 * progress.clamp(0, 1).toDouble(),
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProgressRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.accent != accent ||
+        oldDelegate.track != track;
   }
 }

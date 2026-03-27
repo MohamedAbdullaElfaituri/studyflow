@@ -18,6 +18,10 @@ class AppUserModel {
     required this.fullName,
     required this.email,
     required this.avatarUrl,
+    required this.username,
+    required this.bio,
+    required this.university,
+    required this.department,
     required this.preferredLanguage,
     required this.themeMode,
     required this.createdAt,
@@ -28,6 +32,10 @@ class AppUserModel {
   final String fullName;
   final String email;
   final String? avatarUrl;
+  final String? username;
+  final String bio;
+  final String? university;
+  final String? department;
   final String preferredLanguage;
   final String themeMode;
   final DateTime createdAt;
@@ -37,6 +45,10 @@ class AppUserModel {
     String? fullName,
     String? email,
     Object? avatarUrl = _unset,
+    Object? username = _unset,
+    String? bio,
+    Object? university = _unset,
+    Object? department = _unset,
     String? preferredLanguage,
     String? themeMode,
     DateTime? updatedAt,
@@ -47,6 +59,15 @@ class AppUserModel {
       email: email ?? this.email,
       avatarUrl:
           identical(avatarUrl, _unset) ? this.avatarUrl : avatarUrl as String?,
+      username:
+          identical(username, _unset) ? this.username : username as String?,
+      bio: bio ?? this.bio,
+      university: identical(university, _unset)
+          ? this.university
+          : university as String?,
+      department: identical(department, _unset)
+          ? this.department
+          : department as String?,
       preferredLanguage: preferredLanguage ?? this.preferredLanguage,
       themeMode: themeMode ?? this.themeMode,
       createdAt: createdAt,
@@ -60,6 +81,10 @@ class AppUserModel {
       'full_name': fullName,
       'email': email,
       'avatar_url': avatarUrl,
+      'username': username,
+      'bio': bio,
+      'university': university,
+      'department': department,
       'preferred_language': preferredLanguage,
       'theme_mode': themeMode,
       'created_at': createdAt.toIso8601String(),
@@ -73,6 +98,10 @@ class AppUserModel {
       fullName: json['full_name'] as String? ?? '',
       email: json['email'] as String? ?? '',
       avatarUrl: json['avatar_url'] as String?,
+      username: json['username'] as String?,
+      bio: json['bio'] as String? ?? '',
+      university: json['university'] as String?,
+      department: json['department'] as String?,
       preferredLanguage: json['preferred_language'] as String? ?? 'en',
       themeMode: json['theme_mode'] as String? ?? 'system',
       createdAt: DateTime.parse(json['created_at'] as String),

@@ -80,6 +80,44 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     final repository = ref.watch(authRepositoryProvider);
     final user = await repository.currentUser();
     final onboardingCompleted = await repository.hasCompletedOnboarding();
+    final studyRepository = ref.watch(studyRepositoryProvider);
+
+    if (user != null) {
+      await studyRepository.ensureSeeded(user);
+    }
+
+    if (SupabaseService.isConfigured) {
+      final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
+        (event) async {
+          final currentUser = event.session?.user;
+          final onboardingComplete = await repository.hasCompletedOnboarding();
+
+          if (currentUser == null) {
+            state = AsyncData(
+              AuthViewState(
+                user: null,
+                onboardingCompleted: onboardingComplete,
+              ),
+            );
+            return;
+          }
+
+          final refreshedUser = await repository.currentUser();
+          if (refreshedUser != null) {
+            await studyRepository.ensureSeeded(refreshedUser);
+          }
+          state = AsyncData(
+            AuthViewState(
+              user: refreshedUser,
+              onboardingCompleted: onboardingComplete,
+            ),
+          );
+        },
+        onError: (Object _, StackTrace __) {},
+      );
+      ref.onDispose(subscription.cancel);
+    }
+
     return AuthViewState(
       user: user,
       onboardingCompleted: onboardingCompleted,
@@ -152,6 +190,21 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     await ref.read(authRepositoryProvider).sendPasswordReset(email);
   }
 
+  Future<void> signInWithGoogle() async {
+    final repository = ref.read(authRepositoryProvider);
+    final studyRepository = ref.read(studyRepositoryProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final onboardingCompleted = await repository.hasCompletedOnboarding();
+      final user = await repository.signInWithGoogle();
+      await studyRepository.ensureSeeded(user);
+      return AuthViewState(
+        user: user,
+        onboardingCompleted: onboardingCompleted,
+      );
+    });
+  }
+
   Future<void> updateProfile(AppUserModel user) async {
     final repository = ref.read(authRepositoryProvider);
     final updated = await repository.updateProfile(user);
@@ -160,6 +213,26 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       AuthViewState(
         user: updated,
         onboardingCompleted: onboardingCompleted,
+      ),
+    );
+  }
+
+  Future<void> uploadAvatar(String filePath) async {
+    final repository = ref.read(authRepositoryProvider);
+    final current = state.valueOrNull;
+    final user = current?.user;
+    if (user == null) {
+      return;
+    }
+
+    final updated = await repository.uploadAvatar(
+      user: user,
+      filePath: filePath,
+    );
+    state = AsyncData(
+      AuthViewState(
+        user: updated,
+        onboardingCompleted: current?.onboardingCompleted ?? true,
       ),
     );
   }

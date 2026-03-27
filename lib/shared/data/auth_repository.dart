@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -19,9 +22,14 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+  Future<AppUserModel> signInWithGoogle();
   Future<void> signOut();
   Future<void> sendPasswordReset(String email);
   Future<AppUserModel> updateProfile(AppUserModel user);
+  Future<AppUserModel> uploadAvatar({
+    required AppUserModel user,
+    required String filePath,
+  });
 }
 
 class LocalAuthRepository implements AuthRepository {
@@ -99,6 +107,10 @@ class LocalAuthRepository implements AuthRepository {
       fullName: fullName.trim(),
       email: normalizedEmail,
       avatarUrl: null,
+      username: _suggestUsername(fullName, normalizedEmail),
+      bio: '',
+      university: null,
+      department: null,
       preferredLanguage: preferredLanguage,
       themeMode: 'system',
       createdAt: now,
@@ -128,6 +140,25 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUserModel> signInWithGoogle() async {
+    final googleUser = _profiles.cast<AppUserModel?>().firstWhere(
+          (profile) => profile?.email.toLowerCase() == 'student@studyflow.app',
+          orElse: () => null,
+        );
+
+    if (googleUser != null) {
+      await _storage.writeString(AppConstants.authSessionKey, googleUser.id);
+      return googleUser;
+    }
+
+    return signUp(
+      fullName: 'StudyFlow Student',
+      email: 'student@studyflow.app',
+      password: 'studyflow123',
+    );
+  }
+
+  @override
   Future<void> sendPasswordReset(String email) async {
     final exists = _credentials.any(
       (item) => item.email.toLowerCase() == email.trim().toLowerCase(),
@@ -145,6 +176,18 @@ class LocalAuthRepository implements AuthRepository {
         .toList();
     await _writeProfiles(profiles);
     return user;
+  }
+
+  @override
+  Future<AppUserModel> uploadAvatar({
+    required AppUserModel user,
+    required String filePath,
+  }) async {
+    final updated = user.copyWith(
+      avatarUrl: filePath,
+      updatedAt: DateTime.now(),
+    );
+    return updateProfile(updated);
   }
 
   List<AppUserModel> get _profiles {
@@ -169,6 +212,10 @@ class LocalAuthRepository implements AuthRepository {
       fullName: 'StudyFlow Student',
       email: 'student@studyflow.app',
       avatarUrl: null,
+      username: 'studyflow_student',
+      bio: 'Designing calm, high-focus study weeks with clean routines.',
+      university: 'Istanbul Technical University',
+      department: 'Human-Computer Interaction',
       preferredLanguage:
           _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
       themeMode: 'system',
@@ -267,6 +314,10 @@ class SupabaseAuthRepository implements AuthRepository {
       fullName: fullName.trim(),
       email: email.trim(),
       avatarUrl: null,
+      username: _suggestUsername(fullName, email),
+      bio: '',
+      university: null,
+      department: null,
       preferredLanguage: preferredLanguage,
       themeMode: 'system',
       createdAt: now,
@@ -283,6 +334,33 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUserModel> signInWithGoogle() async {
+    final launched = await _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: AppConstants.supabaseAuthRedirectUrl,
+    );
+
+    if (!launched) {
+      throw const AppException('missing_user');
+    }
+
+    final authState = await _client.auth.onAuthStateChange
+        .firstWhere(
+          (event) =>
+              event.event == AuthChangeEvent.signedIn ||
+              event.session?.user != null,
+        )
+        .timeout(const Duration(minutes: 2));
+
+    final user = authState.session?.user ?? _client.auth.currentUser;
+    if (user == null) {
+      throw const AppException('missing_user');
+    }
+
+    return _fetchProfile(user);
+  }
+
+  @override
   Future<void> sendPasswordReset(String email) async {
     await _client.auth.resetPasswordForEmail(email.trim());
   }
@@ -291,6 +369,38 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<AppUserModel> updateProfile(AppUserModel user) async {
     await _client.from('profiles').upsert(user.toJson());
     return user;
+  }
+
+  @override
+  Future<AppUserModel> uploadAvatar({
+    required AppUserModel user,
+    required String filePath,
+  }) async {
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final extension = _fileExtension(filePath);
+    final objectPath = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$extension';
+
+    final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
+    if (previousObjectPath != null) {
+      try {
+        await _client.storage.from('avatars').remove([previousObjectPath]);
+      } catch (_) {}
+    }
+
+    await _client.storage.from('avatars').uploadBinary(
+          objectPath,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    final publicUrl = _client.storage.from('avatars').getPublicUrl(objectPath);
+    final updated = user.copyWith(
+      avatarUrl: publicUrl,
+      updatedAt: DateTime.now(),
+    );
+    await _client.from('profiles').upsert(updated.toJson());
+    return updated;
   }
 
   Future<AppUserModel> _fetchProfile(User user) async {
@@ -307,6 +417,13 @@ class SupabaseAuthRepository implements AuthRepository {
         fullName: (user.userMetadata?['full_name'] as String?) ?? '',
         email: user.email ?? '',
         avatarUrl: null,
+        username: _suggestUsername(
+          (user.userMetadata?['full_name'] as String?) ?? '',
+          user.email ?? '',
+        ),
+        bio: '',
+        university: null,
+        department: null,
         preferredLanguage:
             _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
         themeMode: 'system',
@@ -319,4 +436,41 @@ class SupabaseAuthRepository implements AuthRepository {
 
     return AppUserModel.fromJson(Map<String, dynamic>.from(data));
   }
+}
+
+String _suggestUsername(String fullName, String email) {
+  final normalized = fullName
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '.')
+      .replaceAll(RegExp(r'\.{2,}'), '.')
+      .replaceAll(RegExp(r'^\.|\.$'), '');
+  if (normalized.isNotEmpty) {
+    return normalized;
+  }
+
+  final emailPrefix = email.split('@').first.toLowerCase();
+  return emailPrefix.isEmpty ? 'studyflow.user' : emailPrefix;
+}
+
+String _fileExtension(String filePath) {
+  final segments = filePath.split('.');
+  if (segments.length < 2) {
+    return 'jpg';
+  }
+  return segments.last.toLowerCase();
+}
+
+String? _extractAvatarObjectPath(String? avatarUrl) {
+  if (avatarUrl == null || avatarUrl.isEmpty) {
+    return null;
+  }
+
+  const marker = '/storage/v1/object/public/avatars/';
+  final index = avatarUrl.indexOf(marker);
+  if (index == -1) {
+    return null;
+  }
+
+  return avatarUrl.substring(index + marker.length);
 }
