@@ -425,6 +425,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
           final existing = widget.taskId == null
               ? null
               : studyData.taskById(widget.taskId!);
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           final selectedCourseId = studyData.courses.any(
             (course) => course.id == _courseId,
           )
@@ -515,10 +516,10 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         onChanged: (value) => setState(() => _courseId = value),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<TaskPriority>(
+                      if (isCompact)
+                        Column(
+                          children: [
+                            DropdownButtonFormField<TaskPriority>(
                               initialValue: _priority,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
@@ -536,10 +537,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                               onChanged: (value) =>
                                   setState(() => _priority = value!),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: DropdownButtonFormField<TaskStatus>(
+                            const SizedBox(height: AppSpacing.md),
+                            DropdownButtonFormField<TaskStatus>(
                               initialValue: _status,
                               decoration:
                                   InputDecoration(labelText: context.l10n.statusLabel),
@@ -556,9 +555,54 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                               onChanged: (value) =>
                                   setState(() => _status = value!),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<TaskPriority>(
+                                initialValue: _priority,
+                                decoration: InputDecoration(
+                                  labelText: context.l10n.priorityLabel,
+                                ),
+                                items: TaskPriority.values
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(
+                                          _taskPriorityLabel(context, value),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _priority = value!),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: DropdownButtonFormField<TaskStatus>(
+                                initialValue: _status,
+                                decoration: InputDecoration(
+                                  labelText: context.l10n.statusLabel,
+                                ),
+                                items: TaskStatus.values
+                                    .map(
+                                      (value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(
+                                          _taskStatusLabel(context, value),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _status = value!),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _estimatedMinutesController,
@@ -568,10 +612,10 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
+                      if (isCompact)
+                        Column(
+                          children: [
+                            OutlinedButton(
                               onPressed: () async {
                                 final picked = await showDatePicker(
                                   context: context,
@@ -595,10 +639,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                       ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: OutlinedButton(
+                            const SizedBox(height: AppSpacing.md),
+                            OutlinedButton(
                               onPressed: () async {
                                 final picked = await showTimePicker(
                                   context: context,
@@ -614,9 +656,58 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                     : _dueTime!.format(context),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    firstDate: DateTime.now()
+                                        .subtract(const Duration(days: 365)),
+                                    lastDate: DateTime.now()
+                                        .add(const Duration(days: 730)),
+                                    initialDate: _dueDate ?? DateTime.now(),
+                                  );
+                                  if (picked != null) {
+                                    setState(() => _dueDate = picked);
+                                  }
+                                },
+                                child: Text(
+                                  _dueDate == null
+                                      ? context.l10n.pickDateAction
+                                      : DateTimeUtils.friendlyDate(
+                                          _dueDate!,
+                                          Localizations.localeOf(context)
+                                              .languageCode,
+                                        ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () async {
+                                  final picked = await showTimePicker(
+                                    context: context,
+                                    initialTime: _dueTime ?? TimeOfDay.now(),
+                                  );
+                                  if (picked != null) {
+                                    setState(() => _dueTime = picked);
+                                  }
+                                },
+                                child: Text(
+                                  _dueTime == null
+                                      ? context.l10n.pickTimeAction
+                                      : _dueTime!.format(context),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.lg),
                       Align(
                         alignment: AlignmentDirectional.centerStart,

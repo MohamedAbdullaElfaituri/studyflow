@@ -25,18 +25,11 @@ final reminderServiceProvider = Provider<ReminderService>(
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final storage = ref.watch(localStorageServiceProvider);
-  if (SupabaseService.isConfigured) {
-    return SupabaseAuthRepository(SupabaseService.client, storage);
-  }
-  return LocalAuthRepository(storage);
+  return SupabaseAuthRepository(SupabaseService.client, storage);
 });
 
 final studyRepositoryProvider = Provider<StudyRepository>((ref) {
-  final storage = ref.watch(localStorageServiceProvider);
-  if (SupabaseService.isConfigured) {
-    return SupabaseStudyRepository(SupabaseService.client);
-  }
-  return LocalStudyRepository(storage);
+  return SupabaseStudyRepository(SupabaseService.client);
 });
 
 final routerProvider = Provider<GoRouter>((ref) => AppRouter.build());
@@ -86,37 +79,35 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       await studyRepository.ensureSeeded(user);
     }
 
-    if (SupabaseService.isConfigured) {
-      final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
-        (event) async {
-          final currentUser = event.session?.user;
-          final onboardingComplete = await repository.hasCompletedOnboarding();
+    final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
+      (event) async {
+        final currentUser = event.session?.user;
+        final onboardingComplete = await repository.hasCompletedOnboarding();
 
-          if (currentUser == null) {
-            state = AsyncData(
-              AuthViewState(
-                user: null,
-                onboardingCompleted: onboardingComplete,
-              ),
-            );
-            return;
-          }
-
-          final refreshedUser = await repository.currentUser();
-          if (refreshedUser != null) {
-            await studyRepository.ensureSeeded(refreshedUser);
-          }
+        if (currentUser == null) {
           state = AsyncData(
             AuthViewState(
-              user: refreshedUser,
+              user: null,
               onboardingCompleted: onboardingComplete,
             ),
           );
-        },
-        onError: (Object _, StackTrace __) {},
-      );
-      ref.onDispose(subscription.cancel);
-    }
+          return;
+        }
+
+        final refreshedUser = await repository.currentUser();
+        if (refreshedUser != null) {
+          await studyRepository.ensureSeeded(refreshedUser);
+        }
+        state = AsyncData(
+          AuthViewState(
+            user: refreshedUser,
+            onboardingCompleted: onboardingComplete,
+          ),
+        );
+      },
+      onError: (Object _, StackTrace __) {},
+    );
+    ref.onDispose(subscription.cancel);
 
     return AuthViewState(
       user: user,
@@ -746,11 +737,12 @@ final currentUserProvider = Provider<AppUserModel?>(
 
 final localeProvider = Provider<Locale?>((ref) {
   final data = ref.watch(studyDataControllerProvider).valueOrNull;
+  final devicePreference = ref.watch(appLocalePreferenceProvider);
   final persistedSettingsLanguage =
       data?.settings.userId.isNotEmpty == true ? data?.settings.languageCode : null;
-  final code = persistedSettingsLanguage ??
-      ref.watch(currentUserProvider)?.preferredLanguage ??
-      ref.watch(appLocalePreferenceProvider);
+  final code = devicePreference ??
+      persistedSettingsLanguage ??
+      ref.watch(currentUserProvider)?.preferredLanguage;
   if (code == null || code.isEmpty) {
     return null;
   }

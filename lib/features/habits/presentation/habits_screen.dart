@@ -33,6 +33,7 @@ class HabitsScreen extends ConsumerWidget {
         ),
         data: (studyData) {
           final habits = studyData.activeHabits;
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           return ListView(
             children: [
               SectionHeader(
@@ -40,29 +41,52 @@ class HabitsScreen extends ConsumerWidget {
                 subtitle: context.copy.habitsSubtitle,
               ),
               const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: HeroMetricCard(
+              if (isCompact)
+                Column(
+                  children: [
+                    HeroMetricCard(
                       title: context.copy.levelLabel,
                       value: '${studyData.completedHabits.length}',
                       subtitle: context.copy.habitsQuickCardTitle,
                       icon: Icons.workspace_premium_rounded,
                       accent: const Color(0xFF2BAE9A),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: HeroMetricCard(
+                    const SizedBox(height: AppSpacing.md),
+                    HeroMetricCard(
                       title: context.l10n.streakLabel,
-                      value: '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
+                      value:
+                          '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
                       subtitle: context.copy.motivationMomentTitle,
                       icon: Icons.local_fire_department_rounded,
                       accent: const Color(0xFFF4A261),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: HeroMetricCard(
+                        title: context.copy.levelLabel,
+                        value: '${studyData.completedHabits.length}',
+                        subtitle: context.copy.habitsQuickCardTitle,
+                        icon: Icons.workspace_premium_rounded,
+                        accent: const Color(0xFF2BAE9A),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: HeroMetricCard(
+                        title: context.l10n.streakLabel,
+                        value:
+                            '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
+                        subtitle: context.copy.motivationMomentTitle,
+                        icon: Icons.local_fire_department_rounded,
+                        accent: const Color(0xFFF4A261),
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.xl),
               if (habits.isEmpty)
                 EmptyState(
@@ -90,50 +114,114 @@ class HabitsScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor:
-                                        Color(habit.color).withOpacity(0.14),
-                                    child: Icon(
-                                      Icons.repeat_rounded,
-                                      color: Color(habit.color),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.md),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                              if (isCompact)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       children: [
-                                        Text(
-                                          habit.title,
-                                          style: Theme.of(context).textTheme.titleMedium,
+                                        CircleAvatar(
+                                          backgroundColor:
+                                              Color(habit.color).withOpacity(0.14),
+                                          child: Icon(
+                                            Icons.repeat_rounded,
+                                            color: Color(habit.color),
+                                          ),
                                         ),
-                                        const SizedBox(height: AppSpacing.xs),
-                                        Text(
-                                          habit.description,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
+                                        const SizedBox(width: AppSpacing.md),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                habit.title,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium,
                                               ),
+                                              const SizedBox(height: AppSpacing.xs),
+                                              Text(
+                                                habit.description,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  FilledButton.tonal(
-                                    onPressed: habit.isCompleted
-                                        ? null
-                                        : () => ref
-                                            .read(studyDataControllerProvider.notifier)
-                                            .completeHabit(habit),
-                                    child: Text(context.l10n.finishAction),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(height: AppSpacing.md),
+                                    FilledButton.tonal(
+                                      onPressed: habit.isCompleted
+                                          ? null
+                                          : () => ref
+                                              .read(
+                                                studyDataControllerProvider
+                                                    .notifier,
+                                              )
+                                              .completeHabit(habit),
+                                      child: Text(context.l10n.finishAction),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor:
+                                          Color(habit.color).withOpacity(0.14),
+                                      child: Icon(
+                                        Icons.repeat_rounded,
+                                        color: Color(habit.color),
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            habit.title,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium,
+                                          ),
+                                          const SizedBox(height: AppSpacing.xs),
+                                          Text(
+                                            habit.description,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    FilledButton.tonal(
+                                      onPressed: habit.isCompleted
+                                          ? null
+                                          : () => ref
+                                              .read(
+                                                studyDataControllerProvider
+                                                    .notifier,
+                                              )
+                                              .completeHabit(habit),
+                                      child: Text(context.l10n.finishAction),
+                                    ),
+                                  ],
+                                ),
                               const SizedBox(height: AppSpacing.md),
                               LinearProgressIndicator(
                                 value: progress.toDouble(),
@@ -230,6 +318,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
         data: (studyData) {
           final existing =
               widget.habitId == null ? null : studyData.habitById(widget.habitId!);
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
 
           if (!_initialized) {
             _initialized = true;
@@ -296,10 +385,10 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<HabitFrequency>(
+                      if (isCompact)
+                        Column(
+                          children: [
+                            DropdownButtonFormField<HabitFrequency>(
                               initialValue: _frequency,
                               decoration: InputDecoration(
                                 labelText: context.copy.habitFrequencyLabel,
@@ -319,10 +408,8 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                               onChanged: (value) =>
                                   setState(() => _frequency = value!),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: DropdownButtonFormField<int>(
+                            const SizedBox(height: AppSpacing.md),
+                            DropdownButtonFormField<int>(
                               initialValue: _goalCount,
                               decoration: InputDecoration(
                                 labelText: context.copy.habitGoalLabel,
@@ -337,9 +424,53 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                               onChanged: (value) =>
                                   setState(() => _goalCount = value ?? 1),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<HabitFrequency>(
+                                initialValue: _frequency,
+                                decoration: InputDecoration(
+                                  labelText: context.copy.habitFrequencyLabel,
+                                ),
+                                items: HabitFrequency.values
+                                    .map(
+                                      (value) => DropdownMenuItem<HabitFrequency>(
+                                        value: value,
+                                        child: Text(
+                                          value == HabitFrequency.daily
+                                              ? context.copy.habitDaily
+                                              : context.copy.habitWeekly,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _frequency = value!),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: DropdownButtonFormField<int>(
+                                initialValue: _goalCount,
+                                decoration: InputDecoration(
+                                  labelText: context.copy.habitGoalLabel,
+                                ),
+                                items: List.generate(
+                                  5,
+                                  (index) => DropdownMenuItem<int>(
+                                    value: index + 1,
+                                    child: Text('${index + 1}'),
+                                  ),
+                                ),
+                                onChanged: (value) =>
+                                    setState(() => _goalCount = value ?? 1),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.lg),
                       Align(
                         alignment: AlignmentDirectional.centerStart,

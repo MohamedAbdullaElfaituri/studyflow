@@ -11,7 +11,13 @@ class SupabaseStudyRepository implements StudyRepository {
   final Uuid _uuid = const Uuid();
 
   @override
-  Future<void> ensureSeeded(AppUserModel user) async {}
+  Future<void> ensureSeeded(AppUserModel user) async {
+    await Future.wait<void>([
+      _ensureGoals(user.id),
+      _ensureReminderPreferences(user.id),
+      _ensureUserSettings(user),
+    ]);
+  }
 
   @override
   Future<List<CourseModel>> getCourses(String userId) async {
@@ -181,7 +187,7 @@ class SupabaseStudyRepository implements StudyRepository {
         await _client.from('goals').select().eq('user_id', userId).maybeSingle();
 
     if (data == null) {
-      return GoalSettingsModel(
+      final created = GoalSettingsModel(
         id: _uuid.v4(),
         userId: userId,
         dailyTargetMinutes: 120,
@@ -190,6 +196,10 @@ class SupabaseStudyRepository implements StudyRepository {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+      await _client
+          .from('goals')
+          .upsert(created.toJson(), onConflict: 'user_id');
+      return created;
     }
 
     return GoalSettingsModel.fromJson(Map<String, dynamic>.from(data));
@@ -209,16 +219,26 @@ class SupabaseStudyRepository implements StudyRepository {
         .maybeSingle();
 
     if (data == null) {
-      return UserSettingsModel(
+      final profileData = await _client
+          .from('profiles')
+          .select('preferred_language, theme_mode')
+          .eq('id', userId)
+          .maybeSingle();
+      final created = UserSettingsModel(
         id: _uuid.v4(),
         userId: userId,
-        languageCode: 'en',
-        themeMode: 'system',
+        languageCode:
+            profileData?['preferred_language'] as String? ?? 'en',
+        themeMode: profileData?['theme_mode'] as String? ?? 'system',
         notificationsEnabled: true,
         accessibilityMode: false,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+      await _client
+          .from('user_settings')
+          .upsert(created.toJson(), onConflict: 'user_id');
+      return created;
     }
 
     return UserSettingsModel.fromJson(Map<String, dynamic>.from(data));
@@ -238,7 +258,7 @@ class SupabaseStudyRepository implements StudyRepository {
         .maybeSingle();
 
     if (data == null) {
-      return ReminderPreferencesModel(
+      final created = ReminderPreferencesModel(
         id: _uuid.v4(),
         userId: userId,
         tasksEnabled: true,
@@ -247,6 +267,10 @@ class SupabaseStudyRepository implements StudyRepository {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+      await _client
+          .from('reminder_preferences')
+          .upsert(created.toJson(), onConflict: 'user_id');
+      return created;
     }
 
     return ReminderPreferencesModel.fromJson(Map<String, dynamic>.from(data));
@@ -257,5 +281,88 @@ class SupabaseStudyRepository implements StudyRepository {
     ReminderPreferencesModel preferences,
   ) async {
     await _client.from('reminder_preferences').upsert(preferences.toJson());
+  }
+
+  Future<void> _ensureGoals(String userId) async {
+    final existing = await _client
+        .from('goals')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (existing != null) {
+      return;
+    }
+
+    final now = DateTime.now();
+    await _client.from('goals').upsert(
+      GoalSettingsModel(
+        id: _uuid.v4(),
+        userId: userId,
+        dailyTargetMinutes: 120,
+        weeklyTargetMinutes: 600,
+        monthlyTargetMinutes: 2400,
+        createdAt: now,
+        updatedAt: now,
+      ).toJson(),
+      onConflict: 'user_id',
+    );
+  }
+
+  Future<void> _ensureUserSettings(AppUserModel user) async {
+    final data = await _client
+        .from('user_settings')
+        .select()
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    final now = DateTime.now();
+    final settings = UserSettingsModel(
+      id: data?['id'] as String? ?? _uuid.v4(),
+      userId: user.id,
+      languageCode: user.preferredLanguage,
+      themeMode: user.themeMode,
+      notificationsEnabled: data?['notifications_enabled'] as bool? ?? true,
+      accessibilityMode: data?['accessibility_mode'] as bool? ?? false,
+      createdAt: data == null
+          ? now
+          : DateTime.parse(data['created_at'] as String),
+      updatedAt: now,
+    );
+
+    final shouldSync = data == null ||
+        data['language'] != user.preferredLanguage ||
+        data['theme_mode'] != user.themeMode;
+    if (!shouldSync) {
+      return;
+    }
+
+    await _client
+        .from('user_settings')
+        .upsert(settings.toJson(), onConflict: 'user_id');
+  }
+
+  Future<void> _ensureReminderPreferences(String userId) async {
+    final existing = await _client
+        .from('reminder_preferences')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+    if (existing != null) {
+      return;
+    }
+
+    final now = DateTime.now();
+    await _client.from('reminder_preferences').upsert(
+      ReminderPreferencesModel(
+        id: _uuid.v4(),
+        userId: userId,
+        tasksEnabled: true,
+        studyEnabled: true,
+        dailyEnabled: false,
+        createdAt: now,
+        updatedAt: now,
+      ).toJson(),
+      onConflict: 'user_id',
+    );
   }
 }
