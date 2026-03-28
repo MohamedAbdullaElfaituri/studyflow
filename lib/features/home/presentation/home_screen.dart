@@ -37,11 +37,16 @@ class HomeScreen extends ConsumerWidget {
           onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
-          final firstName = _firstName(auth?.fullName, auth?.email);
+          final firstName = _firstName(
+            context,
+            auth?.fullName,
+            auth?.email,
+          );
           final completionRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
           final motivation = _motivationQuote(context, studyData);
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           final focusDelta = max(
             studyData.goals.weeklyTargetMinutes - studyData.weeklyStudyMinutes,
             0,
@@ -86,48 +91,86 @@ class HomeScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.copy.premiumDashboardTitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(color: Colors.white),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  context.copy.premiumDashboardSubtitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white.withOpacity(0.82),
-                                      ),
-                                ),
-                              ],
+                      if (isCompact)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.16),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: const Icon(
+                                Icons.auto_graph_rounded,
+                                color: Colors.white,
+                                size: 34,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.16),
-                              borderRadius: BorderRadius.circular(24),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              context.copy.premiumDashboardTitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(color: Colors.white),
                             ),
-                            child: const Icon(
-                              Icons.auto_graph_rounded,
-                              color: Colors.white,
-                              size: 34,
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              context.copy.premiumDashboardSubtitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withOpacity(0.82),
+                                  ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.copy.premiumDashboardTitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(color: Colors.white),
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Text(
+                                    context.copy.premiumDashboardSubtitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withOpacity(0.82),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.16),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: const Icon(
+                                Icons.auto_graph_rounded,
+                                color: Colors.white,
+                                size: 34,
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.xl),
                       Wrap(
                         spacing: AppSpacing.md,
@@ -161,10 +204,10 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Row(
-                  children: [
-                    Expanded(
-                      child: HeroMetricCard(
+                if (isCompact)
+                  Column(
+                    children: [
+                      HeroMetricCard(
                         title: context.l10n.dailyStudyMinutesLabel,
                         value: '${studyData.dailyStudyMinutes}',
                         subtitle: context.l10n.goalProgressValue(
@@ -173,10 +216,8 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         icon: Icons.timer_rounded,
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: HeroMetricCard(
+                      const SizedBox(height: AppSpacing.md),
+                      HeroMetricCard(
                         title: context.l10n.completedTasksLabel,
                         value: '${(completionRate * 100).round()}%',
                         subtitle:
@@ -184,9 +225,35 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.task_alt_rounded,
                         accent: const Color(0xFF2BAE9A),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: HeroMetricCard(
+                          title: context.l10n.dailyStudyMinutesLabel,
+                          value: '${studyData.dailyStudyMinutes}',
+                          subtitle: context.l10n.goalProgressValue(
+                            studyData.dailyStudyMinutes,
+                            studyData.goals.dailyTargetMinutes,
+                          ),
+                          icon: Icons.timer_rounded,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: HeroMetricCard(
+                          title: context.l10n.completedTasksLabel,
+                          value: '${(completionRate * 100).round()}%',
+                          subtitle:
+                              '${studyData.completedTasks.length}/${studyData.tasks.length} ${context.l10n.tasksTitle.toLowerCase()}',
+                          icon: Icons.task_alt_rounded,
+                          accent: const Color(0xFF2BAE9A),
+                        ),
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: AppSpacing.xl),
                 SectionHeader(
                   title: context.l10n.quickActionsTitle,
@@ -197,11 +264,11 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 180,
-                  child: Row(
+                if (isCompact)
+                  Column(
                     children: [
-                      Expanded(
+                      SizedBox(
+                        height: 156,
                         child: QuickActionTile(
                           icon: Icons.checklist_rtl_rounded,
                           title: context.l10n.tasksTitle,
@@ -209,8 +276,9 @@ class HomeScreen extends ConsumerWidget {
                           onTap: () => context.push(TaskEditorScreen.routePath),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
+                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(
+                        height: 156,
                         child: QuickActionTile(
                           icon: Icons.event_note_rounded,
                           title: context.copy.examsTitle,
@@ -219,14 +287,38 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: QuickActionTile(
+                            icon: Icons.checklist_rtl_rounded,
+                            title: context.l10n.tasksTitle,
+                            subtitle: context.l10n.quickTaskSubtitle,
+                            onTap: () => context.push(TaskEditorScreen.routePath),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: QuickActionTile(
+                            icon: Icons.event_note_rounded,
+                            title: context.copy.examsTitle,
+                            subtitle: context.copy.examsQuickCardTitle,
+                            onTap: () => context.push(ExamsScreen.routePath),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 180,
-                  child: Row(
+                if (isCompact)
+                  Column(
                     children: [
-                      Expanded(
+                      SizedBox(
+                        height: 156,
                         child: QuickActionTile(
                           icon: Icons.repeat_rounded,
                           title: context.copy.habitsTitle,
@@ -234,8 +326,9 @@ class HomeScreen extends ConsumerWidget {
                           onTap: () => context.push(HabitsScreen.routePath),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
+                      const SizedBox(height: AppSpacing.md),
+                      SizedBox(
+                        height: 156,
                         child: QuickActionTile(
                           icon: Icons.analytics_rounded,
                           title: context.l10n.analyticsTitle,
@@ -244,8 +337,32 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: QuickActionTile(
+                            icon: Icons.repeat_rounded,
+                            title: context.copy.habitsTitle,
+                            subtitle: context.copy.habitsQuickCardTitle,
+                            onTap: () => context.push(HabitsScreen.routePath),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: QuickActionTile(
+                            icon: Icons.analytics_rounded,
+                            title: context.l10n.analyticsTitle,
+                            subtitle: context.l10n.quickAnalyticsSubtitle,
+                            onTap: () => context.push(AnalyticsScreen.routePath),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: AppSpacing.xl),
                 SectionHeader(
                   title: context.copy.plannerPulseTitle,
@@ -309,6 +426,7 @@ class HomeScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: SectionCard(
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CircleAvatar(
                               backgroundColor: priorityColor(exam.priority)
@@ -339,15 +457,25 @@ class HomeScreen extends ConsumerWidget {
                                               .onSurfaceVariant,
                                         ),
                                   ),
+                                  if (isCompact) ...[
+                                    const SizedBox(height: AppSpacing.sm),
+                                    StatusPill(
+                                      label: context.copy.examCountdown(
+                                        exam.dateTime.difference(DateTime.now()).inDays,
+                                      ),
+                                      color: priorityColor(exam.priority),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
-                            StatusPill(
-                              label: context.copy.examCountdown(
-                                exam.dateTime.difference(DateTime.now()).inDays,
+                            if (!isCompact)
+                              StatusPill(
+                                label: context.copy.examCountdown(
+                                  exam.dateTime.difference(DateTime.now()).inDays,
+                                ),
+                                color: priorityColor(exam.priority),
                               ),
-                              color: priorityColor(exam.priority),
-                            ),
                           ],
                         ),
                       ),
@@ -377,24 +505,48 @@ class HomeScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
+                            if (isCompact)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
                                     habit.title,
                                     style: Theme.of(context).textTheme.titleMedium,
                                   ),
-                                ),
-                                FilledButton.tonal(
-                                  onPressed: habit.isCompleted
-                                      ? null
-                                      : () => ref
-                                          .read(studyDataControllerProvider.notifier)
-                                          .completeHabit(habit),
-                                  child: Text(context.l10n.finishAction),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  FilledButton.tonal(
+                                    onPressed: habit.isCompleted
+                                        ? null
+                                        : () => ref
+                                            .read(
+                                              studyDataControllerProvider.notifier,
+                                            )
+                                            .completeHabit(habit),
+                                    child: Text(context.l10n.finishAction),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      habit.title,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                  ),
+                                  FilledButton.tonal(
+                                    onPressed: habit.isCompleted
+                                        ? null
+                                        : () => ref
+                                            .read(
+                                              studyDataControllerProvider.notifier,
+                                            )
+                                            .completeHabit(habit),
+                                    child: Text(context.l10n.finishAction),
+                                  ),
+                                ],
+                              ),
                             const SizedBox(height: AppSpacing.sm),
                             LinearProgressIndicator(
                               value: (habit.completedCount / habit.goalCount)
@@ -530,7 +682,7 @@ class HomeScreen extends ConsumerWidget {
     return quotes[data.totalXp % quotes.length];
   }
 
-  String _firstName(String? fullName, String? email) {
+  String _firstName(BuildContext context, String? fullName, String? email) {
     final trimmedName = fullName?.trim() ?? '';
     if (trimmedName.isNotEmpty) {
       return trimmedName.split(RegExp(r'\s+')).first;
@@ -541,7 +693,11 @@ class HomeScreen extends ConsumerWidget {
       return mail.split('@').first;
     }
 
-    return 'Student';
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Öğrenci',
+      'ar' => 'طالب',
+      _ => 'Student',
+    };
   }
 
   void _showQuickAddSheet(BuildContext context) {

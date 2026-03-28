@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/errors/app_exception.dart';
 import '../../core/localization/app_copy.dart';
@@ -36,6 +37,21 @@ extension BuildContextX on BuildContext {
         'missing_user' => l10n.errorMissingUser,
         _ => l10n.genericErrorMessage,
       };
+    }
+
+    if (error is AuthException) {
+      final message = error.message.toLowerCase();
+      if (message.contains('invalid login credentials')) {
+        return l10n.errorInvalidCredentials;
+      }
+      if (message.contains('user already registered')) {
+        return l10n.errorDuplicateEmail;
+      }
+      if (message.contains('invalid email') ||
+          message.contains('email address')) {
+        return l10n.validationInvalidEmail;
+      }
+      return l10n.genericErrorMessage;
     }
 
     return l10n.genericErrorMessage;

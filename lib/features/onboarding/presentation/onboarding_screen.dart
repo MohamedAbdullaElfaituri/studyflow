@@ -84,19 +84,41 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
-          SegmentedButton<String>(
-            segments: [
-              ButtonSegment(value: 'en', label: Text(context.l10n.englishLabel)),
-              ButtonSegment(value: 'tr', label: Text(context.l10n.turkishLabel)),
-              ButtonSegment(value: 'ar', label: Text(context.l10n.arabicLabel)),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              _LanguageChip(
+                label: context.l10n.englishLabel,
+                selected: selectedLanguage == 'en',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('en');
+                },
+              ),
+              _LanguageChip(
+                label: context.l10n.turkishLabel,
+                selected: selectedLanguage == 'tr',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('tr');
+                },
+              ),
+              _LanguageChip(
+                label: context.l10n.arabicLabel,
+                selected: selectedLanguage == 'ar',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('ar');
+                },
+              ),
             ],
-            selected: {selectedLanguage},
-            onSelectionChanged: (selection) async {
-              HapticFeedback.selectionClick();
-              await ref
-                  .read(appLocalePreferenceProvider.notifier)
-                  .setLocale(selection.first);
-            },
           ),
           const SizedBox(height: AppSpacing.xl),
           Expanded(
@@ -183,6 +205,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _LanguageChip extends StatelessWidget {
+  const _LanguageChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final Future<void> Function() onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(
+        label,
+        overflow: TextOverflow.ellipsis,
+      ),
+      selected: selected,
+      onSelected: (_) {
+        onSelected();
+      },
     );
   }
 }

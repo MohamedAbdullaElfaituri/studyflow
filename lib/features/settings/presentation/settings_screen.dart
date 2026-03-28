@@ -65,21 +65,53 @@ class SettingsScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment(value: 'en', label: Text(context.l10n.englishLabel)),
-                      ButtonSegment(value: 'tr', label: Text(context.l10n.turkishLabel)),
-                      ButtonSegment(value: 'ar', label: Text(context.l10n.arabicLabel)),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      _SettingsChoiceChip(
+                        label: context.l10n.englishLabel,
+                        selected: selectedLanguage == 'en',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  languageCode: 'en',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
+                      _SettingsChoiceChip(
+                        label: context.l10n.turkishLabel,
+                        selected: selectedLanguage == 'tr',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  languageCode: 'tr',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
+                      _SettingsChoiceChip(
+                        label: context.l10n.arabicLabel,
+                        selected: selectedLanguage == 'ar',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  languageCode: 'ar',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
                     ],
-                    selected: {selectedLanguage},
-                    onSelectionChanged: (selection) async {
-                      await ref.read(studyDataControllerProvider.notifier).updateSettings(
-                            studyData.settings.copyWith(
-                              languageCode: selection.first,
-                              updatedAt: DateTime.now(),
-                            ),
-                          );
-                    },
                   ),
                 ],
               ),
@@ -94,21 +126,53 @@ class SettingsScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment(value: 'system', label: Text(context.l10n.themeSystem)),
-                      ButtonSegment(value: 'light', label: Text(context.l10n.themeLight)),
-                      ButtonSegment(value: 'dark', label: Text(context.l10n.themeDark)),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      _SettingsChoiceChip(
+                        label: context.l10n.themeSystem,
+                        selected: selectedTheme == 'system',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  themeMode: 'system',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
+                      _SettingsChoiceChip(
+                        label: context.l10n.themeLight,
+                        selected: selectedTheme == 'light',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  themeMode: 'light',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
+                      _SettingsChoiceChip(
+                        label: context.l10n.themeDark,
+                        selected: selectedTheme == 'dark',
+                        onSelected: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .updateSettings(
+                                studyData.settings.copyWith(
+                                  themeMode: 'dark',
+                                  updatedAt: DateTime.now(),
+                                ),
+                              );
+                        },
+                      ),
                     ],
-                    selected: {selectedTheme},
-                    onSelectionChanged: (selection) async {
-                      await ref.read(studyDataControllerProvider.notifier).updateSettings(
-                            studyData.settings.copyWith(
-                              themeMode: selection.first,
-                              updatedAt: DateTime.now(),
-                            ),
-                          );
-                    },
                   ),
                 ],
               ),
@@ -269,4 +333,30 @@ void _showPlaceholderSheet(BuildContext context, String title) {
       ),
     ),
   );
+}
+
+class _SettingsChoiceChip extends StatelessWidget {
+  const _SettingsChoiceChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final Future<void> Function() onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(
+        label,
+        overflow: TextOverflow.ellipsis,
+      ),
+      selected: selected,
+      onSelected: (_) {
+        onSelected();
+      },
+    );
+  }
 }

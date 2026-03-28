@@ -13,6 +13,7 @@ import '../../../shared/models/app_models.dart';
 import '../../../shared/providers/app_providers.dart';
 import '../../auth/presentation/auth_screens.dart';
 import '../../settings/presentation/settings_screen.dart';
+import 'profile_copy.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -37,6 +38,11 @@ class ProfileScreen extends ConsumerWidget {
             return const SizedBox.shrink();
           }
 
+          final copy = ProfileCopy.of(context);
+          final locale = Localizations.localeOf(context).languageCode;
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final screenWidth = MediaQuery.sizeOf(context).width;
+          final heroMetricWidth = isCompact ? screenWidth - 72 : (screenWidth - 96) / 3;
           final completedRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
@@ -55,98 +61,156 @@ class ProfileScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _ProfileAvatar(
-                            user: currentUser,
-                            radius: 38,
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      if (isCompact)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ProfileAvatar(
+                              user: currentUser,
+                              radius: 38,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              currentUser.fullName.isEmpty
+                                  ? copy.fallbackUserName
+                                  : currentUser.fullName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              '@${_username(currentUser)}',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Colors.white.withOpacity(0.84),
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
                               children: [
-                                Text(
-                                  currentUser.fullName.isEmpty
-                                      ? 'StudyFlow User'
-                                      : currentUser.fullName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                                _HeroChip(label: copy.dayStreak(studyData.streakCount)),
+                                _HeroChip(
+                                  label: primaryCourse?.title ?? copy.focusPlanner,
                                 ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Text(
-                                  '@${_username(currentUser)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
-                                        color: Colors.white.withOpacity(0.84),
-                                      ),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    _HeroChip(label: '${studyData.streakCount} day streak'),
-                                    _HeroChip(
-                                      label: primaryCourse?.title ?? 'Focus-driven planner',
-                                    ),
-                                    _HeroChip(
-                                      label: currentUser.department ?? 'HCI student',
-                                    ),
-                                  ],
+                                _HeroChip(
+                                  label: currentUser.department ?? copy.hciStudent,
                                 ),
                               ],
                             ),
-                          ),
-                          FilledButton.tonal(
-                            onPressed: () => context.push(ProfileEditScreen.routePath),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.14),
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size(0, 48),
+                            const SizedBox(height: AppSpacing.md),
+                            FilledButton.tonal(
+                              onPressed: () => context.push(ProfileEditScreen.routePath),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.14),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(0, 48),
+                              ),
+                              child: Text(copy.edit),
                             ),
-                            child: const Text('Edit'),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ProfileAvatar(
+                              user: currentUser,
+                              radius: 38,
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentUser.fullName.isEmpty
+                                        ? copy.fallbackUserName
+                                        : currentUser.fullName,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    '@${_username(currentUser)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.copyWith(
+                                          color: Colors.white.withOpacity(0.84),
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _HeroChip(label: copy.dayStreak(studyData.streakCount)),
+                                      _HeroChip(
+                                        label: primaryCourse?.title ?? copy.focusPlanner,
+                                      ),
+                                      _HeroChip(
+                                        label: currentUser.department ?? copy.hciStudent,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            FilledButton.tonal(
+                              onPressed: () => context.push(ProfileEditScreen.routePath),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: Colors.white.withOpacity(0.14),
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(0, 48),
+                              ),
+                              child: Text(copy.edit),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         currentUser.bio.isEmpty
-                            ? 'Designing calm study weeks with focused sessions, visible progress, and low cognitive load.'
+                            ? copy.defaultBio
                             : currentUser.bio,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: Colors.white.withOpacity(0.88),
                             ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Row(
+                      Wrap(
+                        spacing: AppSpacing.md,
+                        runSpacing: AppSpacing.md,
                         children: [
-                          Expanded(
+                          SizedBox(
+                            width: heroMetricWidth,
                             child: _HeroNumber(
-                              label: 'Weekly focus',
+                              label: copy.weeklyFocus,
                               value: studyData.weeklyStudyMinutes.toDouble(),
                               suffix: 'm',
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
+                          SizedBox(
+                            width: heroMetricWidth,
                             child: _HeroNumber(
-                              label: 'Completed tasks',
+                              label: copy.completedTasks,
                               value: studyData.completedTasks.length.toDouble(),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
+                          SizedBox(
+                            width: heroMetricWidth,
                             child: _HeroNumber(
-                              label: 'XP level',
+                              label: copy.xpLevel,
                               value: studyData.level.toDouble(),
                             ),
                           ),
@@ -157,13 +221,13 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
-                children: [
-                  Expanded(
-                    child: RevealOnBuild(
+              if (isCompact)
+                Column(
+                  children: [
+                    RevealOnBuild(
                       delay: const Duration(milliseconds: 120),
                       child: _ProfileStatCard(
-                        label: 'Consistency',
+                        label: copy.consistency,
                         color: Theme.of(context).colorScheme.primary,
                         icon: Icons.local_fire_department_rounded,
                         child: AnimatedMetricValue(
@@ -173,13 +237,11 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: RevealOnBuild(
+                    const SizedBox(height: AppSpacing.md),
+                    RevealOnBuild(
                       delay: const Duration(milliseconds: 180),
                       child: _ProfileStatCard(
-                        label: 'Profile depth',
+                        label: copy.profileDepth,
                         color: Theme.of(context).colorScheme.tertiary,
                         icon: Icons.person_search_rounded,
                         child: AnimatedMetricValue(
@@ -189,17 +251,52 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: RevealOnBuild(
+                        delay: const Duration(milliseconds: 120),
+                        child: _ProfileStatCard(
+                          label: copy.consistency,
+                          color: Theme.of(context).colorScheme.primary,
+                          icon: Icons.local_fire_department_rounded,
+                          child: AnimatedMetricValue(
+                            value: studyData.streakCount.toDouble(),
+                            suffix: 'd',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: RevealOnBuild(
+                        delay: const Duration(milliseconds: 180),
+                        child: _ProfileStatCard(
+                          label: copy.profileDepth,
+                          color: Theme.of(context).colorScheme.tertiary,
+                          icon: Icons.person_search_rounded,
+                          child: AnimatedMetricValue(
+                            value: profileDepth,
+                            suffix: '%',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: RevealOnBuild(
+              if (isCompact)
+                Column(
+                  children: [
+                    RevealOnBuild(
                       delay: const Duration(milliseconds: 240),
                       child: _ProfileStatCard(
-                        label: 'Task completion',
+                        label: copy.taskCompletion,
                         color: Theme.of(context).colorScheme.secondary,
                         icon: Icons.task_alt_rounded,
                         child: AnimatedMetricValue(
@@ -209,13 +306,11 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: RevealOnBuild(
+                    const SizedBox(height: AppSpacing.md),
+                    RevealOnBuild(
                       delay: const Duration(milliseconds: 300),
                       child: _ProfileStatCard(
-                        label: 'Habits locked',
+                        label: copy.habitsLocked,
                         color: Theme.of(context).colorScheme.primary,
                         icon: Icons.repeat_rounded,
                         child: AnimatedMetricValue(
@@ -224,34 +319,68 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: RevealOnBuild(
+                        delay: const Duration(milliseconds: 240),
+                        child: _ProfileStatCard(
+                          label: copy.taskCompletion,
+                          color: Theme.of(context).colorScheme.secondary,
+                          icon: Icons.task_alt_rounded,
+                          child: AnimatedMetricValue(
+                            value: completedRate * 100,
+                            suffix: '%',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: RevealOnBuild(
+                        delay: const Duration(milliseconds: 300),
+                        child: _ProfileStatCard(
+                          label: copy.habitsLocked,
+                          color: Theme.of(context).colorScheme.primary,
+                          icon: Icons.repeat_rounded,
+                          child: AnimatedMetricValue(
+                            value: studyData.completedHabits.length.toDouble(),
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.xl),
               RevealOnBuild(
                 delay: const Duration(milliseconds: 360),
                 child: SectionCard(
-                  child: Row(
-                    children: [
-                      ProgressRing(
-                        progress: weeklyProgress,
-                        label: 'Weekly target',
-                        valueText:
-                            '${(weeklyProgress.clamp(0, 1) * 100).round()}%',
-                        accent: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.lg),
-                      Expanded(
-                        child: Column(
+                  child: isCompact
+                      ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Align(
+                              child: ProgressRing(
+                                progress: weeklyProgress,
+                                label: copy.weeklyTarget,
+                                valueText:
+                                    '${(weeklyProgress.clamp(0, 1) * 100).round()}%',
+                                accent: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
                             Text(
-                              'Performance pulse',
+                              copy.performancePulse,
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             Text(
-                              'A compact summary of your weekly study rhythm and recovery capacity.',
+                              copy.performancePulseSubtitle,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -264,18 +393,71 @@ class ProfileScreen extends ConsumerWidget {
                               child: WeekSparkBars(
                                 values: weeklySeries,
                                 accent: Theme.of(context).colorScheme.primary,
+                                labels: _weekLabels(locale),
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
                             Text(
-                              '${studyData.weeklyStudyMinutes} / ${studyData.goals.weeklyTargetMinutes} minutes focused',
+                              copy.focusMinutes(
+                                studyData.weeklyStudyMinutes,
+                                studyData.goals.weeklyTargetMinutes,
+                              ),
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
+                        )
+                      : Row(
+                          children: [
+                            ProgressRing(
+                              progress: weeklyProgress,
+                              label: copy.weeklyTarget,
+                              valueText:
+                                  '${(weeklyProgress.clamp(0, 1) * 100).round()}%',
+                              accent: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: AppSpacing.lg),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    copy.performancePulse,
+                                    style: Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  Text(
+                                    copy.performancePulseSubtitle,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  SizedBox(
+                                    height: 120,
+                                    child: WeekSparkBars(
+                                      values: weeklySeries,
+                                      accent: Theme.of(context).colorScheme.primary,
+                                      labels: _weekLabels(locale),
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text(
+                                    copy.focusMinutes(
+                                      studyData.weeklyStudyMinutes,
+                                      studyData.goals.weeklyTargetMinutes,
+                                    ),
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -286,29 +468,29 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Identity details',
+                        copy.identityDetails,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Designed to keep personal context visible without overwhelming the screen.',
+                        copy.identityDetailsSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      DetailRow(label: 'Email', value: currentUser.email),
-                      DetailRow(label: 'Username', value: '@${_username(currentUser)}'),
+                      DetailRow(label: copy.email, value: currentUser.email),
+                      DetailRow(label: copy.username, value: '@${_username(currentUser)}'),
                       DetailRow(
-                        label: 'University',
-                        value: currentUser.university ?? 'Not added yet',
+                        label: copy.university,
+                        value: currentUser.university ?? copy.notAddedYet,
                       ),
                       DetailRow(
-                        label: 'Department',
-                        value: currentUser.department ?? 'Not added yet',
+                        label: copy.department,
+                        value: currentUser.department ?? copy.notAddedYet,
                       ),
                       DetailRow(
-                        label: 'Preferred language',
+                        label: copy.preferredLanguage,
                         value: currentUser.preferredLanguage.toUpperCase(),
                       ),
                     ],
@@ -323,12 +505,12 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Achievement shelf',
+                        copy.achievementShelf,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        'Small wins stay visible so motivation becomes a system, not a memory.',
+                        copy.achievementSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
@@ -353,23 +535,23 @@ class ProfileScreen extends ConsumerWidget {
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.edit_outlined),
-                        title: const Text('Edit profile'),
-                        subtitle: const Text('Update avatar, bio, and academic identity'),
+                        title: Text(copy.editProfile),
+                        subtitle: Text(copy.editProfileSubtitle),
                         onTap: () => context.push(ProfileEditScreen.routePath),
                       ),
                       const Divider(),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.shield_outlined),
-                        title: const Text('Password and security'),
-                        subtitle: const Text('Theme, recovery, notifications, and account control'),
+                        title: Text(copy.passwordAndSecurity),
+                        subtitle: Text(copy.passwordAndSecuritySubtitle),
                         onTap: () => context.push(SettingsScreen.routePath),
                       ),
                       const Divider(),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.logout_rounded),
-                        title: const Text('Log out'),
+                        title: Text(copy.logOut),
                         onTap: () async {
                           await ref.read(authControllerProvider.notifier).signOut();
                           if (context.mounted) {
@@ -423,6 +605,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
+    final copy = ProfileCopy.of(context);
     if (!_initialized && user != null) {
       _initialized = true;
       final parts = _splitName(user.fullName);
@@ -450,7 +633,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      'Edit profile',
+                      copy.editProfile,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
@@ -469,12 +652,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                       onPressed:
                           _uploadingAvatar || user == null ? null : () => _pickAvatar(context),
                       child: Text(
-                        _uploadingAvatar ? 'Uploading...' : 'Upload photo',
+                        _uploadingAvatar ? copy.uploading : copy.uploadPhoto,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Use a clean portrait for a stronger presentation identity.',
+                      copy.uploadHint,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
@@ -494,7 +677,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     children: [
                       TextFormField(
                         controller: _firstNameController,
-                        decoration: const InputDecoration(labelText: 'First name'),
+                        decoration: InputDecoration(labelText: copy.firstName),
                         validator: (value) => context.validationMessage(
                           Validators.requiredField(value),
                         ),
@@ -502,29 +685,29 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _lastNameController,
-                        decoration: const InputDecoration(labelText: 'Last name'),
+                        decoration: InputDecoration(labelText: copy.lastName),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _usernameController,
-                        decoration: const InputDecoration(labelText: 'Username'),
+                        decoration: InputDecoration(labelText: copy.username),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _bioController,
                         minLines: 3,
                         maxLines: 4,
-                        decoration: const InputDecoration(labelText: 'Bio'),
+                        decoration: InputDecoration(labelText: copy.bio),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _departmentController,
-                        decoration: const InputDecoration(labelText: 'Department'),
+                        decoration: InputDecoration(labelText: copy.department),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _universityController,
-                        decoration: const InputDecoration(labelText: 'University'),
+                        decoration: InputDecoration(labelText: copy.university),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       FilledButton(
@@ -561,7 +744,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                                 }
                                 context.pop();
                               },
-                        child: const Text('Save profile'),
+                        child: Text(copy.saveProfile),
                       ),
                     ],
                   ),
@@ -575,8 +758,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 child: ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.shield_outlined),
-                  title: const Text('Password and security'),
-                  subtitle: const Text('Manage recovery, notifications, and theme preferences'),
+                  title: Text(copy.passwordAndSecurity),
+                  subtitle: Text(copy.managePreferences),
                   onTap: () => context.push(SettingsScreen.routePath),
                 ),
               ),
@@ -588,6 +771,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   }
 
   Future<void> _pickAvatar(BuildContext context) async {
+    final copy = ProfileCopy.of(context);
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: ImageSource.gallery,
@@ -604,7 +788,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (!mounted) {
         return;
       }
-      context.showAppSnackBar('Profile photo updated');
+      context.showAppSnackBar(copy.photoUpdatedMessage);
     } catch (error) {
       if (!mounted) {
         return;
@@ -734,9 +918,64 @@ class _AchievementRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final copy = ProfileCopy.of(context);
     final progress = achievement.target == 0
         ? 0.0
         : achievement.progress / achievement.target;
+    final compact = MediaQuery.sizeOf(context).width < 360;
+
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                child: Icon(_achievementIcon(achievement.icon)),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      copy.achievementTitle(achievement.id),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      copy.achievementDescription(achievement.id),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '${achievement.progress}/${achievement.target}',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0, 1).toDouble(),
+              minHeight: 10,
+            ),
+          ),
+        ],
+      );
+    }
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -753,12 +992,12 @@ class _AchievementRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                achievement.title,
+                copy.achievementTitle(achievement.id),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                achievement.description,
+                copy.achievementDescription(achievement.id),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -886,6 +1125,14 @@ List<double> _weekSeries(List<StudySessionModel> sessions) {
   });
 }
 
+List<String> _weekLabels(String locale) {
+  return switch (locale) {
+    'tr' => const ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pa'],
+    'ar' => const ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'],
+    _ => const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+  };
+}
+
 (String, String) _splitName(String fullName) {
   final trimmed = fullName.trim();
   if (trimmed.isEmpty) {
@@ -911,7 +1158,300 @@ IconData _achievementIcon(String icon) {
       return Icons.check_circle_rounded;
     case 'local_fire_department':
       return Icons.local_fire_department_rounded;
+    case 'repeat':
+      return Icons.repeat_rounded;
     default:
       return Icons.workspace_premium_rounded;
+  }
+}
+
+class _ProfileCopy {
+  const _ProfileCopy(this.code);
+
+  final String code;
+
+  static _ProfileCopy of(BuildContext context) =>
+      _ProfileCopy(Localizations.localeOf(context).languageCode);
+
+  bool get _isTr => code == 'tr';
+  bool get _isAr => code == 'ar';
+
+  String _pick({
+    required String en,
+    required String tr,
+    required String ar,
+  }) {
+    if (_isTr) {
+      return tr;
+    }
+    if (_isAr) {
+      return ar;
+    }
+    return en;
+  }
+
+  String get fallbackUserName => _pick(
+        en: 'StudyFlow User',
+        tr: 'StudyFlow Kullanicisi',
+        ar: 'مستخدم StudyFlow',
+      );
+  String get focusPlanner => _pick(
+        en: 'Focus-driven planner',
+        tr: 'Odak planlayicisi',
+        ar: 'مخطط قائم على التركيز',
+      );
+  String get hciStudent => _pick(
+        en: 'HCI student',
+        tr: 'HCI ogrencisi',
+        ar: 'طالب تفاعل إنسان وحاسوب',
+      );
+  String dayStreak(int days) => _pick(
+        en: '$days day streak',
+        tr: '$days gun seri',
+        ar: 'سلسلة $days يوم',
+      );
+  String get edit => _pick(
+        en: 'Edit',
+        tr: 'Duzenle',
+        ar: 'تعديل',
+      );
+  String get defaultBio => _pick(
+        en: 'Designing calm study weeks with focused sessions, visible progress, and low cognitive load.',
+        tr: 'Odak seanslari, gorunur ilerleme ve dusuk bilissel yuk ile sakin calisma haftalari kuruyorum.',
+        ar: 'أبني أسابيع دراسة هادئة بجلسات تركيز وتقدم واضح وحمل معرفي منخفض.',
+      );
+  String get weeklyFocus => _pick(
+        en: 'Weekly focus',
+        tr: 'Haftalik odak',
+        ar: 'تركيز الأسبوع',
+      );
+  String get completedTasks => _pick(
+        en: 'Completed tasks',
+        tr: 'Tamamlanan gorevler',
+        ar: 'المهام المكتملة',
+      );
+  String get xpLevel => _pick(
+        en: 'XP level',
+        tr: 'XP seviyesi',
+        ar: 'مستوى XP',
+      );
+  String get weeklyTarget => _pick(
+        en: 'Weekly target',
+        tr: 'Haftalik hedef',
+        ar: 'هدف الأسبوع',
+      );
+  String get consistency => _pick(
+        en: 'Consistency',
+        tr: 'Tutarlilik',
+        ar: 'الاستمرارية',
+      );
+  String get profileDepth => _pick(
+        en: 'Profile depth',
+        tr: 'Profil derinligi',
+        ar: 'عمق الملف الشخصي',
+      );
+  String get taskCompletion => _pick(
+        en: 'Task completion',
+        tr: 'Gorev tamamlama',
+        ar: 'إكمال المهام',
+      );
+  String get habitsLocked => _pick(
+        en: 'Habits locked',
+        tr: 'Tamamlanan aliskanliklar',
+        ar: 'العادات المنجزة',
+      );
+  String get performancePulse => _pick(
+        en: 'Performance pulse',
+        tr: 'Performans ozeti',
+        ar: 'نبض الأداء',
+      );
+  String get performancePulseSubtitle => _pick(
+        en: 'A compact summary of your weekly study rhythm and recovery capacity.',
+        tr: 'Haftalik ritmini ve toparlanma kapasiteni gosteren kisa bir ozet.',
+        ar: 'ملخص مدمج لإيقاع دراستك الأسبوعي وقدرتك على الاستمرار.',
+      );
+  String focusMinutes(int value, int target) => _pick(
+        en: '$value / $target minutes focused',
+        tr: '$value / $target dakika odak',
+        ar: '$value / $target دقيقة تركيز',
+      );
+  String get identityDetails => _pick(
+        en: 'Identity details',
+        tr: 'Kimlik detaylari',
+        ar: 'تفاصيل الهوية',
+      );
+  String get identityDetailsSubtitle => _pick(
+        en: 'Designed to keep personal context visible without overwhelming the screen.',
+        tr: 'Kisisel bilgileri ekrani yormadan gorunur tutmak icin tasarlandi.',
+        ar: 'مصمم لإبقاء السياق الشخصي ظاهراً دون إرباك الشاشة.',
+      );
+  String get email => _pick(
+        en: 'Email',
+        tr: 'E-posta',
+        ar: 'البريد الإلكتروني',
+      );
+  String get username => _pick(
+        en: 'Username',
+        tr: 'Kullanici adi',
+        ar: 'اسم المستخدم',
+      );
+  String get university => _pick(
+        en: 'University',
+        tr: 'Universite',
+        ar: 'الجامعة',
+      );
+  String get department => _pick(
+        en: 'Department',
+        tr: 'Bolum',
+        ar: 'القسم',
+      );
+  String get preferredLanguage => _pick(
+        en: 'Preferred language',
+        tr: 'Tercih edilen dil',
+        ar: 'اللغة المفضلة',
+      );
+  String get notAddedYet => _pick(
+        en: 'Not added yet',
+        tr: 'Henuz eklenmedi',
+        ar: 'لم تتم إضافته بعد',
+      );
+  String get achievementShelf => _pick(
+        en: 'Achievement shelf',
+        tr: 'Basari rafı',
+        ar: 'رف الإنجازات',
+      );
+  String get achievementSubtitle => _pick(
+        en: 'Small wins stay visible so motivation becomes a system, not a memory.',
+        tr: 'Kucuk kazanclar gorunur kaldiginda motivasyon bir sistem haline gelir.',
+        ar: 'تبقى الانتصارات الصغيرة ظاهرة حتى تصبح الدافعية نظاماً لا مجرد ذكرى.',
+      );
+  String get editProfile => _pick(
+        en: 'Edit profile',
+        tr: 'Profili duzenle',
+        ar: 'تعديل الملف الشخصي',
+      );
+  String get editProfileSubtitle => _pick(
+        en: 'Update avatar, bio, and academic identity',
+        tr: 'Avatar, biyografi ve akademik kimligi guncelle',
+        ar: 'حدّث الصورة والنبذة والهوية الأكاديمية',
+      );
+  String get passwordAndSecurity => _pick(
+        en: 'Password and security',
+        tr: 'Sifre ve guvenlik',
+        ar: 'كلمة المرور والأمان',
+      );
+  String get passwordAndSecuritySubtitle => _pick(
+        en: 'Theme, recovery, notifications, and account control',
+        tr: 'Tema, kurtarma, bildirimler ve hesap yonetimi',
+        ar: 'الثيم والاستعادة والإشعارات والتحكم بالحساب',
+      );
+  String get logOut => _pick(
+        en: 'Log out',
+        tr: 'Cikis yap',
+        ar: 'تسجيل الخروج',
+      );
+  String get uploading => _pick(
+        en: 'Uploading...',
+        tr: 'Yukleniyor...',
+        ar: 'جارٍ الرفع...',
+      );
+  String get uploadPhoto => _pick(
+        en: 'Upload photo',
+        tr: 'Fotograf yukle',
+        ar: 'رفع صورة',
+      );
+  String get uploadHint => _pick(
+        en: 'Use a clean portrait for a stronger presentation identity.',
+        tr: 'Sunumda daha guclu bir kimlik icin temiz bir portre kullan.',
+        ar: 'استخدم صورة واضحة لتقديم هوية شخصية أقوى.',
+      );
+  String get firstName => _pick(
+        en: 'First name',
+        tr: 'Ad',
+        ar: 'الاسم الأول',
+      );
+  String get lastName => _pick(
+        en: 'Last name',
+        tr: 'Soyad',
+        ar: 'اسم العائلة',
+      );
+  String get bio => _pick(
+        en: 'Bio',
+        tr: 'Biyografi',
+        ar: 'نبذة',
+      );
+  String get saveProfile => _pick(
+        en: 'Save profile',
+        tr: 'Profili kaydet',
+        ar: 'حفظ الملف الشخصي',
+      );
+  String get managePreferences => _pick(
+        en: 'Manage recovery, notifications, and theme preferences',
+        tr: 'Kurtarma, bildirim ve tema tercihlerini yonet',
+        ar: 'أدِر الاستعادة والإشعارات وتفضيلات الثيم',
+      );
+  String get photoUpdatedMessage => _pick(
+        en: 'Profile photo updated',
+        tr: 'Profil fotografi guncellendi',
+        ar: 'تم تحديث صورة الملف الشخصي',
+      );
+  String achievementTitle(String id) {
+    return switch (id) {
+      'first-focus' => _pick(
+          en: 'Focus Starter',
+          tr: 'Odak baslangici',
+          ar: 'بداية التركيز',
+        ),
+      'task-run' => _pick(
+          en: 'Task Finisher',
+          tr: 'Gorev bitirici',
+          ar: 'منهي المهام',
+        ),
+      'streak' => _pick(
+          en: 'Consistency',
+          tr: 'Tutarlilik',
+          ar: 'الاستمرارية',
+        ),
+      'habit' => _pick(
+          en: 'Ritual Builder',
+          tr: 'Rutin kurucu',
+          ar: 'باني العادات',
+        ),
+      _ => _pick(
+          en: 'Achievement',
+          tr: 'Basari',
+          ar: 'إنجاز',
+        ),
+    };
+  }
+
+  String achievementDescription(String id) {
+    return switch (id) {
+      'first-focus' => _pick(
+          en: 'Complete 3 focus sessions',
+          tr: '3 odak seansi tamamla',
+          ar: 'أكمل 3 جلسات تركيز',
+        ),
+      'task-run' => _pick(
+          en: 'Complete 5 tasks',
+          tr: '5 gorev tamamla',
+          ar: 'أكمل 5 مهام',
+        ),
+      'streak' => _pick(
+          en: 'Maintain a 4 day streak',
+          tr: '4 gunluk seri koru',
+          ar: 'حافظ على سلسلة 4 أيام',
+        ),
+      'habit' => _pick(
+          en: 'Complete 3 habits in one day',
+          tr: 'Bir gunde 3 aliskanlik tamamla',
+          ar: 'أكمل 3 عادات في يوم واحد',
+        ),
+      _ => _pick(
+          en: 'Keep progressing',
+          tr: 'Ilerlemeye devam et',
+          ar: 'استمر في التقدم',
+        ),
+    };
   }
 }

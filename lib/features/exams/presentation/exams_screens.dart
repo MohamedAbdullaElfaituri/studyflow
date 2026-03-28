@@ -35,6 +35,7 @@ class ExamsScreen extends ConsumerWidget {
         ),
         data: (studyData) {
           final exams = studyData.upcomingExams;
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           return ListView(
             children: [
               SectionHeader(
@@ -44,12 +45,16 @@ class ExamsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               GradientBanner(
                 colors: const [Color(0xFF18456B), Color(0xFF1F6FEB), Color(0xFF24A19C)],
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
+                child: isCompact
+                    ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const Icon(
+                            Icons.event_available_rounded,
+                            size: 54,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
                           Text(
                             context.copy.examsQuickCardTitle,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -72,13 +77,51 @@ class ExamsScreen extends ConsumerWidget {
                                 ),
                           ),
                         ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.copy.examsQuickCardTitle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.88),
+                                      ),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  '${studyData.criticalExams.length}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displaySmall
+                                      ?.copyWith(color: Colors.white),
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  context.copy.examsQuickCardSubtitle,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.82),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          const Icon(
+                            Icons.event_available_rounded,
+                            size: 54,
+                            color: Colors.white,
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    const Icon(Icons.event_available_rounded,
-                        size: 54, color: Colors.white),
-                  ],
-                ),
               ),
               const SizedBox(height: AppSpacing.xl),
               if (exams.isEmpty)
@@ -107,20 +150,38 @@ class ExamsScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
+                              if (isCompact)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
                                       exam.title,
                                       style: Theme.of(context).textTheme.titleLarge,
                                     ),
-                                  ),
-                                  StatusPill(
-                                    label: context.copy.examCountdown(countdown),
-                                    color: priorityColor(exam.priority),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    StatusPill(
+                                      label: context.copy.examCountdown(countdown),
+                                      color: priorityColor(exam.priority),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        exam.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
+                                      ),
+                                    ),
+                                    StatusPill(
+                                      label: context.copy.examCountdown(countdown),
+                                      color: priorityColor(exam.priority),
+                                    ),
+                                  ],
+                                ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 exam.description,
@@ -210,6 +271,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
         data: (studyData) {
           final existing =
               widget.examId == null ? null : studyData.examById(widget.examId!);
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           final selectedCourseId = studyData.courses.any(
             (course) => course.id == _courseId,
           )
@@ -301,10 +363,10 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                         onChanged: (value) => setState(() => _courseId = value),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<ExamType>(
+                      if (isCompact)
+                        Column(
+                          children: [
+                            DropdownButtonFormField<ExamType>(
                               initialValue: _type,
                               decoration: InputDecoration(
                                 labelText: context.copy.examTypeLabel,
@@ -319,10 +381,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                                   .toList(),
                               onChanged: (value) => setState(() => _type = value!),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: DropdownButtonFormField<TaskPriority>(
+                            const SizedBox(height: AppSpacing.md),
+                            DropdownButtonFormField<TaskPriority>(
                               initialValue: _priority,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
@@ -338,9 +398,50 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                               onChanged: (value) =>
                                   setState(() => _priority = value!),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<ExamType>(
+                                initialValue: _type,
+                                decoration: InputDecoration(
+                                  labelText: context.copy.examTypeLabel,
+                                ),
+                                items: ExamType.values
+                                    .map(
+                                      (value) => DropdownMenuItem<ExamType>(
+                                        value: value,
+                                        child: Text(_examTypeLabel(context, value)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _type = value!),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: DropdownButtonFormField<TaskPriority>(
+                                initialValue: _priority,
+                                decoration: InputDecoration(
+                                  labelText: context.l10n.priorityLabel,
+                                ),
+                                items: TaskPriority.values
+                                    .map(
+                                      (value) => DropdownMenuItem<TaskPriority>(
+                                        value: value,
+                                        child: Text(_priorityLabel(context, value)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (value) =>
+                                    setState(() => _priority = value!),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.md),
                       OutlinedButton.icon(
                         onPressed: () async {

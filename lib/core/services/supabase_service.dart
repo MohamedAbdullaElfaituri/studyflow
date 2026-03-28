@@ -7,10 +7,16 @@ class SupabaseService {
       AppConstants.supabaseUrl.isNotEmpty &&
       AppConstants.supabaseAnonKey.isNotEmpty;
 
-  static Future<void> initialize() async {
+  static void ensureConfigured() {
     if (!isConfigured) {
-      return;
+      throw StateError(
+        'Supabase configuration is missing. Provide SUPABASE_URL and SUPABASE_ANON_KEY.',
+      );
     }
+  }
+
+  static Future<void> initialize() async {
+    ensureConfigured();
 
     await Supabase.initialize(
       url: AppConstants.supabaseUrl,

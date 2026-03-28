@@ -49,9 +49,9 @@ class AppCopy {
       );
 
   String get chooseLanguageSubtitle => _pick(
-        en: 'You can change this later in Settings without losing layout quality.',
-        tr: 'Bunu daha sonra Ayarlar ekranından düzeni bozmadan değiştirebilirsin.',
-        ar: 'يمكنك تغييرها لاحقًا من الإعدادات بدون التأثير على جودة الواجهة.',
+        en: 'You can change this later in Settings without affecting the layout quality.',
+        tr: 'Bunu daha sonra Ayarlar ekranından düzen bozulmadan değiştirebilirsin.',
+        ar: 'يمكنك تغييرها لاحقًا من الإعدادات من دون التأثير على جودة الواجهة.',
       );
 
   String get examsTitle => _pick(
@@ -115,9 +115,9 @@ class AppCopy {
       );
 
   String get emptyExamsDescription => _pick(
-        en: 'Add your exams or assignments to get visual countdown reminders.',
-        tr: 'Görsel geri sayım için sınavlarını veya teslimlerini ekle.',
-        ar: 'أضف الاختبارات أو المهام للحصول على تذكيرات مرئية بالعد التنازلي.',
+        en: 'Add exams or assignments to keep upcoming pressure visible early.',
+        tr: 'Yaklaşan yoğunluğu önceden görünür tutmak için sınav ve teslim ekle.',
+        ar: 'أضف الاختبارات أو التسليمات لإبقاء الضغط القادم ظاهرًا مبكرًا.',
       );
 
   String get examTypeExam => _pick(
@@ -134,7 +134,7 @@ class AppCopy {
 
   String get examTypeQuiz => _pick(
         en: 'Quiz',
-        tr: 'Quiz',
+        tr: 'Kısa sınav',
         ar: 'اختبار قصير',
       );
 
@@ -151,9 +151,9 @@ class AppCopy {
       );
 
   String get habitsSubtitle => _pick(
-        en: 'Build repeatable routines without making the UI feel heavy.',
-        tr: 'Arayüzü yormadan tekrarlanabilir rutinler oluştur.',
-        ar: 'ابنِ روتينًا متكررًا بدون أن تصبح الواجهة مرهقة.',
+        en: 'Build repeatable routines without making the interface feel heavy.',
+        tr: 'Arayüzü yormadan sürdürülebilir rutinler oluştur.',
+        ar: 'ابنِ روتينًا متكررًا من دون أن تصبح الواجهة مرهقة.',
       );
 
   String get addHabitAction => _pick(
@@ -260,7 +260,7 @@ class AppCopy {
 
   String get emptySearchDescription => _pick(
         en: 'Results will appear instantly across tasks, notes, courses, and exams.',
-        tr: 'Sonuçlar görevler, notlar, dersler ve sınavlarda anında görünecek.',
+        tr: 'Sonuçlar görevler, notlar, dersler ve sınavlar arasında anında görünecek.',
         ar: 'ستظهر النتائج مباشرة عبر المهام والملاحظات والمواد والاختبارات.',
       );
 
@@ -301,9 +301,9 @@ class AppCopy {
       );
 
   String weeklyChallengeDescription(int minutes) => _pick(
-        en: 'Reach $minutes minutes of focused work this week to unlock bonus XP.',
-        tr: 'Bu hafta $minutes dakika odaklı çalışıp bonus XP kazan.',
-        ar: 'صل إلى $minutes دقيقة من التركيز هذا الأسبوع لفتح نقاط XP إضافية.',
+        en: 'Reach $minutes minutes of focused work this week to stay on pace.',
+        tr: 'Bu hafta $minutes dakika odaklı çalışarak ritmini koru.',
+        ar: 'صل إلى $minutes دقيقة من العمل المركّز هذا الأسبوع للحفاظ على الإيقاع.',
       );
 
   String get levelLabel => _pick(
@@ -325,9 +325,9 @@ class AppCopy {
       );
 
   String get syncReadyLabel => _pick(
-        en: 'Ready for Supabase sync',
-        tr: 'Supabase senkronizasyonuna hazır',
-        ar: 'جاهز للمزامنة مع Supabase',
+        en: 'Supabase sync is active',
+        tr: 'Supabase senkronizasyonu aktif',
+        ar: 'مزامنة Supabase فعّالة',
       );
 
   String get aboutLabel => _pick(
@@ -349,21 +349,21 @@ class AppCopy {
       );
 
   String get placeholderLegalBody => _pick(
-        en: 'Placeholder content is ready for final legal or course-project copy.',
-        tr: 'Yer tutucu içerik, final yasal metin ya da ders projesi metni için hazır.',
-        ar: 'المحتوى التجريبي جاهز للنص القانوني النهائي أو نسخة مشروع المقرر.',
+        en: 'This area is ready for your final legal, academic, or institutional content.',
+        tr: 'Bu alan final yasal, akademik veya kurumsal içerik için hazır.',
+        ar: 'هذه المساحة جاهزة للنص القانوني أو الأكاديمي أو المؤسسي النهائي.',
       );
 
   String get premiumDashboardTitle => _pick(
         en: 'Your study command center',
-        tr: 'Çalışma komuta merkezi',
-        ar: 'مركز قيادة الدراسة',
+        tr: 'Çalışma komuta merkezin',
+        ar: 'مركز قيادة دراستك',
       );
 
   String get premiumDashboardSubtitle => _pick(
         en: 'A single view for focus, progress, deadlines, and recovery.',
-        tr: 'Odak, ilerleme, tarih ve dinlenmeyi tek ekranda topla.',
-        ar: 'رؤية واحدة للتركيز والتقدم والمواعيد والاستراحة.',
+        tr: 'Odak, ilerleme, teslimler ve toparlanmayı tek ekranda topla.',
+        ar: 'واجهة واحدة للتركيز والتقدم والمواعيد والاستعادة.',
       );
 
   String get plannerPulseTitle => _pick(
@@ -392,14 +392,14 @@ class AppCopy {
 
   String get examsQuickCardSubtitle => _pick(
         en: 'Keep the next exam or delivery visible before it becomes stressful.',
-        tr: 'Bir sonraki sınav veya teslimi, stres olmadan önce görünür tut.',
-        ar: 'أبقِ الاختبار أو التسليم القادم مرئيًا قبل أن يتحول إلى ضغط.',
+        tr: 'Bir sonraki sınav veya teslimi strese dönüşmeden önce görünür tut.',
+        ar: 'أبقِ الاختبار أو التسليم القادم ظاهرًا قبل أن يتحول إلى ضغط.',
       );
 
   String get habitsQuickCardTitle => _pick(
         en: 'Routines in motion',
-        tr: 'Devam eden rutinler',
-        ar: 'العادات النشطة',
+        tr: 'Hareket halindeki rutinler',
+        ar: 'عادات قيد التقدّم',
       );
 
   String get notificationPermissionsAction => _pick(
@@ -410,7 +410,7 @@ class AppCopy {
 
   String get notificationPermissionsHint => _pick(
         en: 'Enable reminders for focus sessions, tasks, and deadlines.',
-        tr: 'Odak seansları, görevler ve tarihler için hatırlatma aç.',
+        tr: 'Odak seansları, görevler ve teslimler için hatırlatmaları aç.',
         ar: 'فعّل التذكيرات لجلسات التركيز والمهام والمواعيد.',
       );
 }

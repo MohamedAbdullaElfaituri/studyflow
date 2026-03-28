@@ -295,10 +295,16 @@ class SupabaseAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    final preferredLanguage =
+        _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
     final response = await _client.auth.signUp(
       email: email.trim(),
       password: password,
-      data: {'full_name': fullName.trim()},
+      data: {
+        'full_name': fullName.trim(),
+        'preferred_language': preferredLanguage,
+        'theme_mode': 'system',
+      },
     );
 
     final user = response.user;
@@ -307,8 +313,6 @@ class SupabaseAuthRepository implements AuthRepository {
     }
 
     final now = DateTime.now();
-    final preferredLanguage =
-        _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
     final profile = AppUserModel(
       id: user.id,
       fullName: fullName.trim(),

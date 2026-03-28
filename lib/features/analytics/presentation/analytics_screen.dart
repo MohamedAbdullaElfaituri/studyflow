@@ -27,6 +27,7 @@ class AnalyticsScreen extends ConsumerWidget {
         data: (studyData) {
           final courseMinutes = <String, double>{};
           final locale = Localizations.localeOf(context).languageCode;
+          final isCompact = MediaQuery.sizeOf(context).width < 390;
           for (final session in studyData.sessions) {
             final title =
                 studyData.courseById(session.courseId)?.title ?? context.l10n.miscLabel;
@@ -83,65 +84,116 @@ class AnalyticsScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: MetricTile(
+              if (isCompact)
+                Column(
+                  children: [
+                    MetricTile(
                       label: context.l10n.dailyStudyMinutesLabel,
                       value: '${studyData.dailyStudyMinutes}',
                       icon: Icons.today_rounded,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: MetricTile(
+                    const SizedBox(height: AppSpacing.md),
+                    MetricTile(
                       label: context.l10n.weeklyStudyMinutesLabel,
                       value: '${studyData.weeklyStudyMinutes}',
                       icon: Icons.date_range_rounded,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.dailyStudyMinutesLabel,
+                        value: '${studyData.dailyStudyMinutes}',
+                        icon: Icons.today_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.weeklyStudyMinutesLabel,
+                        value: '${studyData.weeklyStudyMinutes}',
+                        icon: Icons.date_range_rounded,
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: MetricTile(
+              if (isCompact)
+                Column(
+                  children: [
+                    MetricTile(
                       label: context.copy.habitsTitle,
                       value: '${(studyData.habitConsistency * 100).round()}%',
                       icon: Icons.repeat_rounded,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: MetricTile(
+                    const SizedBox(height: AppSpacing.md),
+                    MetricTile(
                       label: context.copy.examsTitle,
                       value: '${studyData.criticalExams.length}',
                       icon: Icons.event_note_rounded,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricTile(
+                        label: context.copy.habitsTitle,
+                        value: '${(studyData.habitConsistency * 100).round()}%',
+                        icon: Icons.repeat_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: MetricTile(
+                        label: context.copy.examsTitle,
+                        value: '${studyData.criticalExams.length}',
+                        icon: Icons.event_note_rounded,
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: MetricTile(
+              if (isCompact)
+                Column(
+                  children: [
+                    MetricTile(
                       label: context.l10n.completedTasksLabel,
                       value: '${studyData.completedTasks.length}',
                       icon: Icons.check_circle_rounded,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: MetricTile(
+                    const SizedBox(height: AppSpacing.md),
+                    MetricTile(
                       label: context.l10n.streakLabel,
                       value: '${studyData.streakCount}',
                       icon: Icons.local_fire_department_rounded,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.completedTasksLabel,
+                        value: '${studyData.completedTasks.length}',
+                        icon: Icons.check_circle_rounded,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.streakLabel,
+                        value: '${studyData.streakCount}',
+                        icon: Icons.local_fire_department_rounded,
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 child: Column(
