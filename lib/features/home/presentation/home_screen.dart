@@ -321,8 +321,12 @@ class HomeScreen extends ConsumerWidget {
                             icon: Icons.checklist_rtl_rounded,
                             title: context.l10n.tasksTitle,
                             subtitle: context.l10n.quickTaskSubtitle,
+<<<<<<< HEAD
                             onTap: () =>
                                 context.push(TaskEditorScreen.routePath),
+=======
+                            onTap: () => context.push(TaskEditorScreen.routePath),
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -381,8 +385,12 @@ class HomeScreen extends ConsumerWidget {
                             icon: Icons.analytics_rounded,
                             title: context.l10n.analyticsTitle,
                             subtitle: context.l10n.quickAnalyticsSubtitle,
+<<<<<<< HEAD
                             onTap: () =>
                                 context.push(AnalyticsScreen.routePath),
+=======
+                            onTap: () => context.push(AnalyticsScreen.routePath),
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                           ),
                         ),
                       ],
@@ -489,9 +497,13 @@ class HomeScreen extends ConsumerWidget {
                                     const SizedBox(height: AppSpacing.sm),
                                     StatusPill(
                                       label: context.copy.examCountdown(
+<<<<<<< HEAD
                                         exam.dateTime
                                             .difference(DateTime.now())
                                             .inDays,
+=======
+                                        exam.dateTime.difference(DateTime.now()).inDays,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                       ),
                                       color: priorityColor(exam.priority),
                                     ),
@@ -502,9 +514,13 @@ class HomeScreen extends ConsumerWidget {
                             if (!isCompact)
                               StatusPill(
                                 label: context.copy.examCountdown(
+<<<<<<< HEAD
                                   exam.dateTime
                                       .difference(DateTime.now())
                                       .inDays,
+=======
+                                  exam.dateTime.difference(DateTime.now()).inDays,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                 ),
                                 color: priorityColor(exam.priority),
                               ),
@@ -531,6 +547,7 @@ class HomeScreen extends ConsumerWidget {
                   )
                 else
                   ...studyData.activeHabits.take(3).map(
+<<<<<<< HEAD
                         (habit) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: SectionCard(
@@ -604,6 +621,71 @@ class HomeScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
+=======
+                    (habit) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: SectionCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (isCompact)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    habit.title,
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  FilledButton.tonal(
+                                    onPressed: habit.isCompleted
+                                        ? null
+                                        : () => ref
+                                            .read(
+                                              studyDataControllerProvider.notifier,
+                                            )
+                                            .completeHabit(habit),
+                                    child: Text(context.l10n.finishAction),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      habit.title,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                  ),
+                                  FilledButton.tonal(
+                                    onPressed: habit.isCompleted
+                                        ? null
+                                        : () => ref
+                                            .read(
+                                              studyDataControllerProvider.notifier,
+                                            )
+                                            .completeHabit(habit),
+                                    child: Text(context.l10n.finishAction),
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: AppSpacing.sm),
+                            LinearProgressIndicator(
+                              value: (habit.completedCount / habit.goalCount)
+                                  .clamp(0.0, 1.0)
+                                  .toDouble(),
+                              color: Color(habit.color),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              context.copy.habitProgress(
+                                habit.completedCount,
+                                habit.goalCount,
+                              ),
+                            ),
+                          ],
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                         ),
                       ),
                 const SizedBox(height: AppSpacing.xl),

@@ -423,8 +423,12 @@ class SectionHeader extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+<<<<<<< HEAD
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
+=======
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                           ),
                     ),
                   ],
@@ -975,9 +979,15 @@ class WeekSparkBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final color = accent ?? scheme.primary;
+<<<<<<< HEAD
     final maxValue =
         values.isEmpty ? 1.0 : math.max(values.reduce(math.max), 1.0);
     final resolvedLabels = labels ?? const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+=======
+    final maxValue = values.isEmpty ? 1.0 : math.max(values.reduce(math.max), 1.0);
+    final resolvedLabels =
+        labels ?? const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,

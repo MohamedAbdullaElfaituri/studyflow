@@ -18,10 +18,22 @@ class SupabaseService {
   static BackendMode get backendMode =>
       isConfigured ? BackendMode.supabase : BackendMode.local;
 
+<<<<<<< HEAD
   static Future<void> initialize() async {
     if (!isConfigured || _initialized) {
       return;
+=======
+  static void ensureConfigured() {
+    if (!isConfigured) {
+      throw StateError(
+        'Supabase configuration is missing. Provide SUPABASE_URL and SUPABASE_ANON_KEY.',
+      );
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
     }
+  }
+
+  static Future<void> initialize() async {
+    ensureConfigured();
 
     await Supabase.initialize(
       url: AppConstants.supabaseUrl,
