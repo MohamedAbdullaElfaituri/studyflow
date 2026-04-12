@@ -8,10 +8,12 @@ class AppConstants {
   // Supabase Config (compile-time env)
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
+    defaultValue: 'https://rjnxrgzxytpjqdbqaizj.supabase.co',
   );
 
   static const supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
+    defaultValue: 'sb_publishable_vezyohPqlUwDnmO94ABFEg_lg7f_OBn',
   );
 
   static const demoEmail = 'student@studyflow.app';

@@ -184,6 +184,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon: const Icon(Icons.alternate_email_rounded),
@@ -196,6 +198,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscure,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
                   decoration: InputDecoration(
                     labelText: context.l10n.passwordLabel,
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -359,6 +363,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.name],
                   decoration: InputDecoration(
                     labelText: context.l10n.fullNameLabel,
                     prefixIcon: const Icon(Icons.person_outline_rounded),
@@ -371,6 +377,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon: const Icon(Icons.alternate_email_rounded),
@@ -383,6 +391,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.newPassword],
                   decoration: InputDecoration(
                     labelText: context.l10n.passwordLabel,
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -405,6 +415,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirm,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.newPassword],
                   decoration: InputDecoration(
                     labelText: context.l10n.confirmPasswordLabel,
                     prefixIcon: const Icon(Icons.lock_person_outlined),
@@ -537,6 +549,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon: const Icon(Icons.mail_outline_rounded),
@@ -614,42 +628,133 @@ class _AuthFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (canPop)
-              RevealOnBuild(
-                child: IconButton(
-                  onPressed: context.pop,
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-              ),
-            RevealOnBuild(
-              child: GradientBanner(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 920;
+          final maxContentWidth = isWide ? 1120.0 : 560.0;
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxContentWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
+                    if (canPop)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: RevealOnBuild(
+                          child: IconButton(
+                            onPressed: context.pop,
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(999),
+                    if (isWide)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 11,
+                            child: RevealOnBuild(
+                              child: _AuthHeroPanel(
+                                heroTitle: heroTitle,
+                                heroSubtitle: heroSubtitle,
+                                heroBadge: heroBadge,
+                                metrics: metrics,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xl),
+                          Expanded(
+                            flex: 10,
+                            child: RevealOnBuild(
+                              delay: const Duration(milliseconds: 120),
+                              child: SectionCard(
+                                padding: const EdgeInsets.all(AppSpacing.xl),
+                                child: child,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      RevealOnBuild(
+                        child: _AuthHeroPanel(
+                          heroTitle: heroTitle,
+                          heroSubtitle: heroSubtitle,
+                          heroBadge: heroBadge,
+                          metrics: metrics,
+                        ),
                       ),
-                      child: Text(
-                        heroBadge,
-                        style:
-                            Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                      const SizedBox(height: AppSpacing.xl),
+                      RevealOnBuild(
+                        delay: const Duration(milliseconds: 120),
+                        child: SectionCard(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          child: child,
+                        ),
                       ),
-                    ),
+                    ],
+                    if (footer != null) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      RevealOnBuild(
+                        delay: const Duration(milliseconds: 220),
+                        child: Center(child: footer!),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AuthHeroPanel extends StatelessWidget {
+  const _AuthHeroPanel({
+    required this.heroTitle,
+    required this.heroSubtitle,
+    required this.heroBadge,
+    required this.metrics,
+  });
+
+  final String heroTitle;
+  final String heroSubtitle;
+  final String heroBadge;
+  final List<_HeroMetric> metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 460;
+
+        return GradientBanner(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (compact)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _StudyFlowLogo(size: 102),
                     const SizedBox(height: AppSpacing.lg),
+                    _HeroBadge(label: heroBadge),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      'StudyFlow',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.84),
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       heroTitle,
                       style:
@@ -665,72 +770,293 @@ class _AuthFrame extends StatelessWidget {
                             color: Colors.white.withOpacity(0.84),
                           ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Wrap(
-                      spacing: AppSpacing.md,
-                      runSpacing: AppSpacing.md,
-                      children: metrics
-                          .map(
-                            (item) => Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    item.value,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    item.label,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: Colors.white.withOpacity(0.84),
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
+                  ],
+                )
+              else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _StudyFlowLogo(size: 118),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _HeroBadge(label: heroBadge),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            'StudyFlow',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Colors.white.withOpacity(0.84),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            heroTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            heroSubtitle,
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Colors.white.withOpacity(0.84),
+                                    ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            RevealOnBuild(
-              delay: const Duration(milliseconds: 120),
-              child: SectionCard(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: child,
-              ),
-            ),
-            if (footer != null) ...[
+              const SizedBox(height: AppSpacing.xl),
+              const _LanguageReadinessRow(),
               const SizedBox(height: AppSpacing.lg),
-              RevealOnBuild(
-                delay: const Duration(milliseconds: 220),
-                child: footer!,
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: metrics
+                    .map((item) => _HeroMetricTile(metric: item))
+                    .toList(),
               ),
             ],
-          ],
-        ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StudyFlowLogo extends StatelessWidget {
+  const _StudyFlowLogo({
+    required this.size,
+  });
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Transform.rotate(
+            angle: -0.28,
+            child: Container(
+              width: size * 0.88,
+              height: size * 0.88,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(size * 0.26),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF9DEBFF),
+                    Color(0xFF4EE0C1),
+                    Color(0xFFFFC36F),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.14),
+                    blurRadius: 26,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Transform.rotate(
+            angle: 0.22,
+            child: Container(
+              width: size * 0.66,
+              height: size * 0.66,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(size * 0.22),
+                color: Colors.white.withOpacity(0.2),
+                border: Border.all(color: Colors.white.withOpacity(0.28)),
+              ),
+            ),
+          ),
+          Container(
+            width: size * 0.48,
+            height: size * 0.48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(size * 0.16),
+              color: Colors.white,
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(size * 0.08),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: size * 0.16,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF18456B),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: size * 0.04),
+                  Expanded(
+                    child: Container(
+                      height: size * 0.24,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2BAE9A),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: size * 0.04),
+                  Expanded(
+                    child: Container(
+                      height: size * 0.32,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF4A261),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.12,
+            right: size * 0.12,
+            child: Container(
+              width: size * 0.12,
+              height: size * 0.12,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroBadge extends StatelessWidget {
+  const _HeroBadge({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+      ),
+    );
+  }
+}
+
+class _LanguageReadinessRow extends StatelessWidget {
+  const _LanguageReadinessRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: const [
+        _LanguagePill(label: 'EN'),
+        _LanguagePill(label: 'AR'),
+        _LanguagePill(label: 'TR'),
+      ],
+    );
+  }
+}
+
+class _LanguagePill extends StatelessWidget {
+  const _LanguagePill({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+      ),
+    );
+  }
+}
+
+class _HeroMetricTile extends StatelessWidget {
+  const _HeroMetricTile({
+    required this.metric,
+  });
+
+  final _HeroMetric metric;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 120),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            metric.value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            metric.label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.84),
+                ),
+          ),
+        ],
       ),
     );
   }
