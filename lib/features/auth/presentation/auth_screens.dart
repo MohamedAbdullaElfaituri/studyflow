@@ -134,18 +134,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
     final isLoading = auth.isLoading;
+<<<<<<< HEAD
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+=======
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
     final copy = AuthCopy.of(context);
 
     return _AuthFrame(
       heroTitle: context.l10n.loginTitle,
       heroSubtitle: context.l10n.loginSubtitle,
+<<<<<<< HEAD
       heroBadge: isCloudSyncEnabled ? copy.loginHeroBadge : copy.demoHeroBadge,
       metrics: [
         _HeroMetric(
           copy.streakSyncLabel,
           isCloudSyncEnabled ? copy.liveValue : copy.localValue,
         ),
+=======
+      heroBadge: copy.loginHeroBadge,
+      metrics: [
+        _HeroMetric(copy.streakSyncLabel, copy.liveValue),
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
         _HeroMetric(copy.latencyLabel, '<120ms'),
         _HeroMetric(copy.darkModeLabel, copy.readyValue),
       ],
@@ -327,14 +336,21 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider).isLoading;
+<<<<<<< HEAD
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+=======
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
     final copy = AuthCopy.of(context);
 
     return _AuthFrame(
       canPop: true,
       heroTitle: context.l10n.signUpTitle,
       heroSubtitle: context.l10n.signUpSubtitle,
+<<<<<<< HEAD
       heroBadge: isCloudSyncEnabled ? copy.signupHeroBadge : copy.demoHeroBadge,
+=======
+      heroBadge: copy.signupHeroBadge,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
       metrics: [
         _HeroMetric(copy.profileLabel, copy.richValue),
         _HeroMetric(copy.motionLabel, copy.smoothValue),

@@ -45,8 +45,12 @@ class ProfileScreen extends ConsumerWidget {
           final locale = Localizations.localeOf(context).languageCode;
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           final screenWidth = MediaQuery.sizeOf(context).width;
+<<<<<<< HEAD
           final heroMetricWidth =
               isCompact ? screenWidth - 72 : (screenWidth - 96) / 3;
+=======
+          final heroMetricWidth = isCompact ? screenWidth - 72 : (screenWidth - 96) / 3;
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
           final completedRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
@@ -91,10 +95,14 @@ class ProfileScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               '@${_username(currentUser)}',
+<<<<<<< HEAD
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyLarge
                                   ?.copyWith(
+=======
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                     color: Colors.white.withOpacity(0.84),
                                   ),
                             ),
@@ -103,6 +111,7 @@ class ProfileScreen extends ConsumerWidget {
                               spacing: 8,
                               runSpacing: 8,
                               children: [
+<<<<<<< HEAD
                                 _HeroChip(
                                     label:
                                         copy.dayStreak(studyData.streakCount)),
@@ -113,13 +122,25 @@ class ProfileScreen extends ConsumerWidget {
                                 _HeroChip(
                                   label:
                                       currentUser.department ?? copy.hciStudent,
+=======
+                                _HeroChip(label: copy.dayStreak(studyData.streakCount)),
+                                _HeroChip(
+                                  label: primaryCourse?.title ?? copy.focusPlanner,
+                                ),
+                                _HeroChip(
+                                  label: currentUser.department ?? copy.hciStudent,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                 ),
                               ],
                             ),
                             const SizedBox(height: AppSpacing.md),
                             FilledButton.tonal(
+<<<<<<< HEAD
                               onPressed: () =>
                                   context.push(ProfileEditScreen.routePath),
+=======
+                              onPressed: () => context.push(ProfileEditScreen.routePath),
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white.withOpacity(0.14),
                                 foregroundColor: Colors.white,
@@ -169,6 +190,7 @@ class ProfileScreen extends ConsumerWidget {
                                     spacing: 8,
                                     runSpacing: 8,
                                     children: [
+<<<<<<< HEAD
                                       _HeroChip(
                                           label: copy.dayStreak(
                                               studyData.streakCount)),
@@ -179,6 +201,14 @@ class ProfileScreen extends ConsumerWidget {
                                       _HeroChip(
                                         label: currentUser.department ??
                                             copy.hciStudent,
+=======
+                                      _HeroChip(label: copy.dayStreak(studyData.streakCount)),
+                                      _HeroChip(
+                                        label: primaryCourse?.title ?? copy.focusPlanner,
+                                      ),
+                                      _HeroChip(
+                                        label: currentUser.department ?? copy.hciStudent,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                       ),
                                     ],
                                   ),
@@ -186,8 +216,12 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                             ),
                             FilledButton.tonal(
+<<<<<<< HEAD
                               onPressed: () =>
                                   context.push(ProfileEditScreen.routePath),
+=======
+                              onPressed: () => context.push(ProfileEditScreen.routePath),
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white.withOpacity(0.14),
                                 foregroundColor: Colors.white,
@@ -400,10 +434,14 @@ class ProfileScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               copy.performancePulseSubtitle,
+<<<<<<< HEAD
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
+=======
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
@@ -444,8 +482,12 @@ class ProfileScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     copy.performancePulse,
+<<<<<<< HEAD
                                     style:
                                         Theme.of(context).textTheme.titleLarge,
+=======
+                                    style: Theme.of(context).textTheme.titleLarge,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   Text(
@@ -464,8 +506,12 @@ class ProfileScreen extends ConsumerWidget {
                                     height: 120,
                                     child: WeekSparkBars(
                                       values: weeklySeries,
+<<<<<<< HEAD
                                       accent:
                                           Theme.of(context).colorScheme.primary,
+=======
+                                      accent: Theme.of(context).colorScheme.primary,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                       labels: _weekLabels(locale),
                                     ),
                                   ),
@@ -475,8 +521,12 @@ class ProfileScreen extends ConsumerWidget {
                                       studyData.weeklyStudyMinutes,
                                       studyData.goals.weeklyTargetMinutes,
                                     ),
+<<<<<<< HEAD
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
+=======
+                                    style: Theme.of(context).textTheme.bodyMedium,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                                   ),
                                 ],
                               ),
@@ -507,10 +557,15 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       DetailRow(label: copy.email, value: currentUser.email),
+<<<<<<< HEAD
                       DetailRow(
                           label: copy.username,
                           value: '@${_username(currentUser)}'),
                       DetailRow(
+=======
+                      DetailRow(label: copy.username, value: '@${_username(currentUser)}'),
+                      DetailRow(
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                         label: copy.university,
                         value: currentUser.university ?? copy.notAddedYet,
                       ),
@@ -986,8 +1041,14 @@ class _AchievementRow extends StatelessWidget {
                     Text(
                       copy.achievementDescription(achievement.id),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+<<<<<<< HEAD
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
+=======
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+>>>>>>> 92fae2d3904b11ee5fa030777256fb5aa49368c1
                           ),
                     ),
                   ],
