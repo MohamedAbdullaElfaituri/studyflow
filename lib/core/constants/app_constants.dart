@@ -5,7 +5,6 @@ class AppConstants {
   static const androidLabel = 'StudyFlow';
   static const iosDisplayName = 'StudyFlow';
 
-  // Supabase Config (compile-time env)
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
     defaultValue: 'https://rjnxrgzxytpjqdbqaizj.supabase.co',
