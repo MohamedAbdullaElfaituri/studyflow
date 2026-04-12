@@ -5,8 +5,18 @@ class AppConstants {
   static const androidLabel = 'StudyFlow';
   static const iosDisplayName = 'StudyFlow';
 
-  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Supabase Config (compile-time env)
+  static const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+  );
+
+  static const supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+  );
+
+  static const demoEmail = 'student@studyflow.app';
+  static const demoPassword = 'studyflow123';
+
   static const supabaseAuthRedirectScheme = 'com.mohamedahmet.studyflow';
   static const supabaseAuthRedirectHost = 'login-callback';
 

@@ -27,14 +27,17 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(currentUserProvider);
     final data = ref.watch(studyDataControllerProvider);
+    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final locale = Localizations.localeOf(context).languageCode;
 
     return AppPage(
       child: data.when(
-        loading: () => const SingleChildScrollView(child: LoadingColumn(itemCount: 5)),
+        loading: () =>
+            const SingleChildScrollView(child: LoadingColumn(itemCount: 5)),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final firstName = _firstName(
@@ -53,7 +56,8 @@ class HomeScreen extends ConsumerWidget {
           );
 
           return RefreshIndicator(
-            onRefresh: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+            onRefresh: () =>
+                ref.read(studyDataControllerProvider.notifier).refresh(),
             child: ListView(
               children: [
                 Row(
@@ -71,11 +75,12 @@ class HomeScreen extends ConsumerWidget {
                           const SizedBox(height: AppSpacing.xs),
                           Text(
                             DateTimeUtils.friendlyDate(DateTime.now(), locale),
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                           ),
                         ],
                       ),
@@ -200,6 +205,24 @@ class HomeScreen extends ConsumerWidget {
                           backgroundColor: Colors.white.withOpacity(0.16),
                         ),
                       ),
+                      const SizedBox(height: AppSpacing.md),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          StatusPill(
+                            label: isCloudSyncEnabled
+                                ? context.copy.workspaceCloudChip
+                                : context.copy.workspaceDemoChip,
+                            color: Colors.white,
+                          ),
+                          if (isCloudSyncEnabled)
+                            const StatusPill(
+                              label: 'Google OAuth',
+                              color: Colors.white,
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -298,7 +321,8 @@ class HomeScreen extends ConsumerWidget {
                             icon: Icons.checklist_rtl_rounded,
                             title: context.l10n.tasksTitle,
                             subtitle: context.l10n.quickTaskSubtitle,
-                            onTap: () => context.push(TaskEditorScreen.routePath),
+                            onTap: () =>
+                                context.push(TaskEditorScreen.routePath),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
@@ -357,7 +381,8 @@ class HomeScreen extends ConsumerWidget {
                             icon: Icons.analytics_rounded,
                             title: context.l10n.analyticsTitle,
                             subtitle: context.l10n.quickAnalyticsSubtitle,
-                            onTap: () => context.push(AnalyticsScreen.routePath),
+                            onTap: () =>
+                                context.push(AnalyticsScreen.routePath),
                           ),
                         ),
                       ],
@@ -396,9 +421,10 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       StatusPill(
-                        label: context.copy.weeklyChallengeDescription(focusDelta == 0
-                            ? studyData.goals.weeklyTargetMinutes
-                            : focusDelta),
+                        label: context.copy.weeklyChallengeDescription(
+                            focusDelta == 0
+                                ? studyData.goals.weeklyTargetMinutes
+                                : focusDelta),
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
@@ -443,11 +469,13 @@ class HomeScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     exam.title,
-                                    style: Theme.of(context).textTheme.titleMedium,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   Text(
-                                    DateTimeUtils.friendlyDate(exam.dateTime, locale),
+                                    DateTimeUtils.friendlyDate(
+                                        exam.dateTime, locale),
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
@@ -461,7 +489,9 @@ class HomeScreen extends ConsumerWidget {
                                     const SizedBox(height: AppSpacing.sm),
                                     StatusPill(
                                       label: context.copy.examCountdown(
-                                        exam.dateTime.difference(DateTime.now()).inDays,
+                                        exam.dateTime
+                                            .difference(DateTime.now())
+                                            .inDays,
                                       ),
                                       color: priorityColor(exam.priority),
                                     ),
@@ -472,7 +502,9 @@ class HomeScreen extends ConsumerWidget {
                             if (!isCompact)
                               StatusPill(
                                 label: context.copy.examCountdown(
-                                  exam.dateTime.difference(DateTime.now()).inDays,
+                                  exam.dateTime
+                                      .difference(DateTime.now())
+                                      .inDays,
                                 ),
                                 color: priorityColor(exam.priority),
                               ),
@@ -499,73 +531,81 @@ class HomeScreen extends ConsumerWidget {
                   )
                 else
                   ...studyData.activeHabits.take(3).map(
-                    (habit) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: SectionCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (isCompact)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    habit.title,
-                                    style: Theme.of(context).textTheme.titleMedium,
+                        (habit) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: SectionCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (isCompact)
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        habit.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      const SizedBox(height: AppSpacing.sm),
+                                      FilledButton.tonal(
+                                        onPressed: habit.isCompleted
+                                            ? null
+                                            : () => ref
+                                                .read(
+                                                  studyDataControllerProvider
+                                                      .notifier,
+                                                )
+                                                .completeHabit(habit),
+                                        child: Text(context.l10n.finishAction),
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          habit.title,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                      ),
+                                      FilledButton.tonal(
+                                        onPressed: habit.isCompleted
+                                            ? null
+                                            : () => ref
+                                                .read(
+                                                  studyDataControllerProvider
+                                                      .notifier,
+                                                )
+                                                .completeHabit(habit),
+                                        child: Text(context.l10n.finishAction),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  FilledButton.tonal(
-                                    onPressed: habit.isCompleted
-                                        ? null
-                                        : () => ref
-                                            .read(
-                                              studyDataControllerProvider.notifier,
-                                            )
-                                            .completeHabit(habit),
-                                    child: Text(context.l10n.finishAction),
+                                const SizedBox(height: AppSpacing.sm),
+                                LinearProgressIndicator(
+                                  value:
+                                      (habit.completedCount / habit.goalCount)
+                                          .clamp(0.0, 1.0)
+                                          .toDouble(),
+                                  color: Color(habit.color),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  context.copy.habitProgress(
+                                    habit.completedCount,
+                                    habit.goalCount,
                                   ),
-                                ],
-                              )
-                            else
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      habit.title,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                  ),
-                                  FilledButton.tonal(
-                                    onPressed: habit.isCompleted
-                                        ? null
-                                        : () => ref
-                                            .read(
-                                              studyDataControllerProvider.notifier,
-                                            )
-                                            .completeHabit(habit),
-                                    child: Text(context.l10n.finishAction),
-                                  ),
-                                ],
-                              ),
-                            const SizedBox(height: AppSpacing.sm),
-                            LinearProgressIndicator(
-                              value: (habit.completedCount / habit.goalCount)
-                                  .clamp(0.0, 1.0)
-                                  .toDouble(),
-                              color: Color(habit.color),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              context.copy.habitProgress(
-                                habit.completedCount,
-                                habit.goalCount,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                 const SizedBox(height: AppSpacing.xl),
                 SectionHeader(
                   title: context.copy.motivationMomentTitle,
@@ -626,7 +666,8 @@ class HomeScreen extends ConsumerWidget {
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         context.l10n.focusSessionSummary(

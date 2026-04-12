@@ -22,6 +22,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+  Future<AppUserModel> signInWithDemo();
   Future<AppUserModel> signInWithGoogle();
   Future<void> signOut();
   Future<void> sendPasswordReset(String email);
@@ -135,27 +136,34 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUserModel> signInWithDemo() async {
+    final demoUser = _profiles.cast<AppUserModel?>().firstWhere(
+          (profile) =>
+              profile?.email.toLowerCase() ==
+              AppConstants.demoEmail.toLowerCase(),
+          orElse: () => null,
+        );
+
+    if (demoUser != null) {
+      await _storage.writeString(AppConstants.authSessionKey, demoUser.id);
+      return demoUser;
+    }
+
+    return signUp(
+      fullName: 'StudyFlow Student',
+      email: AppConstants.demoEmail,
+      password: AppConstants.demoPassword,
+    );
+  }
+
+  @override
   Future<void> signOut() async {
     await _storage.remove(AppConstants.authSessionKey);
   }
 
   @override
   Future<AppUserModel> signInWithGoogle() async {
-    final googleUser = _profiles.cast<AppUserModel?>().firstWhere(
-          (profile) => profile?.email.toLowerCase() == 'student@studyflow.app',
-          orElse: () => null,
-        );
-
-    if (googleUser != null) {
-      await _storage.writeString(AppConstants.authSessionKey, googleUser.id);
-      return googleUser;
-    }
-
-    return signUp(
-      fullName: 'StudyFlow Student',
-      email: 'student@studyflow.app',
-      password: 'studyflow123',
-    );
+    return signInWithDemo();
   }
 
   @override
@@ -191,9 +199,10 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   List<AppUserModel> get _profiles {
-    final stored = decodeCollection(_storage.readString(AppConstants.profilesKey))
-        .map(AppUserModel.fromJson)
-        .toList();
+    final stored =
+        decodeCollection(_storage.readString(AppConstants.profilesKey))
+            .map(AppUserModel.fromJson)
+            .toList();
     return stored.isEmpty ? [_demoUser] : stored;
   }
 
@@ -210,7 +219,7 @@ class LocalAuthRepository implements AuthRepository {
     return AppUserModel(
       id: _demoUserId,
       fullName: 'StudyFlow Student',
-      email: 'student@studyflow.app',
+      email: AppConstants.demoEmail,
       avatarUrl: null,
       username: 'studyflow_student',
       bio: 'Designing calm, high-focus study weeks with clean routines.',
@@ -226,8 +235,8 @@ class LocalAuthRepository implements AuthRepository {
 
   AuthCredentialModel get _demoCredential => const AuthCredentialModel(
         userId: _demoUserId,
-        email: 'student@studyflow.app',
-        password: 'studyflow123',
+        email: AppConstants.demoEmail,
+        password: AppConstants.demoPassword,
       );
 
   Future<void> _writeProfiles(List<AppUserModel> profiles) async {
@@ -333,6 +342,11 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUserModel> signInWithDemo() async {
+    throw const AppException('demo_mode_unavailable');
+  }
+
+  @override
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
@@ -383,7 +397,8 @@ class SupabaseAuthRepository implements AuthRepository {
     final file = File(filePath);
     final bytes = await file.readAsBytes();
     final extension = _fileExtension(filePath);
-    final objectPath = '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$extension';
+    final objectPath =
+        '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$extension';
 
     final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
     if (previousObjectPath != null) {
@@ -408,11 +423,8 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   Future<AppUserModel> _fetchProfile(User user) async {
-    final data = await _client
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    final data =
+        await _client.from('profiles').select().eq('id', user.id).maybeSingle();
 
     if (data == null) {
       final now = DateTime.now();

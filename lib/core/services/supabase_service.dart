@@ -2,21 +2,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../constants/app_constants.dart';
 
-class SupabaseService {
-  static bool get isConfigured =>
-      AppConstants.supabaseUrl.isNotEmpty &&
-      AppConstants.supabaseAnonKey.isNotEmpty;
+enum BackendMode { local, supabase }
 
-  static void ensureConfigured() {
-    if (!isConfigured) {
-      throw StateError(
-        'Supabase configuration is missing. Provide SUPABASE_URL and SUPABASE_ANON_KEY.',
-      );
-    }
-  }
+class SupabaseService {
+  static bool _initialized = false;
+
+  static String _normalized(String value) => value.trim();
+
+  static bool get isConfigured =>
+      _normalized(AppConstants.supabaseUrl).isNotEmpty &&
+      _normalized(AppConstants.supabaseAnonKey).isNotEmpty;
+
+  static bool get isInitialized => _initialized;
+
+  static BackendMode get backendMode =>
+      isConfigured ? BackendMode.supabase : BackendMode.local;
 
   static Future<void> initialize() async {
-    ensureConfigured();
+    if (!isConfigured || _initialized) {
+      return;
+    }
 
     await Supabase.initialize(
       url: AppConstants.supabaseUrl,
@@ -25,7 +30,17 @@ class SupabaseService {
         authFlowType: AuthFlowType.pkce,
       ),
     );
+
+    _initialized = true;
   }
 
-  static SupabaseClient get client => Supabase.instance.client;
+  static SupabaseClient get client {
+    if (!_initialized) {
+      throw StateError(
+        'Supabase is not initialized. Provide SUPABASE_URL and SUPABASE_ANON_KEY, '
+        'or use the local demo mode.',
+      );
+    }
+    return Supabase.instance.client;
+  }
 }

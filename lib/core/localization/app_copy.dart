@@ -413,4 +413,86 @@ class AppCopy {
         tr: 'Odak seansları, görevler ve teslimler için hatırlatmaları aç.',
         ar: 'فعّل التذكيرات لجلسات التركيز والمهام والمواعيد.',
       );
+
+  String get workspaceModeTitle => _pick(
+        en: 'Workspace mode',
+        tr: 'Çalışma modu',
+        ar: 'وضع مساحة العمل',
+      );
+
+  String get workspaceCloudChip => _pick(
+        en: 'Supabase cloud',
+        tr: 'Supabase bulut',
+        ar: 'سحابة Supabase',
+      );
+
+  String get workspaceDemoChip => _pick(
+        en: 'Local demo',
+        tr: 'Yerel demo',
+        ar: 'عرض محلي',
+      );
+
+  String get workspaceCloudTitle => _pick(
+        en: 'Cloud sync is active',
+        tr: 'Bulut senkronizasyonu aktif',
+        ar: 'المزامنة السحابية مفعلة',
+      );
+
+  String get workspaceCloudDescription => _pick(
+        en: 'Your app is reading live data from Supabase and can use real Google OAuth.',
+        tr: 'Uygulama Supabase üzerinden canlı veri okuyor ve gerçek Google OAuth kullanabilir.',
+        ar: 'التطبيق يعمل على بيانات Supabase الحية ويمكنه استخدام Google OAuth الحقيقي.',
+      );
+
+  String get workspaceDemoTitle => _pick(
+        en: 'Demo mode is active',
+        tr: 'Demo modu aktif',
+        ar: 'وضع العرض مفعل',
+      );
+
+  String get workspaceDemoDescription => _pick(
+        en: 'No cloud credentials were detected, so the app is running with safe local demo data.',
+        tr: 'Bulut anahtarları bulunamadı; uygulama güvenli yerel demo verileriyle çalışıyor.',
+        ar: 'لم يتم العثور على مفاتيح سحابية، لذلك يعمل التطبيق ببيانات عرض محلية وآمنة.',
+      );
+
+  String get googleOAuthReadyLabel => _pick(
+        en: 'Google OAuth ready',
+        tr: 'Google OAuth hazır',
+        ar: 'Google OAuth جاهز',
+      );
+
+  String get accessibilityModeTitle => _pick(
+        en: 'Accessibility mode',
+        tr: 'Erişilebilirlik modu',
+        ar: 'وضع سهولة الوصول',
+      );
+
+  String get accessibilityModeDescription => _pick(
+        en: 'Reduce motion and slightly increase readability across the app.',
+        tr: 'Hareketi azaltır ve uygulama genelinde okunabilirliği artırır.',
+        ar: 'يقلل الحركة ويحسن قابلية القراءة قليلًا في كامل التطبيق.',
+      );
+
+  String motivationQuote(int seed) {
+    final quotes = switch (languageCode) {
+      'tr' => const [
+          'Küçük ama tutarlı adımlar, yoğun günlerde bile güven verir.',
+          'Net plan, düşük stres ve daha yüksek odak demektir.',
+          'Bugünün kısa oturumu yarının rahatlığını oluşturur.',
+        ],
+      'ar' => const [
+          'الخطوات الصغيرة المنتظمة تمنحك ثقة أكبر من الاندفاع المؤقت.',
+          'الخطة الواضحة تقلل الضغط وتزيد جودة التركيز.',
+          'جلسة قصيرة اليوم تصنع هدوءًا أكبر غدًا.',
+        ],
+      _ => const [
+          'Small consistent wins are easier to trust than random bursts of effort.',
+          'A clear plan lowers stress and raises the quality of focus.',
+          'A short session today often protects tomorrow from chaos.',
+        ],
+    };
+
+    return quotes[seed % quotes.length];
+  }
 }

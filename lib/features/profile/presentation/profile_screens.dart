@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -30,7 +32,8 @@ class ProfileScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final currentUser = user;
@@ -42,16 +45,19 @@ class ProfileScreen extends ConsumerWidget {
           final locale = Localizations.localeOf(context).languageCode;
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           final screenWidth = MediaQuery.sizeOf(context).width;
-          final heroMetricWidth = isCompact ? screenWidth - 72 : (screenWidth - 96) / 3;
+          final heroMetricWidth =
+              isCompact ? screenWidth - 72 : (screenWidth - 96) / 3;
           final completedRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
           final weeklyProgress = studyData.goals.weeklyTargetMinutes == 0
               ? 0.0
-              : studyData.weeklyStudyMinutes / studyData.goals.weeklyTargetMinutes;
+              : studyData.weeklyStudyMinutes /
+                  studyData.goals.weeklyTargetMinutes;
           final profileDepth = _profileDepth(currentUser);
           final weeklySeries = _weekSeries(studyData.sessions);
-          final primaryCourse = studyData.courses.isEmpty ? null : studyData.courses.first;
+          final primaryCourse =
+              studyData.courses.isEmpty ? null : studyData.courses.first;
 
           return ListView(
             physics: const BouncingScrollPhysics(),
@@ -85,7 +91,10 @@ class ProfileScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               '@${_username(currentUser)}',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
                                     color: Colors.white.withOpacity(0.84),
                                   ),
                             ),
@@ -94,18 +103,23 @@ class ProfileScreen extends ConsumerWidget {
                               spacing: 8,
                               runSpacing: 8,
                               children: [
-                                _HeroChip(label: copy.dayStreak(studyData.streakCount)),
                                 _HeroChip(
-                                  label: primaryCourse?.title ?? copy.focusPlanner,
+                                    label:
+                                        copy.dayStreak(studyData.streakCount)),
+                                _HeroChip(
+                                  label:
+                                      primaryCourse?.title ?? copy.focusPlanner,
                                 ),
                                 _HeroChip(
-                                  label: currentUser.department ?? copy.hciStudent,
+                                  label:
+                                      currentUser.department ?? copy.hciStudent,
                                 ),
                               ],
                             ),
                             const SizedBox(height: AppSpacing.md),
                             FilledButton.tonal(
-                              onPressed: () => context.push(ProfileEditScreen.routePath),
+                              onPressed: () =>
+                                  context.push(ProfileEditScreen.routePath),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white.withOpacity(0.14),
                                 foregroundColor: Colors.white,
@@ -155,12 +169,16 @@ class ProfileScreen extends ConsumerWidget {
                                     spacing: 8,
                                     runSpacing: 8,
                                     children: [
-                                      _HeroChip(label: copy.dayStreak(studyData.streakCount)),
                                       _HeroChip(
-                                        label: primaryCourse?.title ?? copy.focusPlanner,
+                                          label: copy.dayStreak(
+                                              studyData.streakCount)),
+                                      _HeroChip(
+                                        label: primaryCourse?.title ??
+                                            copy.focusPlanner,
                                       ),
                                       _HeroChip(
-                                        label: currentUser.department ?? copy.hciStudent,
+                                        label: currentUser.department ??
+                                            copy.hciStudent,
                                       ),
                                     ],
                                   ),
@@ -168,7 +186,8 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                             ),
                             FilledButton.tonal(
-                              onPressed: () => context.push(ProfileEditScreen.routePath),
+                              onPressed: () =>
+                                  context.push(ProfileEditScreen.routePath),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.white.withOpacity(0.14),
                                 foregroundColor: Colors.white,
@@ -381,7 +400,10 @@ class ProfileScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpacing.xs),
                             Text(
                               copy.performancePulseSubtitle,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
@@ -422,7 +444,8 @@ class ProfileScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     copy.performancePulse,
-                                    style: Theme.of(context).textTheme.titleLarge,
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
                                   ),
                                   const SizedBox(height: AppSpacing.xs),
                                   Text(
@@ -441,7 +464,8 @@ class ProfileScreen extends ConsumerWidget {
                                     height: 120,
                                     child: WeekSparkBars(
                                       values: weeklySeries,
-                                      accent: Theme.of(context).colorScheme.primary,
+                                      accent:
+                                          Theme.of(context).colorScheme.primary,
                                       labels: _weekLabels(locale),
                                     ),
                                   ),
@@ -451,7 +475,8 @@ class ProfileScreen extends ConsumerWidget {
                                       studyData.weeklyStudyMinutes,
                                       studyData.goals.weeklyTargetMinutes,
                                     ),
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                   ),
                                 ],
                               ),
@@ -475,12 +500,16 @@ class ProfileScreen extends ConsumerWidget {
                       Text(
                         copy.identityDetailsSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       DetailRow(label: copy.email, value: currentUser.email),
-                      DetailRow(label: copy.username, value: '@${_username(currentUser)}'),
+                      DetailRow(
+                          label: copy.username,
+                          value: '@${_username(currentUser)}'),
                       DetailRow(
                         label: copy.university,
                         value: currentUser.university ?? copy.notAddedYet,
@@ -512,13 +541,16 @@ class ProfileScreen extends ConsumerWidget {
                       Text(
                         copy.achievementSubtitle,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       ...studyData.achievements.take(3).map(
                             (achievement) => Padding(
-                              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                              padding:
+                                  const EdgeInsets.only(bottom: AppSpacing.lg),
                               child: _AchievementRow(achievement: achievement),
                             ),
                           ),
@@ -553,7 +585,9 @@ class ProfileScreen extends ConsumerWidget {
                         leading: const Icon(Icons.logout_rounded),
                         title: Text(copy.logOut),
                         onTap: () async {
-                          await ref.read(authControllerProvider.notifier).signOut();
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .signOut();
                           if (context.mounted) {
                             context.go(LoginScreen.routePath);
                           }
@@ -649,8 +683,9 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     _ProfileAvatar(user: user, radius: 42),
                     const SizedBox(height: AppSpacing.md),
                     FilledButton.tonal(
-                      onPressed:
-                          _uploadingAvatar || user == null ? null : () => _pickAvatar(context),
+                      onPressed: _uploadingAvatar || user == null
+                          ? null
+                          : () => _pickAvatar(context),
                       child: Text(
                         _uploadingAvatar ? copy.uploading : copy.uploadPhoto,
                       ),
@@ -659,7 +694,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     Text(
                       copy.uploadHint,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -950,9 +986,8 @@ class _AchievementRow extends StatelessWidget {
                     Text(
                       copy.achievementDescription(achievement.id),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],

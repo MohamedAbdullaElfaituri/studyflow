@@ -40,6 +40,11 @@ class AuthCopy {
         tr: 'Kurtarma',
         ar: 'استعادة الحساب',
       );
+  String get demoHeroBadge => _pick(
+        en: 'Local demo mode',
+        tr: 'Yerel demo modu',
+        ar: 'وضع العرض المحلي',
+      );
   String get streakSyncLabel => _pick(
         en: 'Streak sync',
         tr: 'Seri senkronu',
@@ -115,6 +120,11 @@ class AuthCopy {
         tr: 'Anlık',
         ar: 'فوري',
       );
+  String get localValue => _pick(
+        en: 'Local',
+        tr: 'Yerel',
+        ar: 'محلي',
+      );
   String get simpleValue => _pick(
         en: 'Simple',
         tr: 'Sade',
@@ -154,5 +164,15 @@ class AuthCopy {
         en: 'We will send a recovery link so you can safely re-enter your workspace.',
         tr: 'Çalışma alanına güvenle dönebilmen için bir kurtarma bağlantısı göndereceğiz.',
         ar: 'سنرسل رابط استعادة لتتمكن من العودة إلى مساحتك بأمان.',
+      );
+  String get enterDemoWorkspace => _pick(
+        en: 'Enter demo workspace',
+        tr: 'Demo çalışma alanına gir',
+        ar: 'ادخل مساحة العرض',
+      );
+  String get demoCredentialsLabel => _pick(
+        en: 'Demo credentials',
+        tr: 'Demo bilgileri',
+        ar: 'بيانات العرض',
       );
 }

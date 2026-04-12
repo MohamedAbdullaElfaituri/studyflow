@@ -116,6 +116,7 @@ class MainNavigationShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Stack(
       children: [
@@ -152,11 +153,11 @@ class MainNavigationShell extends StatelessWidget {
           backgroundColor: Colors.transparent,
           body: navigationShell,
           bottomNavigationBar: Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.md,
               0,
               AppSpacing.md,
-              AppSpacing.md,
+              bottomInset > AppSpacing.sm ? bottomInset : AppSpacing.md,
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -422,7 +423,8 @@ class SectionHeader extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -572,8 +574,8 @@ class LoadingColumn extends StatelessWidget {
       children: List.generate(
         itemCount,
         (index) => Padding(
-          padding:
-              EdgeInsets.only(bottom: index == itemCount - 1 ? 0 : AppSpacing.md),
+          padding: EdgeInsets.only(
+              bottom: index == itemCount - 1 ? 0 : AppSpacing.md),
           child: const SectionCard(
             child: SizedBox(height: 120),
           ),
@@ -733,7 +735,8 @@ class CourseAvatar extends StatelessWidget {
       radius: size / 2,
       backgroundColor: Color(course.color).withOpacity(0.15),
       child: Text(
-        (course.title.isEmpty ? '?' : course.title.substring(0, 1)).toUpperCase(),
+        (course.title.isEmpty ? '?' : course.title.substring(0, 1))
+            .toUpperCase(),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Color(course.color),
               fontWeight: FontWeight.w700,
@@ -838,6 +841,12 @@ class _RevealOnBuildState extends State<RevealOnBuild> {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (disableAnimations) {
+      return widget.child;
+    }
+
     return AnimatedSlide(
       duration: const Duration(milliseconds: 650),
       curve: Curves.easeOutCubic,
@@ -910,7 +919,8 @@ class ProgressRing extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0, end: progress.clamp(0, 1).toDouble()),
+            tween:
+                Tween<double>(begin: 0, end: progress.clamp(0, 1).toDouble()),
             duration: const Duration(milliseconds: 1100),
             curve: Curves.easeOutCubic,
             builder: (context, animatedProgress, _) {
@@ -965,9 +975,9 @@ class WeekSparkBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final color = accent ?? scheme.primary;
-    final maxValue = values.isEmpty ? 1.0 : math.max(values.reduce(math.max), 1.0);
-    final resolvedLabels =
-        labels ?? const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final maxValue =
+        values.isEmpty ? 1.0 : math.max(values.reduce(math.max), 1.0);
+    final resolvedLabels = labels ?? const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,

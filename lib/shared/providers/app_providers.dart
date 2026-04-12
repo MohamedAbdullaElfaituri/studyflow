@@ -23,13 +23,28 @@ final reminderServiceProvider = Provider<ReminderService>(
   (ref) => throw UnimplementedError(),
 );
 
+final backendModeProvider =
+    Provider<BackendMode>((ref) => SupabaseService.backendMode);
+
+final isCloudSyncEnabledProvider = Provider<bool>(
+  (ref) => ref.watch(backendModeProvider) == BackendMode.supabase,
+);
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final storage = ref.watch(localStorageServiceProvider);
-  return SupabaseAuthRepository(SupabaseService.client, storage);
+  final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+  if (isCloudSyncEnabled) {
+    return SupabaseAuthRepository(SupabaseService.client, storage);
+  }
+  return LocalAuthRepository(storage);
 });
 
 final studyRepositoryProvider = Provider<StudyRepository>((ref) {
-  return SupabaseStudyRepository(SupabaseService.client);
+  final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+  if (isCloudSyncEnabled) {
+    return SupabaseStudyRepository(SupabaseService.client);
+  }
+  return LocalStudyRepository(ref.watch(localStorageServiceProvider));
 });
 
 final routerProvider = Provider<GoRouter>((ref) => AppRouter.build());
@@ -71,6 +86,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   @override
   Future<AuthViewState> build() async {
     final repository = ref.watch(authRepositoryProvider);
+    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final user = await repository.currentUser();
     final onboardingCompleted = await repository.hasCompletedOnboarding();
     final studyRepository = ref.watch(studyRepositoryProvider);
@@ -79,35 +95,37 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       await studyRepository.ensureSeeded(user);
     }
 
-    final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
-      (event) async {
-        final currentUser = event.session?.user;
-        final onboardingComplete = await repository.hasCompletedOnboarding();
+    if (isCloudSyncEnabled) {
+      final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
+        (event) async {
+          final currentUser = event.session?.user;
+          final onboardingComplete = await repository.hasCompletedOnboarding();
 
-        if (currentUser == null) {
+          if (currentUser == null) {
+            state = AsyncData(
+              AuthViewState(
+                user: null,
+                onboardingCompleted: onboardingComplete,
+              ),
+            );
+            return;
+          }
+
+          final refreshedUser = await repository.currentUser();
+          if (refreshedUser != null) {
+            await studyRepository.ensureSeeded(refreshedUser);
+          }
           state = AsyncData(
             AuthViewState(
-              user: null,
+              user: refreshedUser,
               onboardingCompleted: onboardingComplete,
             ),
           );
-          return;
-        }
-
-        final refreshedUser = await repository.currentUser();
-        if (refreshedUser != null) {
-          await studyRepository.ensureSeeded(refreshedUser);
-        }
-        state = AsyncData(
-          AuthViewState(
-            user: refreshedUser,
-            onboardingCompleted: onboardingComplete,
-          ),
-        );
-      },
-      onError: (Object _, StackTrace __) {},
-    );
-    ref.onDispose(subscription.cancel);
+        },
+        onError: (Object _, StackTrace __) {},
+      );
+      ref.onDispose(subscription.cancel);
+    }
 
     return AuthViewState(
       user: user,
@@ -188,6 +206,21 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     state = await AsyncValue.guard(() async {
       final onboardingCompleted = await repository.hasCompletedOnboarding();
       final user = await repository.signInWithGoogle();
+      await studyRepository.ensureSeeded(user);
+      return AuthViewState(
+        user: user,
+        onboardingCompleted: onboardingCompleted,
+      );
+    });
+  }
+
+  Future<void> signInWithDemo() async {
+    final repository = ref.read(authRepositoryProvider);
+    final studyRepository = ref.read(studyRepositoryProvider);
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final onboardingCompleted = await repository.hasCompletedOnboarding();
+      final user = await repository.signInWithDemo();
       await studyRepository.ensureSeeded(user);
       return AuthViewState(
         user: user,
@@ -329,7 +362,8 @@ class StudyDataState {
         .toList();
   }
 
-  List<NoteModel> get pinnedNotes => notes.where((item) => item.isPinned).toList();
+  List<NoteModel> get pinnedNotes =>
+      notes.where((item) => item.isPinned).toList();
 
   List<ExamModel> get upcomingExams {
     final now = DateTime.now();
@@ -388,8 +422,8 @@ class StudyDataState {
     }
 
     final studyDays = sessions
-        .map((session) => DateTime(session.startTime.year, session.startTime.month,
-            session.startTime.day))
+        .map((session) => DateTime(session.startTime.year,
+            session.startTime.month, session.startTime.day))
         .toSet()
         .toList()
       ..sort((a, b) => b.compareTo(a));
@@ -417,7 +451,10 @@ class StudyDataState {
       completedTasks.length * 25 +
       sessions.length * 40 +
       completedHabits.length * 18 +
-      upcomingExams.where((item) => item.priority == TaskPriority.urgent).length * 12;
+      upcomingExams
+              .where((item) => item.priority == TaskPriority.urgent)
+              .length *
+          12;
 
   int get level => (totalXp ~/ 180) + 1;
 
@@ -436,11 +473,14 @@ class StudyDataState {
   CourseModel? courseById(String? id) =>
       courses.firstWhereOrNull((course) => course.id == id);
 
-  TaskModel? taskById(String id) => tasks.firstWhereOrNull((task) => task.id == id);
+  TaskModel? taskById(String id) =>
+      tasks.firstWhereOrNull((task) => task.id == id);
 
-  NoteModel? noteById(String id) => notes.firstWhereOrNull((note) => note.id == id);
+  NoteModel? noteById(String id) =>
+      notes.firstWhereOrNull((note) => note.id == id);
 
-  ExamModel? examById(String id) => exams.firstWhereOrNull((exam) => exam.id == id);
+  ExamModel? examById(String id) =>
+      exams.firstWhereOrNull((exam) => exam.id == id);
 
   HabitModel? habitById(String id) =>
       habits.firstWhereOrNull((habit) => habit.id == id);
@@ -599,7 +639,8 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     final current = state.valueOrNull;
     if (current == null) return;
 
-    for (final task in current.completedTasks.where((item) => !item.isArchived)) {
+    for (final task
+        in current.completedTasks.where((item) => !item.isArchived)) {
       await ref.read(studyRepositoryProvider).saveTask(
             task.copyWith(isArchived: true, updatedAt: DateTime.now()),
           );
@@ -712,7 +753,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
   }
 
   Future<void> updateReminders(ReminderPreferencesModel preferences) async {
-    await ref.read(studyRepositoryProvider).saveReminderPreferences(preferences);
+    await ref
+        .read(studyRepositoryProvider)
+        .saveReminderPreferences(preferences);
     await _softRefresh();
   }
 
@@ -738,8 +781,9 @@ final currentUserProvider = Provider<AppUserModel?>(
 final localeProvider = Provider<Locale?>((ref) {
   final data = ref.watch(studyDataControllerProvider).valueOrNull;
   final devicePreference = ref.watch(appLocalePreferenceProvider);
-  final persistedSettingsLanguage =
-      data?.settings.userId.isNotEmpty == true ? data?.settings.languageCode : null;
+  final persistedSettingsLanguage = data?.settings.userId.isNotEmpty == true
+      ? data?.settings.languageCode
+      : null;
   final code = devicePreference ??
       persistedSettingsLanguage ??
       ref.watch(currentUserProvider)?.preferredLanguage;
@@ -759,4 +803,13 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
     'dark' => ThemeMode.dark,
     _ => ThemeMode.system,
   };
+});
+
+final accessibilityModeProvider = Provider<bool>((ref) {
+  return ref
+          .watch(studyDataControllerProvider)
+          .valueOrNull
+          ?.settings
+          .accessibilityMode ??
+      false;
 });

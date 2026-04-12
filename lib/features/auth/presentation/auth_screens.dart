@@ -1,7 +1,10 @@
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_widgets.dart';
@@ -131,14 +134,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
     final isLoading = auth.isLoading;
+    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final copy = AuthCopy.of(context);
 
     return _AuthFrame(
       heroTitle: context.l10n.loginTitle,
       heroSubtitle: context.l10n.loginSubtitle,
-      heroBadge: copy.loginHeroBadge,
+      heroBadge: isCloudSyncEnabled ? copy.loginHeroBadge : copy.demoHeroBadge,
       metrics: [
-        _HeroMetric(copy.streakSyncLabel, copy.liveValue),
+        _HeroMetric(
+          copy.streakSyncLabel,
+          isCloudSyncEnabled ? copy.liveValue : copy.localValue,
+        ),
         _HeroMetric(copy.latencyLabel, '<120ms'),
         _HeroMetric(copy.darkModeLabel, copy.readyValue),
       ],
@@ -209,7 +216,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
                   child: TextButton(
-                    onPressed: () => context.push(ForgotPasswordScreen.routePath),
+                    onPressed: () =>
+                        context.push(ForgotPasswordScreen.routePath),
                     child: Text(context.l10n.forgotPasswordAction),
                   ),
                 ),
@@ -221,7 +229,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           if (!_formKey.currentState!.validate()) {
                             return;
                           }
-                          await ref.read(authControllerProvider.notifier).signIn(
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .signIn(
                                 email: _emailController.text,
                                 password: _passwordController.text,
                               );
@@ -234,14 +244,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
-          _AuthDivider(label: context.copy.authDivider),
-          const SizedBox(height: AppSpacing.lg),
-          _GoogleButton(
-            label: context.copy.continueWithGoogle,
-            isLoading: isLoading,
-            onPressed: () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
-          ),
+          if (isCloudSyncEnabled) ...[
+            const SizedBox(height: AppSpacing.xl),
+            _AuthDivider(label: context.copy.authDivider),
+            const SizedBox(height: AppSpacing.lg),
+            _GoogleButton(
+              label: context.copy.continueWithGoogle,
+              isLoading: isLoading,
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signInWithGoogle(),
+            ),
+          ] else ...[
+            const SizedBox(height: AppSpacing.xl),
+            _DemoWorkspaceCard(
+              title: context.l10n.demoAccountTitle,
+              description: context.l10n.demoAccountDescription,
+              credentialsLabel: copy.demoCredentialsLabel,
+              email: AppConstants.demoEmail,
+              password: AppConstants.demoPassword,
+              buttonLabel: copy.enterDemoWorkspace,
+              isLoading: isLoading,
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signInWithDemo(),
+            ),
+          ],
         ],
       ),
     );
@@ -297,13 +323,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider).isLoading;
+    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final copy = AuthCopy.of(context);
 
     return _AuthFrame(
       canPop: true,
       heroTitle: context.l10n.signUpTitle,
       heroSubtitle: context.l10n.signUpSubtitle,
-      heroBadge: copy.signupHeroBadge,
+      heroBadge: isCloudSyncEnabled ? copy.signupHeroBadge : copy.demoHeroBadge,
       metrics: [
         _HeroMetric(copy.profileLabel, copy.richValue),
         _HeroMetric(copy.motionLabel, copy.smoothValue),
@@ -406,7 +433,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           if (!_formKey.currentState!.validate()) {
                             return;
                           }
-                          await ref.read(authControllerProvider.notifier).signUp(
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .signUp(
                                 fullName: _nameController.text,
                                 email: _emailController.text,
                                 password: _passwordController.text,
@@ -420,14 +449,30 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          _AuthDivider(label: context.copy.authDivider),
-          const SizedBox(height: AppSpacing.lg),
-          _GoogleButton(
-            label: context.copy.continueWithGoogle,
-            isLoading: isLoading,
-            onPressed: () => ref.read(authControllerProvider.notifier).signInWithGoogle(),
-          ),
+          if (isCloudSyncEnabled) ...[
+            const SizedBox(height: AppSpacing.lg),
+            _AuthDivider(label: context.copy.authDivider),
+            const SizedBox(height: AppSpacing.lg),
+            _GoogleButton(
+              label: context.copy.continueWithGoogle,
+              isLoading: isLoading,
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signInWithGoogle(),
+            ),
+          ] else ...[
+            const SizedBox(height: AppSpacing.xl),
+            _DemoWorkspaceCard(
+              title: context.l10n.demoAccountTitle,
+              description: context.l10n.demoAccountDescription,
+              credentialsLabel: copy.demoCredentialsLabel,
+              email: AppConstants.demoEmail,
+              password: AppConstants.demoPassword,
+              buttonLabel: copy.enterDemoWorkspace,
+              isLoading: isLoading,
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).signInWithDemo(),
+            ),
+          ],
         ],
       ),
     );
@@ -597,19 +642,21 @@ class _AuthFrame extends StatelessWidget {
                       ),
                       child: Text(
                         heroBadge,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       heroTitle,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
@@ -757,6 +804,124 @@ class _GoogleButton extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DemoWorkspaceCard extends StatelessWidget {
+  const _DemoWorkspaceCard({
+    required this.title,
+    required this.description,
+    required this.credentialsLabel,
+    required this.email,
+    required this.password,
+    required this.buttonLabel,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String description;
+  final String credentialsLabel;
+  final String email;
+  final String password;
+  final String buttonLabel;
+  final bool isLoading;
+  final Future<void> Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withOpacity(0.34),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: scheme.outlineVariant.withOpacity(0.45)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: scheme.primary.withOpacity(0.14),
+                  child:
+                      Icon(Icons.rocket_launch_rounded, color: scheme.primary),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              credentialsLabel,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                _CredentialPill(label: email),
+                _CredentialPill(label: password),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton.tonal(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      await onPressed();
+                    },
+              child: _AsyncLabel(
+                isLoading: isLoading,
+                label: buttonLabel,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CredentialPill extends StatelessWidget {
+  const _CredentialPill({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.45),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
   }
