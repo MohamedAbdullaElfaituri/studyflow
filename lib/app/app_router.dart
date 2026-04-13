@@ -47,6 +47,10 @@ class AppRouter {
           path: ForgotPasswordScreen.routePath,
           builder: (context, state) => const ForgotPasswordScreen(),
         ),
+        GoRoute(
+          path: ResetPasswordScreen.routePath,
+          builder: (context, state) => const ResetPasswordScreen(),
+        ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
               MainNavigationShell(navigationShell: navigationShell),

@@ -4,15 +4,59 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/errors/app_exception.dart';
 import '../../core/localization/app_copy.dart';
 import '../../core/localization/generated/app_localizations.dart';
+import '../../core/widgets/app_notification.dart';
 
 extension BuildContextX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this)!;
   AppCopy get copy => AppCopy.of(Localizations.localeOf(this));
 
-  void showAppSnackBar(String message) {
-    ScaffoldMessenger.of(this)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  void showAppSnackBar(
+    String message, {
+    AppNotificationTone tone = AppNotificationTone.info,
+    AppNotificationPosition? position,
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    AppNotificationController.show(
+      context: this,
+      message: message,
+      title: title,
+      tone: tone,
+      position: position ??
+          switch (tone) {
+            AppNotificationTone.error => AppNotificationPosition.top,
+            AppNotificationTone.warning => AppNotificationPosition.top,
+            AppNotificationTone.success => AppNotificationPosition.bottom,
+            AppNotificationTone.info => AppNotificationPosition.bottom,
+          },
+      duration: duration,
+    );
+  }
+
+  void showSuccessNotification(
+    String message, {
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    showAppSnackBar(
+      message,
+      title: title,
+      tone: AppNotificationTone.success,
+      duration: duration,
+    );
+  }
+
+  void showErrorNotification(
+    String message, {
+    String? title,
+    Duration duration = const Duration(seconds: 5),
+  }) {
+    showAppSnackBar(
+      message,
+      title: title,
+      tone: AppNotificationTone.error,
+      duration: duration,
+    );
   }
 
   String? validationMessage(String? code, {int minLength = 6}) {
@@ -50,6 +94,9 @@ extension BuildContextX on BuildContext {
       if (message.contains('invalid email') ||
           message.contains('email address')) {
         return l10n.validationInvalidEmail;
+      }
+      if (message.contains('password should be at least')) {
+        return l10n.validationMinLength(6);
       }
       return l10n.genericErrorMessage;
     }

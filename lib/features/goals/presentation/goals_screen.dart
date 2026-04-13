@@ -20,7 +20,8 @@ class GoalsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) => ListView(
           children: [
@@ -54,7 +55,8 @@ class GoalsScreen extends ConsumerWidget {
                       ),
                     );
                 if (context.mounted) {
-                  context.showAppSnackBar(context.l10n.goalsSavedMessage);
+                  context
+                      .showSuccessNotification(context.l10n.goalsSavedMessage);
                 }
               },
             ),
@@ -76,7 +78,7 @@ class GoalsScreen extends ConsumerWidget {
                           .read(studyDataControllerProvider.notifier)
                           .addStudySession(durationMinutes: 15);
                       if (context.mounted) {
-                        context.showAppSnackBar(
+                        context.showSuccessNotification(
                           context.l10n.dailyCheckInSuccessMessage,
                         );
                       }
@@ -125,7 +127,8 @@ class _GoalsEditor extends StatefulWidget {
   final double daily;
   final double weekly;
   final double monthly;
-  final Future<void> Function(double daily, double weekly, double monthly) onSave;
+  final Future<void> Function(double daily, double weekly, double monthly)
+      onSave;
 
   @override
   State<_GoalsEditor> createState() => _GoalsEditorState();

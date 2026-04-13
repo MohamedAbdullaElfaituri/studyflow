@@ -27,6 +27,38 @@ String _continueWithGoogle(BuildContext context) {
   return 'Continue with Google';
 }
 
+String _resetPasswordFlowTitle(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') return 'Yeni bir sifre belirle';
+  if (code == 'ar') return 'عيّن كلمة مرور جديدة';
+  return 'Create a new password';
+}
+
+String _resetPasswordFlowSubtitle(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') {
+    return 'Hesabina yeniden erisim saglamak icin yeni sifreni belirle.';
+  }
+  if (code == 'ar') {
+    return 'أدخل كلمة مرور جديدة لإكمال استعادة الوصول إلى حسابك.';
+  }
+  return 'Choose a new password to finish recovering access to your account.';
+}
+
+String _resetPasswordFlowAction(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') return 'Sifreyi guncelle';
+  if (code == 'ar') return 'تحديث كلمة المرور';
+  return 'Update password';
+}
+
+String _resetPasswordFlowSuccess(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') return 'Sifren guncellendi.';
+  if (code == 'ar') return 'تم تحديث كلمة المرور بنجاح.';
+  return 'Your password was updated.';
+}
+
 // ─────────────────────────────────────────────
 //  SPLASH
 // ─────────────────────────────────────────────
@@ -40,11 +72,13 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(authControllerProvider, (_, next) {
       next.whenData((value) {
-        final target = !value.onboardingCompleted
-            ? OnboardingScreen.routePath
-            : value.isAuthenticated
-            ? HomeScreen.routePath
-            : LoginScreen.routePath;
+        final target = value.requiresPasswordReset
+            ? ResetPasswordScreen.routePath
+            : !value.onboardingCompleted
+                ? OnboardingScreen.routePath
+                : value.isAuthenticated
+                    ? HomeScreen.routePath
+                    : LoginScreen.routePath;
 
         if (GoRouterState.of(context).uri.toString() != target) {
           context.go(target);
@@ -63,9 +97,9 @@ class SplashScreen extends ConsumerWidget {
               Text(
                 context.l10n.appName,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               SizedBox(
@@ -109,10 +143,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listenManual(authControllerProvider, (_, next) {
       next.whenOrNull(
         data: (value) {
-          if (value.isAuthenticated && mounted) context.go(HomeScreen.routePath);
+          if (!mounted) return;
+          if (value.requiresPasswordReset) {
+            context.go(ResetPasswordScreen.routePath);
+            return;
+          }
+          if (value.isAuthenticated) {
+            context.go(HomeScreen.routePath);
+          }
         },
         error: (error, _) {
-          if (mounted) context.showAppSnackBar(context.resolveError(error));
+          if (mounted) {
+            context.showErrorNotification(context.resolveError(error));
+          }
         },
       );
     });
@@ -137,8 +180,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Text(
             context.l10n.noAccountPrompt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           TextButton(
             onPressed: () => context.push(SignupScreen.routePath),
@@ -155,17 +198,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(
               context.l10n.loginTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.loginSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -214,13 +257,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: isLoading
                   ? null
                   : () async {
-                if (!_formKey.currentState!.validate()) return;
-                await ref.read(authControllerProvider.notifier).signIn(
-                  email: _emailController.text,
-                  password: _passwordController.text,
-                );
-              },
-              child: _AsyncLabel(isLoading: isLoading, label: context.l10n.loginAction),
+                      if (!_formKey.currentState!.validate()) return;
+                      await ref.read(authControllerProvider.notifier).signIn(
+                            email: _emailController.text,
+                            password: _passwordController.text,
+                          );
+                    },
+              child: _AsyncLabel(
+                  isLoading: isLoading, label: context.l10n.loginAction),
             ),
 
             // ── Google ──
@@ -267,10 +311,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     ref.listenManual(authControllerProvider, (_, next) {
       next.whenOrNull(
         data: (value) {
-          if (value.isAuthenticated && mounted) context.go(HomeScreen.routePath);
+          if (!mounted) return;
+          if (value.requiresPasswordReset) {
+            context.go(ResetPasswordScreen.routePath);
+            return;
+          }
+          if (value.isAuthenticated) {
+            context.go(HomeScreen.routePath);
+          }
         },
         error: (error, _) {
-          if (mounted) context.showAppSnackBar(context.resolveError(error));
+          if (mounted) {
+            context.showErrorNotification(context.resolveError(error));
+          }
         },
       );
     });
@@ -300,17 +353,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             Text(
               context.l10n.signUpTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.signUpSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -387,13 +440,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               onPressed: isLoading
                   ? null
                   : () async {
-                if (!_formKey.currentState!.validate()) return;
-                await ref.read(authControllerProvider.notifier).signUp(
-                  fullName: _nameController.text,
-                  email: _emailController.text,
-                  password: _passwordController.text,
-                );
-              },
+                      if (!_formKey.currentState!.validate()) return;
+                      await ref.read(authControllerProvider.notifier).signUp(
+                            fullName: _nameController.text,
+                            email: _emailController.text,
+                            password: _passwordController.text,
+                          );
+                    },
               child: _AsyncLabel(
                 isLoading: isLoading,
                 label: context.l10n.createAccountAction,
@@ -430,11 +483,30 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
       _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState
-    extends ConsumerState<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(authControllerProvider, (_, next) {
+      next.whenOrNull(
+        data: (value) {
+          if (!mounted) return;
+          if (value.requiresPasswordReset) {
+            context.go(ResetPasswordScreen.routePath);
+          }
+        },
+        error: (error, _) {
+          if (mounted) {
+            context.showErrorNotification(context.resolveError(error));
+          }
+        },
+      );
+    });
+  }
 
   @override
   void dispose() {
@@ -453,17 +525,17 @@ class _ForgotPasswordScreenState
           Text(
             context.l10n.forgotPasswordTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.forgotPasswordSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -479,7 +551,7 @@ class _ForgotPasswordScreenState
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon:
-                    const Icon(Icons.mail_outline_rounded, size: 20),
+                        const Icon(Icons.mail_outline_rounded, size: 20),
                   ),
                   validator: (v) =>
                       context.validationMessage(Validators.email(v)),
@@ -489,24 +561,28 @@ class _ForgotPasswordScreenState
                   onPressed: _isSubmitting
                       ? null
                       : () async {
-                    if (!_formKey.currentState!.validate()) return;
-                    setState(() => _isSubmitting = true);
-                    try {
-                      await ref
-                          .read(authControllerProvider.notifier)
-                          .sendPasswordReset(_emailController.text);
-                      if (!mounted) return;
-                      context.showAppSnackBar(
-                          context.l10n.resetPasswordSentMessage);
-                      context.pop();
-                    } catch (error) {
-                      if (!mounted) return;
-                      context.showAppSnackBar(
-                          context.resolveError(error));
-                    } finally {
-                      if (mounted) setState(() => _isSubmitting = false);
-                    }
-                  },
+                          if (!_formKey.currentState!.validate()) return;
+                          setState(() => _isSubmitting = true);
+                          try {
+                            await ref
+                                .read(authControllerProvider.notifier)
+                                .sendPasswordReset(_emailController.text);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.l10n.resetPasswordSentMessage,
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isSubmitting = false);
+                            }
+                          }
+                        },
                   child: _AsyncLabel(
                     isLoading: _isSubmitting,
                     label: context.l10n.sendResetLinkAction,
@@ -516,6 +592,142 @@ class _ForgotPasswordScreenState
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ResetPasswordScreen extends ConsumerStatefulWidget {
+  const ResetPasswordScreen({super.key});
+
+  static const routePath = '/reset-password';
+
+  @override
+  ConsumerState<ResetPasswordScreen> createState() =>
+      _ResetPasswordScreenState();
+}
+
+class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(authControllerProvider, (_, next) {
+      next.whenOrNull(
+        data: (value) {
+          if (!mounted) return;
+          if (value.requiresPasswordReset) {
+            return;
+          }
+          if (value.isAuthenticated) {
+            context.showSuccessNotification(_resetPasswordFlowSuccess(context));
+            context.go(HomeScreen.routePath);
+            return;
+          }
+          context.go(LoginScreen.routePath);
+        },
+        error: (error, _) {
+          if (mounted) {
+            context.showErrorNotification(context.resolveError(error));
+          }
+        },
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = ref.watch(authControllerProvider).isLoading;
+
+    return _AuthShell(
+      canPop: false,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              _resetPasswordFlowTitle(context),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              _resetPasswordFlowSubtitle(context),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                labelText: context.l10n.passwordLabel,
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                suffixIcon: _VisibilityToggle(
+                  obscure: _obscurePassword,
+                  onToggle: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              validator: (value) =>
+                  context.validationMessage(Validators.minLength(value, 6)),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _confirmController,
+              obscureText: _obscureConfirm,
+              textInputAction: TextInputAction.done,
+              decoration: InputDecoration(
+                labelText: context.l10n.confirmPasswordLabel,
+                prefixIcon: const Icon(Icons.lock_person_outlined, size: 20),
+                suffixIcon: _VisibilityToggle(
+                  obscure: _obscureConfirm,
+                  onToggle: () =>
+                      setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
+              ),
+              validator: (value) {
+                if (value != _passwordController.text) {
+                  return context.l10n.passwordsDoNotMatch;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (!_formKey.currentState!.validate()) return;
+                      await ref
+                          .read(authControllerProvider.notifier)
+                          .updatePassword(_passwordController.text);
+                    },
+              child: _AsyncLabel(
+                isLoading: isLoading,
+                label: _resetPasswordFlowAction(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -561,18 +773,16 @@ class _AuthShell extends StatelessWidget {
                       if (canPop)
                         IconButton.filledTonal(
                           onPressed: context.pop,
-                          icon: const Icon(
-                              Icons.arrow_back_ios_new_rounded, size: 18),
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                              size: 18),
                           style: IconButton.styleFrom(
-                            backgroundColor:
-                            scheme.surfaceContainerHighest.withOpacity(0.6),
+                            backgroundColor: scheme.surfaceContainerHighest
+                                .withValues(alpha: 0.6),
                           ),
                         ),
-                      SizedBox(
-                          height: canPop ? AppSpacing.lg : AppSpacing.xxl),
-
+                      SizedBox(height: canPop ? AppSpacing.lg : AppSpacing.xxl),
                       if (isWide)
-                      // ── Wide: side by side ──
+                        // ── Wide: side by side ──
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -589,7 +799,6 @@ class _AuthShell extends StatelessWidget {
                         const SizedBox(height: AppSpacing.xl),
                         _FormCard(child: child),
                       ],
-
                       if (footer != null) ...[
                         const SizedBox(height: AppSpacing.lg),
                         Center(child: footer!),
@@ -621,11 +830,11 @@ class _LogoPanel extends StatelessWidget {
         Text(
           context.l10n.appName,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.2,
-            height: 1.05,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1.2,
+                height: 1.05,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
       ],
     );
@@ -649,13 +858,14 @@ class _FormCard extends StatelessWidget {
         color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: scheme.outlineVariant.withOpacity(0.5),
+          color: scheme.outlineVariant.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: scheme.shadow.withOpacity(
-              Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
+            color: scheme.shadow.withValues(
+              alpha:
+                  Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
             ),
             blurRadius: 32,
             offset: const Offset(0, 8),
@@ -688,7 +898,7 @@ class _AppLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: scheme.primary.withOpacity(0.18),
+            color: scheme.primary.withValues(alpha: 0.18),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -767,8 +977,8 @@ class _AuthDivider extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
           ),
         ),
         const Expanded(child: Divider()),
@@ -797,8 +1007,7 @@ class _GoogleButton extends StatelessWidget {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         side: BorderSide(color: scheme.outlineVariant),
       ),
       onPressed: isLoading ? null : () async => onPressed(),
@@ -841,9 +1050,7 @@ class _VisibilityToggle extends StatelessWidget {
     return IconButton(
       onPressed: onToggle,
       icon: Icon(
-        obscure
-            ? Icons.visibility_outlined
-            : Icons.visibility_off_outlined,
+        obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
         size: 20,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
@@ -870,22 +1077,22 @@ class _AsyncLabel extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       child: isLoading
           ? SizedBox(
-        key: const ValueKey('loading'),
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      )
+              key: const ValueKey('loading'),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            )
           : Text(
-        key: const ValueKey('label'),
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      ),
+              key: const ValueKey('label'),
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
     );
   }
 }

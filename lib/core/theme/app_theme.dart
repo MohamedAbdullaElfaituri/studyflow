@@ -111,7 +111,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: BorderSide(
-            color: scheme.outlineVariant.withOpacity(0.5),
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -138,7 +138,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(56),
-          side: BorderSide(color: scheme.outlineVariant.withOpacity(0.7)),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.7)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
           ),
@@ -147,8 +147,9 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surface
-            .withOpacity(brightness == Brightness.dark ? 0.78 : 0.92),
+        fillColor: scheme.surface.withValues(
+          alpha: brightness == Brightness.dark ? 0.78 : 0.92,
+        ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
@@ -190,11 +191,11 @@ class AppTheme {
         }),
       ),
       dividerTheme: DividerThemeData(
-        color: scheme.outlineVariant.withOpacity(0.55),
+        color: scheme.outlineVariant.withValues(alpha: 0.55),
         space: 24,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: scheme.surface.withOpacity(0.72),
+        backgroundColor: scheme.surface.withValues(alpha: 0.72),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
@@ -214,9 +215,17 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: scheme.surface,
+        backgroundColor: Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.08),
+          scheme.surface,
+        ),
+        elevation: 0,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(22),
         ),
       ),
       appBarTheme: AppBarTheme(

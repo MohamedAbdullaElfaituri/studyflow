@@ -1,73 +1,127 @@
 # Google Console + Supabase Setup
 
-هذا هو المرجع الوحيد المعتمد لإعداد المشروع بعد التنظيف.
+This guide matches the current mobile auth flow in the app.
 
-## 1. وضعيات التشغيل
+## 1. Important project values
 
-- `Demo / Local`
-  لا يحتاج مفاتيح Supabase.
-  التطبيق يعمل ببيانات محلية آمنة داخل `SharedPreferences`.
+- Supabase mode is enabled only when you pass `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+- If those values are missing, the app now falls back to local demo mode.
+- The mobile auth deep link used by the app is:
 
-- `Supabase / Cloud`
-  يحتاج:
-  - `SUPABASE_URL`
-  - `SUPABASE_ANON_KEY`
+```text
+com.mohamedahmet.studyflow://login-callback/
+```
 
-## 2. ملفات الإعداد المهمة
+## 2. Files involved in auth
 
 - [lib/core/constants/app_constants.dart](/c:/Users/moham/studyflow/lib/core/constants/app_constants.dart)
 - [lib/core/services/supabase_service.dart](/c:/Users/moham/studyflow/lib/core/services/supabase_service.dart)
 - [lib/shared/data/auth_repository.dart](/c:/Users/moham/studyflow/lib/shared/data/auth_repository.dart)
+- [lib/shared/providers/app_providers.dart](/c:/Users/moham/studyflow/lib/shared/providers/app_providers.dart)
+- [lib/features/auth/presentation/auth_screens.dart](/c:/Users/moham/studyflow/lib/features/auth/presentation/auth_screens.dart)
 - [android/app/src/main/AndroidManifest.xml](/c:/Users/moham/studyflow/android/app/src/main/AndroidManifest.xml)
 - [ios/Runner/Info.plist](/c:/Users/moham/studyflow/ios/Runner/Info.plist)
 
-## 3. Supabase
+## 3. Supabase setup
 
-### 3.1 إنشاء المشروع
+### 3.1 Create the project
 
-1. افتح `https://supabase.com`
-2. أنشئ مشروعًا جديدًا.
-3. اختر المنطقة الأقرب لك.
-4. بعد اكتمال الإنشاء افتح:
-   `Project Settings -> API`
+1. Open `https://supabase.com`.
+2. Create a new project.
+3. Open `Project Settings -> API`.
+4. Copy:
+   - `Project URL`
+   - `anon public key`
 
-انسخ:
+### 3.2 Run the SQL migrations
 
-- `Project URL`
-- `anon public key`
-
-### 3.2 تفعيل Authentication
-
-من داخل Supabase:
-
-1. افتح `Authentication -> Providers`
-2. فعّل `Email`
-3. فعّل `Google`
-
-لا تُكمل Google الآن قبل إنهاء قسم Google Cloud بالأسفل.
-
-### 3.3 تشغيل الـ SQL
-
-شغّل الملفات التالية بالترتيب داخل `SQL Editor`:
+Run these files in `SQL Editor` in this order:
 
 1. [supabase/migrations/001_initial_schema.sql](/c:/Users/moham/studyflow/supabase/migrations/001_initial_schema.sql)
 2. [supabase/migrations/002_mobile_premium_upgrade.sql](/c:/Users/moham/studyflow/supabase/migrations/002_mobile_premium_upgrade.sql)
 
-الملف الأول ينشئ الجداول الأساسية.
-الملف الثاني يضيف الحقول الإضافية، achievements، notifications، وسياسات تخزين avatars.
+### 3.3 Authentication providers
 
-### 3.4 ملف البيئة
+Open `Authentication -> Providers`:
 
-استخدم أحد الخيارين:
+1. Enable `Email`.
+2. Enable `Google`.
+3. Do not save Google until you finish the Google Cloud section below.
 
-`.env.example`
+### 3.4 URL configuration
 
-```env
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-public-anon-key
+Open `Authentication -> URL Configuration`.
+
+Use these values:
+
+- `Site URL`
+  - use your real website if you have one
+  - if this is mobile-only for now, `http://localhost` is acceptable
+- `Redirect URLs`
+  - add `com.mohamedahmet.studyflow://login-callback/`
+
+This redirect URL is used by both:
+
+- Google OAuth return to the mobile app
+- Password reset return to the mobile app
+
+### 3.5 Google provider values inside Supabase
+
+After creating the Google OAuth client, return to:
+
+`Authentication -> Providers -> Google`
+
+Paste:
+
+- `Client ID`
+- `Client Secret`
+
+Then save.
+
+## 4. Google Cloud Console setup
+
+### 4.1 Create or choose a project
+
+1. Open `https://console.cloud.google.com`.
+2. Create a project or select an existing one.
+3. Go to `APIs & Services`.
+
+### 4.2 Configure the OAuth consent screen
+
+Open `OAuth consent screen` and complete:
+
+1. User type: usually `External`
+2. App name
+3. Support email
+4. Developer contact email
+5. Add test users if the app is still in testing mode
+
+### 4.3 Create the OAuth client
+
+Open `Credentials -> Create Credentials -> OAuth client ID`.
+
+Choose:
+
+- `Application type`: `Web application`
+
+This is correct for Supabase Google auth because Google redirects to Supabase first, not directly to the app.
+
+### 4.4 Authorized redirect URI
+
+Add this exact URI in Google Cloud:
+
+```text
+https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
 ```
 
-أو `.env.json`
+Replace `YOUR_PROJECT_REF` with your real Supabase project ref.
+
+You do not put the mobile custom scheme in Google Cloud for this Supabase flow.
+The custom scheme belongs in Supabase `Redirect URLs`.
+
+## 5. App environment values
+
+Create a local `.env.json` file like this:
 
 ```json
 {
@@ -76,177 +130,105 @@ SUPABASE_ANON_KEY=your-public-anon-key
 }
 ```
 
-ثم شغّل التطبيق:
+Run the app with:
 
 ```bash
 flutter run --dart-define-from-file=.env.json
 ```
 
-## 4. Google Cloud Console
+If you run without these values, the app will stay in local demo mode.
 
-### 4.1 إنشاء مشروع Google
+## 6. Password reset flow
 
-1. افتح `https://console.cloud.google.com`
-2. أنشئ مشروعًا جديدًا أو استخدم مشروعًا موجودًا.
-3. افتح `APIs & Services`
+The app now completes the password reset flow end-to-end:
 
-### 4.2 OAuth Consent Screen
+1. The user requests a reset email from the app.
+2. Supabase sends the email with:
+   `redirectTo = com.mohamedahmet.studyflow://login-callback/`
+3. The email link returns to the mobile app.
+4. Supabase emits the `passwordRecovery` auth event.
+5. The app opens the in-app reset password screen.
+6. The user submits a new password.
 
-1. افتح `OAuth consent screen`
-2. اختر `External`
-3. عبئ:
-   - App name
-   - Support email
-   - Developer contact email
-4. أضف النطاقات المطلوبة إذا طلبت Google ذلك.
-5. أضف حسابات الاختبار إذا كان التطبيق ما زال في وضع الاختبار.
+Because of that, the redirect URL in `Authentication -> URL Configuration` must be present.
 
-### 4.3 إنشاء OAuth Client
-
-من `Credentials`:
-
-1. اختر `Create Credentials`
-2. اختر `OAuth client ID`
-3. اختر النوع:
-   `Web application`
-
-هذا مهم: مع Supabase Google provider نحن نستخدم `Web application` لأن Google سترجع إلى Supabase أولًا.
-
-### 4.4 Authorized Redirect URI
-
-أضف هذا الرابط داخل Google Cloud:
-
-```text
-https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
-```
-
-بدّل `YOUR_PROJECT_REF` بالـ project ref الحقيقي من Supabase.
-
-### 4.5 إدخال Google Client داخل Supabase
-
-ارجع إلى:
-
-`Supabase -> Authentication -> Providers -> Google`
-
-ثم الصق:
-
-- Google Client ID
-- Google Client Secret
-
-احفظ الإعداد.
-
-## 5. Mobile Deep Links
-
-التطبيق مضبوط مسبقًا على هذا الـ scheme:
-
-```text
-com.mohamedahmet.studyflow://login-callback/
-```
+## 7. Platform deep link values already configured in code
 
 ### Android
 
-تم ضبطه في:
+Configured in:
 
 - [android/app/src/main/AndroidManifest.xml](/c:/Users/moham/studyflow/android/app/src/main/AndroidManifest.xml)
 
-القيم الحالية:
+Current values:
 
-- package / application id: `com.mohamedahmet.studyflow`
-- host: `login-callback`
 - scheme: `com.mohamedahmet.studyflow`
+- host: `login-callback`
 
 ### iOS
 
-تم ضبطه في:
+Configured in:
 
 - [ios/Runner/Info.plist](/c:/Users/moham/studyflow/ios/Runner/Info.plist)
 
-القيم الحالية:
+Current value:
 
 - URL scheme: `com.mohamedahmet.studyflow`
 
-إذا غيّرت اسم الحزمة أو bundle id مستقبلاً، غيّر هذه القيم في Android وiOS والكود معًا.
+If you ever change the bundle id or package name, update:
 
-## 6. كيف يعمل Google Login داخل التطبيق
+- Flutter auth constants
+- Android manifest deep link
+- iOS URL scheme
+- Supabase redirect URL
 
-التدفق الحالي هو:
+## 8. Quick verification checklist
 
-1. التطبيق يطلب `signInWithOAuth(Google)`
-2. Supabase يفتح تدفق OAuth
-3. Google ترجع إلى Supabase callback
-4. Supabase يعيد الجلسة إلى التطبيق عبر:
-   `com.mohamedahmet.studyflow://login-callback/`
+Test these flows on a real phone:
 
-الملف المسؤول:
+1. Email sign up
+2. Email sign in
+3. Google sign in
+4. Forgot password
+5. Open the reset email on the same device
+6. Set a new password inside the app
+7. Sign out and sign in again with the new password
 
-- [lib/shared/data/auth_repository.dart](/c:/Users/moham/studyflow/lib/shared/data/auth_repository.dart)
+## 9. Common failures
 
-## 7. Avatar Storage
+### Google opens and returns without a session
 
-سياسات التخزين الخاصة بالصور موجودة داخل migration الثاني.
+Check all of these:
 
-الباكِت المطلوبة:
+- Google provider is enabled in Supabase
+- Google client ID and secret are saved in Supabase
+- Google Cloud redirect URI is exactly `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+- Supabase `Redirect URLs` contains `com.mohamedahmet.studyflow://login-callback/`
 
-- `avatars`
+### Password reset email sends, but the app does not open the reset screen
 
-والرفع يتم من:
+Check all of these:
 
-- [lib/shared/data/auth_repository.dart](/c:/Users/moham/studyflow/lib/shared/data/auth_repository.dart)
+- Supabase `Redirect URLs` contains `com.mohamedahmet.studyflow://login-callback/`
+- the email link was opened on a device with the app installed
+- Android manifest and iOS URL scheme still match the values in code
 
-## 8. فحص الجاهزية على iPhone و Samsung
+### The app keeps using local demo mode
 
-نفّذ هذا checklist قبل أي نشر:
+Check all of these:
 
-1. جرّب `Login`, `Signup`, `Forgot password`
-2. جرّب تغيير اللغة بين `EN`, `AR`, `TR`
-3. اختبر RTL كامل على العربية
-4. اختبر safe areas على iPhone مع الـ bottom navigation
-5. اختبر الشاشات الصغيرة على Samsung متوسطة وصغيرة الحجم
-6. اختبر لوحة المفاتيح داخل `Auth`, `Task editor`, `Profile edit`
-7. اختبر الإشعارات
-8. اختبر رفع الصورة الشخصية
-9. اختبر Google Login على جهاز حقيقي وليس emulator فقط
+- you passed `--dart-define-from-file=.env.json`
+- `SUPABASE_URL` is not empty
+- `SUPABASE_ANON_KEY` is not empty
 
-## 9. أوامر مفيدة
+## 10. Useful commands
 
 ```bash
 flutter pub get
-flutter test
 flutter analyze
+flutter test
 flutter run
 flutter run --dart-define-from-file=.env.json
 flutter build apk --release
 flutter build ios --release
 ```
-
-## 10. مشاكل شائعة
-
-### Google login يفتح ثم يرجع بدون جلسة
-
-- تأكد من أن redirect URI داخل Google Cloud هو:
-  `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
-- تأكد من تفعيل Google provider داخل Supabase
-- تأكد من أن الـ scheme في Android وiOS يطابق الكود
-
-### التطبيق يعمل Demo بدل Cloud
-
-- تحقق من تمرير `--dart-define-from-file=.env.json`
-- تأكد أن القيم ليست فارغة
-
-### البيانات لا تظهر بعد تسجيل الدخول
-
-- غالبًا الـ migrations لم تُشغّل
-- أو سياسات RLS غير موجودة
-
-### رفع الصورة لا يعمل
-
-- تأكد من تشغيل migration الثاني
-- تأكد من وجود bucket باسم `avatars`
-
-## 11. توصية نهائية
-
-لبيئة نظيفة:
-
-- لا تضع أي مفاتيح حقيقية داخل `lib/`
-- احتفظ بالمفاتيح داخل ملف محلي غير مرفوع
-- استخدم `.env.json` محليًا فقط

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../theme/app_colors.dart';
+
 class ReminderService {
   ReminderService(
     this._notifications, {
@@ -17,7 +19,13 @@ class ReminderService {
     }
 
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const ios = DarwinInitializationSettings();
+    const ios = DarwinInitializationSettings(
+      defaultPresentAlert: true,
+      defaultPresentBadge: true,
+      defaultPresentBanner: true,
+      defaultPresentList: true,
+      defaultPresentSound: true,
+    );
     const settings = InitializationSettings(android: android, iOS: ios);
     await notifications.initialize(settings);
     return ReminderService(notifications);
@@ -43,18 +51,46 @@ class ReminderService {
         );
   }
 
-  NotificationDetails get _details => const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'studyflow_general',
-          'StudyFlow General',
-          channelDescription: 'General reminders, exams, habits, and focus nudges',
-          importance: Importance.high,
-          priority: Priority.high,
+  NotificationDetails _details({
+    required String title,
+    required String body,
+  }) {
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        'studyflow_general',
+        'StudyFlow',
+        channelDescription: 'StudyFlow reminders and progress updates',
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.reminder,
+        color: AppColors.seed,
+        colorized: true,
+        enableLights: true,
+        playSound: true,
+        enableVibration: true,
+        ticker: title,
+        visibility: NotificationVisibility.public,
+        subText: 'StudyFlow',
+        styleInformation: BigTextStyleInformation(
+          body,
+          contentTitle: title,
+          summaryText: 'StudyFlow',
         ),
-        iOS: DarwinNotificationDetails(),
-      );
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentBanner: true,
+        presentList: true,
+        presentSound: true,
+        subtitle: 'StudyFlow',
+        threadIdentifier: 'studyflow_general',
+        interruptionLevel: InterruptionLevel.active,
+      ),
+    );
+  }
 
-  Future<void> showPreview({
+  Future<void> showMessage({
     required int id,
     required String title,
     required String body,
@@ -63,39 +99,31 @@ class ReminderService {
       return;
     }
 
-    await _notifications.show(id, title, body, _details);
+    await _notifications.show(
+        id, title, body, _details(title: title, body: body));
+  }
+
+  Future<void> showPreview({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    await showMessage(id: id, title: title, body: body);
   }
 
   Future<void> showPomodoroComplete({
     required int id,
-    required int minutes,
+    required String title,
+    required String body,
   }) async {
-    if (!isSupported) {
-      return;
-    }
-
-    await _notifications.show(
-      id,
-      'Focus session complete',
-      '$minutes minute session saved to your timeline.',
-      _details,
-    );
+    await showMessage(id: id, title: title, body: body);
   }
 
   Future<void> showHabitCelebration({
     required int id,
     required String title,
-    required int streak,
+    required String body,
   }) async {
-    if (!isSupported) {
-      return;
-    }
-
-    await _notifications.show(
-      id,
-      'Habit progress unlocked',
-      '$title completed. Current streak: $streak.',
-      _details,
-    );
+    await showMessage(id: id, title: title, body: body);
   }
 }

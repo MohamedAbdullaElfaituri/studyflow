@@ -26,6 +26,7 @@ abstract class AuthRepository {
   Future<AppUserModel> signInWithGoogle();
   Future<void> signOut();
   Future<void> sendPasswordReset(String email);
+  Future<void> updatePassword({required String password});
   Future<AppUserModel> updateProfile(AppUserModel user);
   Future<AppUserModel> uploadAvatar({
     required AppUserModel user,
@@ -175,6 +176,28 @@ class LocalAuthRepository implements AuthRepository {
     if (!exists) {
       throw const AppException('user_not_found');
     }
+  }
+
+  @override
+  Future<void> updatePassword({required String password}) async {
+    final userId = _storage.readString(AppConstants.authSessionKey);
+    if (userId == null) {
+      throw const AppException('missing_user');
+    }
+
+    final credentials = _credentials
+        .map(
+          (item) => item.userId == userId
+              ? AuthCredentialModel(
+                  userId: item.userId,
+                  email: item.email,
+                  password: password,
+                )
+              : item,
+        )
+        .toList();
+
+    await _writeCredentials(credentials);
   }
 
   @override
@@ -380,7 +403,21 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> sendPasswordReset(String email) async {
-    await _client.auth.resetPasswordForEmail(email.trim());
+    await _client.auth.resetPasswordForEmail(
+      email.trim(),
+      redirectTo: AppConstants.supabaseAuthRedirectUrl,
+    );
+  }
+
+  @override
+  Future<void> updatePassword({required String password}) async {
+    if (_client.auth.currentUser == null) {
+      throw const AppException('missing_user');
+    }
+
+    await _client.auth.updateUser(
+      UserAttributes(password: password),
+    );
   }
 
   @override

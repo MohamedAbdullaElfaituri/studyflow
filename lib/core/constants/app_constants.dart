@@ -5,15 +5,9 @@ class AppConstants {
   static const androidLabel = 'StudyFlow';
   static const iosDisplayName = 'StudyFlow';
 
-  static const supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://rjnxrgzxytpjqdbqaizj.supabase.co',
-  );
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 
-  static const supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: 'sb_publishable_vezyohPqlUwDnmO94ABFEg_lg7f_OBn',
-  );
+  static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
   static const demoEmail = 'student@studyflow.app';
   static const demoPassword = 'studyflow123';

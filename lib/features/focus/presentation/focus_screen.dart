@@ -35,15 +35,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(studyDataControllerProvider);
-    final minutes = _remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = _remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final minutes =
+        _remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds =
+        _remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
 
     return AppPage(
       child: data.when(
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final selectedCourseId = studyData.courses.any(
@@ -54,149 +57,151 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
           return ListView(
             children: [
-            SectionHeader(
-              title: context.l10n.focusTitle,
-              subtitle: context.l10n.focusSubtitle,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SectionCard(
-              child: Column(
-                children: [
-                  Text(
-                    _isBreak
-                        ? context.l10n.breakModeLabel
-                        : context.l10n.focusModeLabel,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$minutes:$seconds',
-                        style: Theme.of(context).textTheme.displaySmall,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Wrap(
-                    spacing: AppSpacing.md,
-                    runSpacing: AppSpacing.md,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      FilledButton(
-                        onPressed: _isRunning ? null : _startTimer,
-                        child: Text(context.l10n.startAction),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: _isRunning ? _pauseTimer : null,
-                        child: Text(context.l10n.pauseAction),
-                      ),
-                      OutlinedButton(
-                        onPressed: !_isRunning && _remaining.inSeconds > 0
-                            ? _resumeTimer
-                            : null,
-                        child: Text(context.l10n.resumeAction),
-                      ),
-                      OutlinedButton(
-                        onPressed: _resetTimer,
-                        child: Text(context.l10n.resetAction),
-                      ),
-                    ],
-                  ),
-                ],
+              SectionHeader(
+                title: context.l10n.focusTitle,
+                subtitle: context.l10n.focusSubtitle,
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SectionCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.customizeSessionTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(context.l10n.focusDurationLabel(_focusMinutes)),
-                  Slider(
-                    value: _focusMinutes.toDouble(),
-                    min: 15,
-                    max: 90,
-                    divisions: 15,
-                    onChanged: _isRunning
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _focusMinutes = value.round();
-                              if (!_isBreak) {
-                                _remaining = Duration(minutes: _focusMinutes);
-                              }
-                            });
-                          },
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(context.l10n.breakDurationLabel(_breakMinutes)),
-                  Slider(
-                    value: _breakMinutes.toDouble(),
-                    min: 5,
-                    max: 30,
-                    divisions: 5,
-                    onChanged: _isRunning
-                        ? null
-                        : (value) => setState(() => _breakMinutes = value.round()),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  DropdownButtonFormField<String?>(
-                    initialValue: selectedCourseId,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.linkCourseOptionalLabel,
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
+                child: Column(
+                  children: [
+                    Text(
+                      _isBreak
+                          ? context.l10n.breakModeLabel
+                          : context.l10n.focusModeLabel,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    items: [
-                      DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text(context.l10n.optionalCourseLabel),
+                    const SizedBox(height: AppSpacing.lg),
+                    Container(
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primaryContainer,
                       ),
-                      ...studyData.courses.map(
-                        (course) => DropdownMenuItem<String?>(
-                          value: course.id,
-                          child: Text(course.title),
+                      child: Center(
+                        child: Text(
+                          '$minutes:$seconds',
+                          style: Theme.of(context).textTheme.displaySmall,
                         ),
                       ),
-                    ],
-                    onChanged: (value) => setState(() => _courseId = value),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SectionHeader(
-              title: context.l10n.focusHistoryTitle,
-              subtitle: context.l10n.focusHistorySubtitle,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            if (studyData.sessions.isEmpty)
-              EmptyState(
-                title: context.l10n.emptyFocusHistoryTitle,
-                description: context.l10n.emptyFocusHistoryDescription,
-                icon: Icons.timer_off_rounded,
-              )
-            else
-              ...studyData.sessions.take(5).map(
-                (session) => Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: SectionCard(
-                    child: Text(
-                      context.l10n.focusSessionSummary(session.durationMinutes),
                     ),
-                  ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        FilledButton(
+                          onPressed: _isRunning ? null : _startTimer,
+                          child: Text(context.l10n.startAction),
+                        ),
+                        FilledButton.tonal(
+                          onPressed: _isRunning ? _pauseTimer : null,
+                          child: Text(context.l10n.pauseAction),
+                        ),
+                        OutlinedButton(
+                          onPressed: !_isRunning && _remaining.inSeconds > 0
+                              ? _resumeTimer
+                              : null,
+                          child: Text(context.l10n.resumeAction),
+                        ),
+                        OutlinedButton(
+                          onPressed: _resetTimer,
+                          child: Text(context.l10n.resetAction),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.customizeSessionTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(context.l10n.focusDurationLabel(_focusMinutes)),
+                    Slider(
+                      value: _focusMinutes.toDouble(),
+                      min: 15,
+                      max: 90,
+                      divisions: 15,
+                      onChanged: _isRunning
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _focusMinutes = value.round();
+                                if (!_isBreak) {
+                                  _remaining = Duration(minutes: _focusMinutes);
+                                }
+                              });
+                            },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(context.l10n.breakDurationLabel(_breakMinutes)),
+                    Slider(
+                      value: _breakMinutes.toDouble(),
+                      min: 5,
+                      max: 30,
+                      divisions: 5,
+                      onChanged: _isRunning
+                          ? null
+                          : (value) =>
+                              setState(() => _breakMinutes = value.round()),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    DropdownButtonFormField<String?>(
+                      initialValue: selectedCourseId,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.linkCourseOptionalLabel,
+                      ),
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(context.l10n.optionalCourseLabel),
+                        ),
+                        ...studyData.courses.map(
+                          (course) => DropdownMenuItem<String?>(
+                            value: course.id,
+                            child: Text(course.title),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() => _courseId = value),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionHeader(
+                title: context.l10n.focusHistoryTitle,
+                subtitle: context.l10n.focusHistorySubtitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (studyData.sessions.isEmpty)
+                EmptyState(
+                  title: context.l10n.emptyFocusHistoryTitle,
+                  description: context.l10n.emptyFocusHistoryDescription,
+                  icon: Icons.timer_off_rounded,
+                )
+              else
+                ...studyData.sessions.take(5).map(
+                      (session) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: SectionCard(
+                          child: Text(
+                            context.l10n
+                                .focusSessionSummary(session.durationMinutes),
+                          ),
+                        ),
+                      ),
+                    ),
+            ],
           );
         },
       ),
@@ -257,7 +262,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 body: context.l10n.focusSessionCompleteMessage,
               );
           if (mounted) {
-            context.showAppSnackBar(context.l10n.focusSessionCompleteMessage);
+            context.showSuccessNotification(
+              context.l10n.focusSessionCompleteMessage,
+            );
           }
         }
 
@@ -268,7 +275,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
         setState(() {
           _isRunning = false;
           _isBreak = !_isBreak;
-          _remaining = Duration(minutes: _isBreak ? _breakMinutes : _focusMinutes);
+          _remaining =
+              Duration(minutes: _isBreak ? _breakMinutes : _focusMinutes);
         });
         return;
       }

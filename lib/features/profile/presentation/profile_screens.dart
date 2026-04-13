@@ -824,12 +824,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (!mounted) {
         return;
       }
-      context.showAppSnackBar(copy.photoUpdatedMessage);
+      context.showSuccessNotification(copy.photoUpdatedMessage);
     } catch (error) {
       if (!mounted) {
         return;
       }
-      context.showAppSnackBar(context.resolveError(error));
+      context.showErrorNotification(context.resolveError(error));
     } finally {
       if (mounted) {
         setState(() => _uploadingAvatar = false);

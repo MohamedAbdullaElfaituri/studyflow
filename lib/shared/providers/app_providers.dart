@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../app/app_router.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/errors/app_exception.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/services/reminder_service.dart';
 import '../../core/services/supabase_service.dart';
@@ -74,10 +76,12 @@ class AuthViewState {
   const AuthViewState({
     required this.user,
     required this.onboardingCompleted,
+    required this.requiresPasswordReset,
   });
 
   final AppUserModel? user;
   final bool onboardingCompleted;
+  final bool requiresPasswordReset;
 
   bool get isAuthenticated => user != null;
 }
@@ -106,6 +110,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
               AuthViewState(
                 user: null,
                 onboardingCompleted: onboardingComplete,
+                requiresPasswordReset: false,
               ),
             );
             return;
@@ -117,8 +122,10 @@ class AuthController extends AsyncNotifier<AuthViewState> {
           }
           state = AsyncData(
             AuthViewState(
-              user: refreshedUser,
+              user: refreshedUser ?? state.valueOrNull?.user,
               onboardingCompleted: onboardingComplete,
+              requiresPasswordReset:
+                  event.event == AuthChangeEvent.passwordRecovery,
             ),
           );
         },
@@ -130,6 +137,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     return AuthViewState(
       user: user,
       onboardingCompleted: onboardingCompleted,
+      requiresPasswordReset: false,
     );
   }
 
@@ -147,6 +155,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       return AuthViewState(
         user: user,
         onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
       );
     });
   }
@@ -170,6 +179,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       return AuthViewState(
         user: user,
         onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
       );
     });
   }
@@ -179,7 +189,11 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     final onboardingCompleted = state.valueOrNull?.onboardingCompleted ?? false;
     await repository.signOut();
     state = AsyncData(
-      AuthViewState(user: null, onboardingCompleted: onboardingCompleted),
+      AuthViewState(
+        user: null,
+        onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
+      ),
     );
   }
 
@@ -191,6 +205,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       AuthViewState(
         user: current?.user,
         onboardingCompleted: true,
+        requiresPasswordReset: current?.requiresPasswordReset ?? false,
       ),
     );
   }
@@ -210,6 +225,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       return AuthViewState(
         user: user,
         onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
       );
     });
   }
@@ -225,6 +241,28 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       return AuthViewState(
         user: user,
         onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
+      );
+    });
+  }
+
+  Future<void> updatePassword(String password) async {
+    final repository = ref.read(authRepositoryProvider);
+    final studyRepository = ref.read(studyRepositoryProvider);
+    final previous = state.valueOrNull;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final onboardingCompleted = await repository.hasCompletedOnboarding();
+      await repository.updatePassword(password: password);
+      final user = await repository.currentUser() ?? previous?.user;
+      if (user == null) {
+        throw const AppException('missing_user');
+      }
+      await studyRepository.ensureSeeded(user);
+      return AuthViewState(
+        user: user,
+        onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
       );
     });
   }
@@ -237,6 +275,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       AuthViewState(
         user: updated,
         onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: state.valueOrNull?.requiresPasswordReset ?? false,
       ),
     );
   }
@@ -257,6 +296,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       AuthViewState(
         user: updated,
         onboardingCompleted: current?.onboardingCompleted ?? true,
+        requiresPasswordReset: current?.requiresPasswordReset ?? false,
       ),
     );
   }
