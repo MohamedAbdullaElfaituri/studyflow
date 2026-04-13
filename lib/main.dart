@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
-import 'core/constants/app_constants.dart';
 import 'core/services/local_storage_service.dart';
 import 'core/services/reminder_service.dart';
 import 'core/services/supabase_service.dart';
@@ -17,18 +16,7 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  print('SUPABASE_URL = "${AppConstants.supabaseUrl}"');
-  print('SUPABASE_ANON_KEY empty = ${AppConstants.supabaseAnonKey.isEmpty}');
-
-  try {
-    await SupabaseService.initialize();
-    print('Backend mode = ${SupabaseService.backendMode}');
-    print('Supabase initialized = ${SupabaseService.isInitialized}');
-  } catch (e, st) {
-    print('Supabase init ERROR: $e');
-    print(st);
-  }
-
+  await SupabaseService.initialize();
   final storage = await LocalStorageService.create();
   final reminders = await ReminderService.create();
 

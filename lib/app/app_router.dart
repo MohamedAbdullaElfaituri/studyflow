@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/widgets/app_widgets.dart';
@@ -18,14 +19,77 @@ import '../features/search/presentation/search_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/tasks/presentation/tasks_screens.dart';
 import '../shared/extensions/build_context_x.dart';
+import '../shared/providers/app_providers.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 class AppRouter {
-  static GoRouter build() {
+  static final Set<String> _authPaths = {
+    LoginScreen.routePath,
+    SignupScreen.routePath,
+    ForgotPasswordScreen.routePath,
+    ResetPasswordScreen.routePath,
+  };
+
+  static final Set<String> _publicPaths = {
+    SplashScreen.routePath,
+    OnboardingScreen.routePath,
+    LoginScreen.routePath,
+    SignupScreen.routePath,
+    ForgotPasswordScreen.routePath,
+  };
+
+  static GoRouter build(Ref ref, Listenable refreshListenable) {
     return GoRouter(
       navigatorKey: rootNavigatorKey,
       initialLocation: SplashScreen.routePath,
+      refreshListenable: refreshListenable,
+      redirect: (context, state) {
+        final authAsync = ref.read(authControllerProvider);
+        final location = state.matchedLocation;
+
+        if (authAsync.isLoading && !authAsync.hasValue) {
+          return location == SplashScreen.routePath
+              ? null
+              : SplashScreen.routePath;
+        }
+
+        final authState = authAsync.valueOrNull;
+        if (authState == null) {
+          return location == SplashScreen.routePath
+              ? null
+              : SplashScreen.routePath;
+        }
+
+        if (authState.requiresPasswordReset) {
+          return location == ResetPasswordScreen.routePath
+              ? null
+              : ResetPasswordScreen.routePath;
+        }
+
+        if (!authState.onboardingCompleted) {
+          return location == OnboardingScreen.routePath
+              ? null
+              : OnboardingScreen.routePath;
+        }
+
+        if (!authState.isAuthenticated) {
+          if (_publicPaths.contains(location)) {
+            return location == SplashScreen.routePath
+                ? LoginScreen.routePath
+                : null;
+          }
+          return LoginScreen.routePath;
+        }
+
+        if (location == SplashScreen.routePath ||
+            location == OnboardingScreen.routePath ||
+            _authPaths.contains(location)) {
+          return HomeScreen.routePath;
+        }
+
+        return null;
+      },
       routes: [
         GoRoute(
           path: SplashScreen.routePath,
@@ -108,8 +172,8 @@ class AppRouter {
         ),
         GoRoute(
           path: CourseEditorScreen.routePath,
-          builder: (context, state) =>
-              CourseEditorScreen(courseId: state.uri.queryParameters['courseId']),
+          builder: (context, state) => CourseEditorScreen(
+              courseId: state.uri.queryParameters['courseId']),
         ),
         GoRoute(
           path: TaskDetailScreen.routePath,

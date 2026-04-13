@@ -1,17 +1,16 @@
-// ignore_for_file: unused_element
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_widgets.dart';
 import '../../../shared/extensions/build_context_x.dart';
 import '../../../shared/providers/app_providers.dart';
-import '../../home/presentation/home_screen.dart';
-import '../../onboarding/presentation/onboarding_screen.dart';
 
 String _or(BuildContext context) {
   final code = Localizations.localeOf(context).languageCode;
@@ -25,6 +24,28 @@ String _continueWithGoogle(BuildContext context) {
   if (code == 'tr') return 'Google ile devam et';
   if (code == 'ar') return 'المتابعة عبر Google';
   return 'Continue with Google';
+}
+
+String _browserHandoffMessage(BuildContext context) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') {
+    return 'Google girisi tarayicida acildi. Islemi tamamlayinca uygulamaya geri doneceksin.';
+  }
+  if (code == 'ar') {
+    return 'تم فتح تسجيل الدخول عبر Google في المتصفح. ستعود إلى التطبيق بعد إكماله.';
+  }
+  return 'Google sign-in opened in your browser. You will come back to the app when it finishes.';
+}
+
+String _signupConfirmationMessage(BuildContext context, String email) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') {
+    return '$email adresine dogrulama baglantisi gonderildi. E-postani onaylayip giris yap.';
+  }
+  if (code == 'ar') {
+    return 'أرسلنا رابط تأكيد إلى $email. أكّد بريدك الإلكتروني ثم سجّل الدخول.';
+  }
+  return 'We sent a confirmation link to $email. Verify your email, then sign in.';
 }
 
 String _resetPasswordFlowTitle(BuildContext context) {
@@ -59,33 +80,13 @@ String _resetPasswordFlowSuccess(BuildContext context) {
   return 'Your password was updated.';
 }
 
-// ─────────────────────────────────────────────
-//  SPLASH
-// ─────────────────────────────────────────────
-
-class SplashScreen extends ConsumerWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   static const routePath = '/splash';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(authControllerProvider, (_, next) {
-      next.whenData((value) {
-        final target = value.requiresPasswordReset
-            ? ResetPasswordScreen.routePath
-            : !value.onboardingCompleted
-            ? OnboardingScreen.routePath
-            : value.isAuthenticated
-            ? HomeScreen.routePath
-            : LoginScreen.routePath;
-
-        if (GoRouterState.of(context).uri.toString() != target) {
-          context.go(target);
-        }
-      });
-    });
-
+  Widget build(BuildContext context) {
     return AppPage(
       child: Center(
         child: RevealOnBuild(
@@ -118,10 +119,6 @@ class SplashScreen extends ConsumerWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  LOGIN
-// ─────────────────────────────────────────────
-
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -135,42 +132,109 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  StreamSubscription<AuthState>? _authSubscription;
+
   bool _obscure = true;
+  bool _isSubmitting = false;
+  bool _isGoogleSubmitting = false;
+  bool _hasNavigatedAfterAuth = false;
 
   @override
   void initState() {
     super.initState();
-    ref.listenManual(authControllerProvider, (_, next) {
-      next.whenOrNull(
-        data: (value) {
-          if (!mounted) return;
-          if (value.requiresPasswordReset) {
-            context.go(ResetPasswordScreen.routePath);
-            return;
-          }
-          if (value.isAuthenticated) {
-            context.go(HomeScreen.routePath);
-          }
-        },
-        error: (error, _) {
-          if (mounted) {
-            context.showErrorNotification(context.resolveError(error));
-          }
-        },
-      );
+    _listenForAuthChanges();
+    _checkExistingSession();
+  }
+
+  void _listenForAuthChanges() {
+    final supabase = Supabase.instance.client;
+
+    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      final session = data.session;
+
+      debugPrint('AUTH EVENT: $event');
+      debugPrint('AUTH SESSION: $session');
+      debugPrint('AUTH USER: ${session?.user.email}');
+
+      if (!mounted || _hasNavigatedAfterAuth) return;
+
+      if (session != null) {
+        _hasNavigatedAfterAuth = true;
+        context.go('/home'); // BURAYI kendi ana ekran rotana göre değiştir
+      }
     });
+  }
+
+  void _checkExistingSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    debugPrint('CURRENT SESSION ON LOGIN SCREEN: $session');
+
+    if (!mounted || _hasNavigatedAfterAuth) return;
+
+    if (session != null) {
+      _hasNavigatedAfterAuth = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.go('/home'); // BURAYI kendi ana ekran rotana göre değiştir
+      });
+    }
   }
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSubmitting = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _isGoogleSubmitting = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+
+      if (!mounted) return;
+      context.showAppSnackBar(_browserHandoffMessage(context));
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleSubmitting = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider).isLoading;
+    final isBusy = _isSubmitting || _isGoogleSubmitting;
 
     return _AuthShell(
       canPop: false,
@@ -184,7 +248,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
           TextButton(
-            onPressed: () => context.push(SignupScreen.routePath),
+            onPressed:
+            isBusy ? null : () => context.push(SignupScreen.routePath),
             child: Text(context.l10n.signUpAction),
           ),
         ],
@@ -194,7 +259,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Header ──
             Text(
               context.l10n.loginTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -211,25 +275,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-
-            // ── Email ──
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              autocorrect: false,
               decoration: InputDecoration(
                 labelText: context.l10n.emailLabel,
                 prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
               ),
-              validator: (v) => context.validationMessage(Validators.email(v)),
+              validator: (value) =>
+                  context.validationMessage(Validators.email(value)),
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // ── Password ──
             TextFormField(
               controller: _passwordController,
               obscureText: _obscure,
               textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.password],
+              autocorrect: false,
+              enableSuggestions: false,
+              onFieldSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
@@ -238,43 +305,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onToggle: () => setState(() => _obscure = !_obscure),
                 ),
               ),
-              validator: (v) =>
-                  context.validationMessage(Validators.minLength(v, 6)),
+              validator: (value) =>
+                  context.validationMessage(Validators.minLength(value, 6)),
             ),
-
-            // ── Forgot password ──
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
-                onPressed: () => context.push(ForgotPasswordScreen.routePath),
+                onPressed: isBusy
+                    ? null
+                    : () => context.push(ForgotPasswordScreen.routePath),
                 child: Text(context.l10n.forgotPasswordAction),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // ── Submit ──
             FilledButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                if (!_formKey.currentState!.validate()) return;
-                await ref.read(authControllerProvider.notifier).signIn(
-                  email: _emailController.text,
-                  password: _passwordController.text,
-                );
-              },
+              onPressed: isBusy ? null : _submit,
               child: _AsyncLabel(
-                  isLoading: isLoading, label: context.l10n.loginAction),
+                isLoading: _isSubmitting,
+                label: context.l10n.loginAction,
+              ),
             ),
-
-            // ── Google ──
             const SizedBox(height: AppSpacing.xl),
             _AuthDivider(label: _or(context)),
             const SizedBox(height: AppSpacing.xl),
             _GoogleButton(
-              isLoading: isLoading,
-              onPressed: () =>
-                  ref.read(authControllerProvider.notifier).signInWithGoogle(),
+              isLoading: _isGoogleSubmitting,
+              enabled: !isBusy,
+              onPressed: _signInWithGoogle,
             ),
           ],
         ),
@@ -282,10 +339,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  SIGNUP
-// ─────────────────────────────────────────────
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -302,35 +355,60 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+
+  StreamSubscription<AuthState>? _authSubscription;
+
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  bool _isSubmitting = false;
+  bool _isGoogleSubmitting = false;
+  bool _hasNavigatedAfterAuth = false;
 
   @override
   void initState() {
     super.initState();
-    ref.listenManual(authControllerProvider, (_, next) {
-      next.whenOrNull(
-        data: (value) {
-          if (!mounted) return;
-          if (value.requiresPasswordReset) {
-            context.go(ResetPasswordScreen.routePath);
-            return;
-          }
-          if (value.isAuthenticated) {
-            context.go(HomeScreen.routePath);
-          }
-        },
-        error: (error, _) {
-          if (mounted) {
-            context.showErrorNotification(context.resolveError(error));
-          }
-        },
-      );
+    _listenForAuthChanges();
+    _checkExistingSession();
+  }
+
+  void _listenForAuthChanges() {
+    final supabase = Supabase.instance.client;
+
+    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      final session = data.session;
+
+      debugPrint('SIGNUP AUTH EVENT: $event');
+      debugPrint('SIGNUP AUTH SESSION: $session');
+      debugPrint('SIGNUP AUTH USER: ${session?.user.email}');
+
+      if (!mounted || _hasNavigatedAfterAuth) return;
+
+      if (session != null) {
+        _hasNavigatedAfterAuth = true;
+        context.go('/home'); // BURAYI kendi ana ekran rotana göre değiştir
+      }
     });
+  }
+
+  void _checkExistingSession() {
+    final session = Supabase.instance.client.auth.currentSession;
+    debugPrint('CURRENT SESSION ON SIGNUP SCREEN: $session');
+
+    if (!mounted || _hasNavigatedAfterAuth) return;
+
+    if (session != null) {
+      _hasNavigatedAfterAuth = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.go('/home'); // BURAYI kendi ana ekran rotana göre değiştir
+      });
+    }
   }
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -338,9 +416,61 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSubmitting = true);
+
+    try {
+      final result = await ref.read(authControllerProvider.notifier).signUp(
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (result.requiresEmailConfirmation) {
+        context.showSuccessNotification(
+          _signupConfirmationMessage(context, result.email),
+        );
+        context.go(LoginScreen.routePath);
+      }
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _isGoogleSubmitting = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).signInWithGoogle();
+
+      if (!mounted) return;
+      context.showAppSnackBar(_browserHandoffMessage(context));
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleSubmitting = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider).isLoading;
+    final isBusy = _isSubmitting || _isGoogleSubmitting;
 
     return _AuthShell(
       canPop: true,
@@ -349,7 +479,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Header ──
             Text(
               context.l10n.signUpTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -366,101 +495,94 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-
-            // ── Full name ──
             TextFormField(
               controller: _nameController,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.name],
+              textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: context.l10n.fullNameLabel,
                 prefixIcon: const Icon(Icons.person_outline_rounded, size: 20),
               ),
-              validator: (v) =>
-                  context.validationMessage(Validators.requiredField(v)),
+              validator: (value) =>
+                  context.validationMessage(Validators.requiredField(value)),
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // ── Email ──
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.email],
+              autocorrect: false,
               decoration: InputDecoration(
                 labelText: context.l10n.emailLabel,
                 prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
               ),
-              validator: (v) => context.validationMessage(Validators.email(v)),
+              validator: (value) =>
+                  context.validationMessage(Validators.email(value)),
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // ── Password ──
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newPassword],
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscurePassword,
-                  onToggle: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
+                  onToggle: () => setState(
+                        () => _obscurePassword = !_obscurePassword,
+                  ),
                 ),
               ),
-              validator: (v) =>
-                  context.validationMessage(Validators.minLength(v, 6)),
+              validator: (value) =>
+                  context.validationMessage(Validators.minLength(value, 6)),
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // ── Confirm password ──
             TextFormField(
               controller: _confirmController,
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.newPassword],
+              autocorrect: false,
+              enableSuggestions: false,
+              onFieldSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 labelText: context.l10n.confirmPasswordLabel,
                 prefixIcon: const Icon(Icons.lock_person_outlined, size: 20),
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscureConfirm,
-                  onToggle: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  onToggle: () => setState(
+                        () => _obscureConfirm = !_obscureConfirm,
+                  ),
                 ),
               ),
-              validator: (v) {
-                if (v != _passwordController.text) {
+              validator: (value) {
+                if (value != _passwordController.text) {
                   return context.l10n.passwordsDoNotMatch;
                 }
                 return null;
               },
             ),
             const SizedBox(height: AppSpacing.xl),
-
-            // ── Submit ──
             FilledButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                if (!_formKey.currentState!.validate()) return;
-                await ref.read(authControllerProvider.notifier).signUp(
-                  fullName: _nameController.text,
-                  email: _emailController.text,
-                  password: _passwordController.text,
-                );
-              },
+              onPressed: isBusy ? null : _submit,
               child: _AsyncLabel(
-                isLoading: isLoading,
+                isLoading: _isSubmitting,
                 label: context.l10n.createAccountAction,
               ),
             ),
-
-            // ── Google ──
             const SizedBox(height: AppSpacing.xl),
             _AuthDivider(label: _or(context)),
             const SizedBox(height: AppSpacing.xl),
             _GoogleButton(
-              isLoading: isLoading,
-              onPressed: () =>
-                  ref.read(authControllerProvider.notifier).signInWithGoogle(),
+              isLoading: _isGoogleSubmitting,
+              enabled: !isBusy,
+              onPressed: _signInWithGoogle,
             ),
           ],
         ),
@@ -468,10 +590,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  FORGOT PASSWORD
-// ─────────────────────────────────────────────
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -489,29 +607,38 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   bool _isSubmitting = false;
 
   @override
-  void initState() {
-    super.initState();
-    ref.listenManual(authControllerProvider, (_, next) {
-      next.whenOrNull(
-        data: (value) {
-          if (!mounted) return;
-          if (value.requiresPasswordReset) {
-            context.go(ResetPasswordScreen.routePath);
-          }
-        },
-        error: (error, _) {
-          if (mounted) {
-            context.showErrorNotification(context.resolveError(error));
-          }
-        },
-      );
-    });
-  }
-
-  @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSubmitting = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).sendPasswordReset(
+        _emailController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      context.showSuccessNotification(
+        context.l10n.resetPasswordSentMessage,
+      );
+      context.go(LoginScreen.routePath);
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -521,7 +648,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Header ──
           Text(
             context.l10n.forgotPasswordTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -538,8 +664,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-
-          // ── Form ──
           Form(
             key: _formKey,
             child: Column(
@@ -548,41 +672,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.email],
+                  autocorrect: false,
+                  onFieldSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon:
                     const Icon(Icons.mail_outline_rounded, size: 20),
                   ),
-                  validator: (v) =>
-                      context.validationMessage(Validators.email(v)),
+                  validator: (value) =>
+                      context.validationMessage(Validators.email(value)),
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 FilledButton(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () async {
-                    if (!_formKey.currentState!.validate()) return;
-                    setState(() => _isSubmitting = true);
-                    try {
-                      await ref
-                          .read(authControllerProvider.notifier)
-                          .sendPasswordReset(_emailController.text);
-                      if (!mounted) return;
-                      context.showSuccessNotification(
-                        context.l10n.resetPasswordSentMessage,
-                      );
-                      context.pop();
-                    } catch (error) {
-                      if (!mounted) return;
-                      context.showErrorNotification(
-                        context.resolveError(error),
-                      );
-                    } finally {
-                      if (mounted) {
-                        setState(() => _isSubmitting = false);
-                      }
-                    }
-                  },
+                  onPressed: _isSubmitting ? null : _submit,
                   child: _AsyncLabel(
                     isLoading: _isSubmitting,
                     label: context.l10n.sendResetLinkAction,
@@ -613,32 +716,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _confirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-
-  @override
-  void initState() {
-    super.initState();
-    ref.listenManual(authControllerProvider, (_, next) {
-      next.whenOrNull(
-        data: (value) {
-          if (!mounted) return;
-          if (value.requiresPasswordReset) {
-            return;
-          }
-          if (value.isAuthenticated) {
-            context.showSuccessNotification(_resetPasswordFlowSuccess(context));
-            context.go(HomeScreen.routePath);
-            return;
-          }
-          context.go(LoginScreen.routePath);
-        },
-        error: (error, _) {
-          if (mounted) {
-            context.showErrorNotification(context.resolveError(error));
-          }
-        },
-      );
-    });
-  }
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -647,10 +725,34 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     super.dispose();
   }
 
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSubmitting = true);
+
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .updatePassword(_passwordController.text);
+
+      if (!mounted) return;
+
+      context.showSuccessNotification(_resetPasswordFlowSuccess(context));
+    } catch (error) {
+      if (!mounted) return;
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider).isLoading;
-
     return _AuthShell(
       canPop: false,
       child: Form(
@@ -678,13 +780,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newPassword],
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscurePassword,
-                  onToggle: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
+                  onToggle: () => setState(
+                        () => _obscurePassword = !_obscurePassword,
+                  ),
                 ),
               ),
               validator: (value) =>
@@ -695,13 +801,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               controller: _confirmController,
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.newPassword],
+              autocorrect: false,
+              enableSuggestions: false,
+              onFieldSubmitted: (_) => _submit(),
               decoration: InputDecoration(
                 labelText: context.l10n.confirmPasswordLabel,
                 prefixIcon: const Icon(Icons.lock_person_outlined, size: 20),
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscureConfirm,
-                  onToggle: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
+                  onToggle: () => setState(
+                        () => _obscureConfirm = !_obscureConfirm,
+                  ),
                 ),
               ),
               validator: (value) {
@@ -713,16 +824,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
             FilledButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                if (!_formKey.currentState!.validate()) return;
-                await ref
-                    .read(authControllerProvider.notifier)
-                    .updatePassword(_passwordController.text);
-              },
+              onPressed: _isSubmitting ? null : _submit,
               child: _AsyncLabel(
-                isLoading: isLoading,
+                isLoading: _isSubmitting,
                 label: _resetPasswordFlowAction(context),
               ),
             ),
@@ -732,10 +836,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  SHARED SHELL
-// ─────────────────────────────────────────────
 
 class _AuthShell extends StatelessWidget {
   const _AuthShell({
@@ -773,8 +873,10 @@ class _AuthShell extends StatelessWidget {
                       if (canPop)
                         IconButton.filledTonal(
                           onPressed: context.pop,
-                          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                              size: 18),
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 18,
+                          ),
                           style: IconButton.styleFrom(
                             backgroundColor: scheme.surfaceContainerHighest
                                 .withValues(alpha: 0.6),
@@ -782,19 +884,15 @@ class _AuthShell extends StatelessWidget {
                         ),
                       SizedBox(height: canPop ? AppSpacing.lg : AppSpacing.xxl),
                       if (isWide)
-                      // ── Wide: side by side ──
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(child: _LogoPanel()),
                             const SizedBox(width: AppSpacing.xxl),
-                            Expanded(
-                              child: _FormCard(child: child),
-                            ),
+                            Expanded(child: _FormCard(child: child)),
                           ],
                         )
                       else ...[
-                        // ── Narrow: stacked ──
                         _LogoPanel(),
                         const SizedBox(height: AppSpacing.xl),
                         _FormCard(child: child),
@@ -814,10 +912,6 @@ class _AuthShell extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  LOGO PANEL  (left / top)
-// ─────────────────────────────────────────────
 
 class _LogoPanel extends StatelessWidget {
   @override
@@ -841,12 +935,9 @@ class _LogoPanel extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FORM CARD
-// ─────────────────────────────────────────────
-
 class _FormCard extends StatelessWidget {
   const _FormCard({required this.child});
+
   final Widget child;
 
   @override
@@ -878,12 +969,9 @@ class _FormCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  APP LOGO
-// ─────────────────────────────────────────────
-
 class _AppLogo extends StatelessWidget {
   const _AppLogo({required this.size});
+
   final double size;
 
   @override
@@ -922,10 +1010,6 @@ class _AppLogo extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  FALLBACK LOGO  (shown when asset is missing)
-// ─────────────────────────────────────────────
-
 class _FallbackLogo extends StatelessWidget {
   const _FallbackLogo({
     required this.size,
@@ -959,12 +1043,9 @@ class _FallbackLogo extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  AUTH DIVIDER
-// ─────────────────────────────────────────────
-
 class _AuthDivider extends StatelessWidget {
   const _AuthDivider({required this.label});
+
   final String label;
 
   @override
@@ -987,17 +1068,15 @@ class _AuthDivider extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-//  GOOGLE BUTTON
-// ─────────────────────────────────────────────
-
 class _GoogleButton extends StatelessWidget {
   const _GoogleButton({
     required this.isLoading,
+    required this.enabled,
     required this.onPressed,
   });
 
   final bool isLoading;
+  final bool enabled;
   final Future<void> Function() onPressed;
 
   @override
@@ -1010,7 +1089,7 @@ class _GoogleButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         side: BorderSide(color: scheme.outlineVariant),
       ),
-      onPressed: isLoading ? null : () async => onPressed(),
+      onPressed: !enabled || isLoading ? null : () async => onPressed(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -1031,10 +1110,6 @@ class _GoogleButton extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  VISIBILITY TOGGLE
-// ─────────────────────────────────────────────
 
 class _VisibilityToggle extends StatelessWidget {
   const _VisibilityToggle({
@@ -1057,10 +1132,6 @@ class _VisibilityToggle extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────
-//  ASYNC LABEL
-// ─────────────────────────────────────────────
 
 class _AsyncLabel extends StatelessWidget {
   const _AsyncLabel({

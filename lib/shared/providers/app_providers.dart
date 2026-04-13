@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -18,18 +20,18 @@ import '../data/supabase_study_repository.dart';
 import '../models/app_models.dart';
 
 final localStorageServiceProvider = Provider<LocalStorageService>(
-      (ref) => throw UnimplementedError(),
+  (ref) => throw UnimplementedError(),
 );
 
 final reminderServiceProvider = Provider<ReminderService>(
-      (ref) => throw UnimplementedError(),
+  (ref) => throw UnimplementedError(),
 );
 
 final backendModeProvider =
-Provider<BackendMode>((ref) => SupabaseService.backendMode);
+    Provider<BackendMode>((ref) => SupabaseService.backendMode);
 
 final isCloudSyncEnabledProvider = Provider<bool>(
-      (ref) => ref.watch(backendModeProvider) == BackendMode.supabase,
+  (ref) => ref.watch(backendModeProvider) == BackendMode.supabase,
 );
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -49,8 +51,6 @@ final studyRepositoryProvider = Provider<StudyRepository>((ref) {
   return LocalStudyRepository(ref.watch(localStorageServiceProvider));
 });
 
-final routerProvider = Provider<GoRouter>((ref) => AppRouter.build());
-
 class AppLocalePreferenceController extends Notifier<String?> {
   @override
   String? build() {
@@ -68,7 +68,7 @@ class AppLocalePreferenceController extends Notifier<String?> {
 }
 
 final appLocalePreferenceProvider =
-NotifierProvider<AppLocalePreferenceController, String?>(
+    NotifierProvider<AppLocalePreferenceController, String?>(
   AppLocalePreferenceController.new,
 );
 
@@ -90,54 +90,34 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   @override
   Future<AuthViewState> build() async {
     final repository = ref.watch(authRepositoryProvider);
-    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
-    final user = await repository.currentUser();
-    final onboardingCompleted = await repository.hasCompletedOnboarding();
     final studyRepository = ref.watch(studyRepositoryProvider);
-
-    if (user != null) {
-      await studyRepository.ensureSeeded(user);
-    }
+    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+    final initialAuthState = isCloudSyncEnabled
+        ? await SupabaseService.client.auth.onAuthStateChange.first
+        : null;
 
     if (isCloudSyncEnabled) {
       final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
-            (event) async {
-          final currentUser = event.session?.user;
-          final onboardingComplete = await repository.hasCompletedOnboarding();
-
-          if (currentUser == null) {
-            state = AsyncData(
-              AuthViewState(
-                user: null,
-                onboardingCompleted: onboardingComplete,
-                requiresPasswordReset: false,
-              ),
-            );
-            return;
-          }
-
-          final refreshedUser = await repository.currentUser();
-          if (refreshedUser != null) {
-            await studyRepository.ensureSeeded(refreshedUser);
-          }
-          state = AsyncData(
-            AuthViewState(
-              user: refreshedUser ?? state.valueOrNull?.user,
-              onboardingCompleted: onboardingComplete,
-              requiresPasswordReset:
-              event.event == AuthChangeEvent.passwordRecovery,
-            ),
-          );
+        (authState) {
+          unawaited(_handleAuthStateChange(authState));
         },
         onError: (Object _, StackTrace __) {},
       );
       ref.onDispose(subscription.cancel);
     }
 
+    final onboardingCompleted = await repository.hasCompletedOnboarding();
+    final user = await repository.currentUser();
+
+    if (user != null) {
+      await studyRepository.ensureSeeded(user);
+    }
+
     return AuthViewState(
       user: user,
       onboardingCompleted: onboardingCompleted,
-      requiresPasswordReset: false,
+      requiresPasswordReset:
+          initialAuthState?.event == AuthChangeEvent.passwordRecovery,
     );
   }
 
@@ -146,55 +126,34 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     required String password,
   }) async {
     final repository = ref.read(authRepositoryProvider);
-    final studyRepository = ref.read(studyRepositoryProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final onboardingCompleted = await repository.hasCompletedOnboarding();
-      final user = await repository.signIn(email: email, password: password);
-      await studyRepository.ensureSeeded(user);
-      return AuthViewState(
-        user: user,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      );
-    });
+    final user = await repository.signIn(email: email, password: password);
+    await _setAuthenticatedUser(user);
   }
 
-  Future<void> signUp({
+  Future<AuthSignUpResult> signUp({
     required String fullName,
     required String email,
     required String password,
   }) async {
     final repository = ref.read(authRepositoryProvider);
-    final studyRepository = ref.read(studyRepositoryProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final onboardingCompleted = await repository.hasCompletedOnboarding();
-      final user = await repository.signUp(
-        fullName: fullName,
-        email: email,
-        password: password,
-      );
-      await studyRepository.ensureSeeded(user);
-      return AuthViewState(
-        user: user,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      );
-    });
+    final result = await repository.signUp(
+      fullName: fullName,
+      email: email,
+      password: password,
+    );
+
+    final user = result.user;
+    if (user != null) {
+      await _setAuthenticatedUser(user);
+    }
+
+    return result;
   }
 
   Future<void> signOut() async {
     final repository = ref.read(authRepositoryProvider);
-    final onboardingCompleted = state.valueOrNull?.onboardingCompleted ?? false;
     await repository.signOut();
-    state = AsyncData(
-      AuthViewState(
-        user: null,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      ),
-    );
+    await _setSignedOutState();
   }
 
   Future<void> completeOnboarding() async {
@@ -216,55 +175,30 @@ class AuthController extends AsyncNotifier<AuthViewState> {
 
   Future<void> signInWithGoogle() async {
     final repository = ref.read(authRepositoryProvider);
-    final studyRepository = ref.read(studyRepositoryProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final onboardingCompleted = await repository.hasCompletedOnboarding();
-      final user = await repository.signInWithGoogle();
-      await studyRepository.ensureSeeded(user);
-      return AuthViewState(
-        user: user,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      );
-    });
+    await repository.signInWithGoogle();
+
+    if (!ref.read(isCloudSyncEnabledProvider)) {
+      final user = await repository.currentUser();
+      if (user != null) {
+        await _setAuthenticatedUser(user);
+      }
+    }
   }
 
   Future<void> signInWithDemo() async {
     final repository = ref.read(authRepositoryProvider);
-    final studyRepository = ref.read(studyRepositoryProvider);
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final onboardingCompleted = await repository.hasCompletedOnboarding();
-      final user = await repository.signInWithDemo();
-      await studyRepository.ensureSeeded(user);
-      return AuthViewState(
-        user: user,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      );
-    });
+    final user = await repository.signInWithDemo();
+    await _setAuthenticatedUser(user);
   }
 
   Future<void> updatePassword(String password) async {
     final repository = ref.read(authRepositoryProvider);
-    final studyRepository = ref.read(studyRepositoryProvider);
-    final previous = state.valueOrNull;
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final onboardingCompleted = await repository.hasCompletedOnboarding();
-      await repository.updatePassword(password: password);
-      final user = await repository.currentUser() ?? previous?.user;
-      if (user == null) {
-        throw const AppException('missing_user');
-      }
-      await studyRepository.ensureSeeded(user);
-      return AuthViewState(
-        user: user,
-        onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: false,
-      );
-    });
+    await repository.updatePassword(password: password);
+    final user = await repository.currentUser();
+    if (user == null) {
+      throw const AppException('missing_user');
+    }
+    await _setAuthenticatedUser(user);
   }
 
   Future<void> updateProfile(AppUserModel user) async {
@@ -275,7 +209,8 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       AuthViewState(
         user: updated,
         onboardingCompleted: onboardingCompleted,
-        requiresPasswordReset: state.valueOrNull?.requiresPasswordReset ?? false,
+        requiresPasswordReset:
+            state.valueOrNull?.requiresPasswordReset ?? false,
       ),
     );
   }
@@ -300,10 +235,87 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       ),
     );
   }
+
+  Future<void> _handleAuthStateChange(AuthState authState) async {
+    try {
+      if (authState.event == AuthChangeEvent.signedOut ||
+          authState.session?.user == null) {
+        await _setSignedOutState();
+        return;
+      }
+
+      final repository = ref.read(authRepositoryProvider);
+      final user = await repository.currentUser();
+      if (user == null) {
+        await _setSignedOutState();
+        return;
+      }
+
+      await _setAuthenticatedUser(
+        user,
+        requiresPasswordReset:
+            authState.event == AuthChangeEvent.passwordRecovery,
+      );
+    } catch (error, stackTrace) {
+      if (!state.hasValue) {
+        state = AsyncError(error, stackTrace);
+      }
+    }
+  }
+
+  Future<void> _setAuthenticatedUser(
+    AppUserModel user, {
+    bool requiresPasswordReset = false,
+  }) async {
+    final repository = ref.read(authRepositoryProvider);
+    final studyRepository = ref.read(studyRepositoryProvider);
+    final onboardingCompleted = await repository.hasCompletedOnboarding();
+
+    await studyRepository.ensureSeeded(user);
+
+    state = AsyncData(
+      AuthViewState(
+        user: user,
+        onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: requiresPasswordReset,
+      ),
+    );
+  }
+
+  Future<void> _setSignedOutState() async {
+    final onboardingCompleted =
+        await ref.read(authRepositoryProvider).hasCompletedOnboarding();
+    state = AsyncData(
+      AuthViewState(
+        user: null,
+        onboardingCompleted: onboardingCompleted,
+        requiresPasswordReset: false,
+      ),
+    );
+  }
 }
 
 final authControllerProvider =
-AsyncNotifierProvider<AuthController, AuthViewState>(AuthController.new);
+    AsyncNotifierProvider<AuthController, AuthViewState>(AuthController.new);
+
+class GoRouterRefreshNotifier extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
+final goRouterRefreshNotifierProvider =
+    Provider<GoRouterRefreshNotifier>((ref) {
+  final notifier = GoRouterRefreshNotifier();
+  ref.listen<AsyncValue<AuthViewState>>(authControllerProvider, (_, __) {
+    notifier.refresh();
+  });
+  ref.onDispose(notifier.dispose);
+  return notifier;
+});
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final refreshNotifier = ref.watch(goRouterRefreshNotifierProvider);
+  return AppRouter.build(ref, refreshNotifier);
+});
 
 class StudyDataState {
   const StudyDataState({
@@ -381,11 +393,11 @@ class StudyDataState {
     return activeTasks
         .where(
           (task) =>
-      task.dueDateTime != null &&
-          task.dueDateTime!.year == now.year &&
-          task.dueDateTime!.month == now.month &&
-          task.dueDateTime!.day == now.day,
-    )
+              task.dueDateTime != null &&
+              task.dueDateTime!.year == now.year &&
+              task.dueDateTime!.month == now.month &&
+              task.dueDateTime!.day == now.day,
+        )
         .toList();
   }
 
@@ -394,10 +406,10 @@ class StudyDataState {
     return activeTasks
         .where(
           (task) =>
-      task.status != TaskStatus.completed &&
-          task.dueDateTime != null &&
-          task.dueDateTime!.isAfter(now.subtract(const Duration(hours: 1))),
-    )
+              task.status != TaskStatus.completed &&
+              task.dueDateTime != null &&
+              task.dueDateTime!.isAfter(now.subtract(const Duration(hours: 1))),
+        )
         .take(5)
         .toList();
   }
@@ -431,10 +443,10 @@ class StudyDataState {
     return sessions
         .where(
           (item) =>
-      item.startTime.year == now.year &&
-          item.startTime.month == now.month &&
-          item.startTime.day == now.day,
-    )
+              item.startTime.year == now.year &&
+              item.startTime.month == now.month &&
+              item.startTime.day == now.day,
+        )
         .fold(0, (sum, item) => sum + item.durationMinutes);
   }
 
@@ -450,9 +462,9 @@ class StudyDataState {
     return sessions
         .where(
           (item) =>
-      item.startTime.year == now.year &&
-          item.startTime.month == now.month,
-    )
+              item.startTime.year == now.year &&
+              item.startTime.month == now.month,
+        )
         .fold(0, (sum, item) => sum + item.durationMinutes);
   }
 
@@ -463,7 +475,7 @@ class StudyDataState {
 
     final studyDays = sessions
         .map((session) => DateTime(session.startTime.year,
-        session.startTime.month, session.startTime.day))
+            session.startTime.month, session.startTime.day))
         .toSet()
         .toList()
       ..sort((a, b) => b.compareTo(a));
@@ -489,12 +501,12 @@ class StudyDataState {
 
   int get totalXp =>
       completedTasks.length * 25 +
-          sessions.length * 40 +
-          completedHabits.length * 18 +
-          upcomingExams
+      sessions.length * 40 +
+      completedHabits.length * 18 +
+      upcomingExams
               .where((item) => item.priority == TaskPriority.urgent)
               .length *
-              12;
+          12;
 
   int get level => (totalXp ~/ 180) + 1;
 
@@ -538,39 +550,39 @@ class StudyDataState {
       sessions.where((session) => session.courseId == courseId).toList();
 
   List<AchievementModel> get achievements => [
-    AchievementModel(
-      id: 'first-focus',
-      title: 'Focus Starter',
-      description: 'Complete 3 focus sessions',
-      progress: sessions.length,
-      target: 3,
-      icon: 'timer',
-    ),
-    AchievementModel(
-      id: 'task-run',
-      title: 'Task Finisher',
-      description: 'Complete 5 tasks',
-      progress: completedTasks.length,
-      target: 5,
-      icon: 'check_circle',
-    ),
-    AchievementModel(
-      id: 'streak',
-      title: 'Consistency',
-      description: 'Maintain a 4 day streak',
-      progress: streakCount,
-      target: 4,
-      icon: 'local_fire_department',
-    ),
-    AchievementModel(
-      id: 'habit',
-      title: 'Ritual Builder',
-      description: 'Complete 3 habits in one day',
-      progress: completedHabits.length,
-      target: 3,
-      icon: 'repeat',
-    ),
-  ];
+        AchievementModel(
+          id: 'first-focus',
+          title: 'Focus Starter',
+          description: 'Complete 3 focus sessions',
+          progress: sessions.length,
+          target: 3,
+          icon: 'timer',
+        ),
+        AchievementModel(
+          id: 'task-run',
+          title: 'Task Finisher',
+          description: 'Complete 5 tasks',
+          progress: completedTasks.length,
+          target: 5,
+          icon: 'check_circle',
+        ),
+        AchievementModel(
+          id: 'streak',
+          title: 'Consistency',
+          description: 'Maintain a 4 day streak',
+          progress: streakCount,
+          target: 4,
+          icon: 'local_fire_department',
+        ),
+        AchievementModel(
+          id: 'habit',
+          title: 'Ritual Builder',
+          description: 'Complete 3 habits in one day',
+          progress: completedHabits.length,
+          target: 3,
+          icon: 'repeat',
+        ),
+      ];
 }
 
 class StudyDataController extends AsyncNotifier<StudyDataState> {
@@ -666,9 +678,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       subtasks: task.subtasks
           .map(
             (item) => item.id == subtask.id
-            ? item.copyWith(isCompleted: !item.isCompleted)
-            : item,
-      )
+                ? item.copyWith(isCompleted: !item.isCompleted)
+                : item,
+          )
           .toList(),
       updatedAt: DateTime.now(),
     );
@@ -680,10 +692,10 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     if (current == null) return;
 
     for (final task
-    in current.completedTasks.where((item) => !item.isArchived)) {
+        in current.completedTasks.where((item) => !item.isArchived)) {
       await ref.read(studyRepositoryProvider).saveTask(
-        task.copyWith(isArchived: true, updatedAt: DateTime.now()),
-      );
+            task.copyWith(isArchived: true, updatedAt: DateTime.now()),
+          );
     }
     await _softRefresh();
   }
@@ -729,15 +741,15 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
         ? habit.goalCount
         : habit.completedCount + 1;
     await ref.read(studyRepositoryProvider).saveHabit(
-      habit.copyWith(
-        completedCount: nextCompleted,
-        streakCount: nextCompleted >= habit.goalCount
-            ? habit.streakCount + 1
-            : habit.streakCount,
-        lastCompletedAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    );
+          habit.copyWith(
+            completedCount: nextCompleted,
+            streakCount: nextCompleted >= habit.goalCount
+                ? habit.streakCount + 1
+                : habit.streakCount,
+            lastCompletedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
     HapticFeedback.lightImpact();
     await _softRefresh();
   }
@@ -781,12 +793,12 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
 
     if (authState?.user != null) {
       await ref.read(authControllerProvider.notifier).updateProfile(
-        authState!.user!.copyWith(
-          preferredLanguage: settings.languageCode,
-          themeMode: settings.themeMode,
-          updatedAt: DateTime.now(),
-        ),
-      );
+            authState!.user!.copyWith(
+              preferredLanguage: settings.languageCode,
+              themeMode: settings.themeMode,
+              updatedAt: DateTime.now(),
+            ),
+          );
     }
 
     await _softRefresh();
@@ -810,12 +822,12 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
 }
 
 final studyDataControllerProvider =
-AsyncNotifierProvider<StudyDataController, StudyDataState>(
+    AsyncNotifierProvider<StudyDataController, StudyDataState>(
   StudyDataController.new,
 );
 
 final currentUserProvider = Provider<AppUserModel?>(
-      (ref) => ref.watch(authControllerProvider).valueOrNull?.user,
+  (ref) => ref.watch(authControllerProvider).valueOrNull?.user,
 );
 
 final localeProvider = Provider<Locale?>((ref) {
@@ -847,9 +859,9 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 
 final accessibilityModeProvider = Provider<bool>((ref) {
   return ref
-      .watch(studyDataControllerProvider)
-      .valueOrNull
-      ?.settings
-      .accessibilityMode ??
+          .watch(studyDataControllerProvider)
+          .valueOrNull
+          ?.settings
+          .accessibilityMode ??
       false;
 });

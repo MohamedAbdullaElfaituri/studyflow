@@ -19,15 +19,16 @@ class SupabaseService {
       isConfigured ? BackendMode.supabase : BackendMode.local;
 
   static Future<void> initialize() async {
-    if (!isConfigured || _initialized) {
+    if (_initialized || !isConfigured) {
       return;
     }
 
     await Supabase.initialize(
-      url: AppConstants.supabaseUrl,
-      anonKey: AppConstants.supabaseAnonKey,
+      url: _normalized(AppConstants.supabaseUrl),
+      anonKey: _normalized(AppConstants.supabaseAnonKey),
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
+        detectSessionInUri: true,
       ),
     );
 
@@ -36,10 +37,7 @@ class SupabaseService {
 
   static SupabaseClient get client {
     if (!_initialized) {
-      throw StateError(
-        'Supabase is not initialized. Provide SUPABASE_URL and SUPABASE_ANON_KEY, '
-            'or use the local demo mode.',
-      );
+      throw StateError('Supabase has not been initialized.');
     }
     return Supabase.instance.client;
   }

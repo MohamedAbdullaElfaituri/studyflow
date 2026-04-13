@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,13 +16,13 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
-  Future<AppUserModel> signUp({
+  Future<AuthSignUpResult> signUp({
     required String fullName,
     required String email,
     required String password,
   });
   Future<AppUserModel> signInWithDemo();
-  Future<AppUserModel> signInWithGoogle();
+  Future<void> signInWithGoogle();
   Future<void> signOut();
   Future<void> sendPasswordReset(String email);
   Future<void> updatePassword({required String password});
@@ -32,6 +31,32 @@ abstract class AuthRepository {
     required AppUserModel user,
     required String filePath,
   });
+}
+
+class AuthSignUpResult {
+  const AuthSignUpResult._({
+    required this.email,
+    required this.requiresEmailConfirmation,
+    this.user,
+  });
+
+  AuthSignUpResult.authenticated(AppUserModel user)
+      : this._(
+          email: user.email,
+          requiresEmailConfirmation: false,
+          user: user,
+        );
+
+  const AuthSignUpResult.emailConfirmationRequired({
+    required String email,
+  }) : this._(
+          email: email,
+          requiresEmailConfirmation: true,
+        );
+
+  final String email;
+  final bool requiresEmailConfirmation;
+  final AppUserModel? user;
 }
 
 class LocalAuthRepository implements AuthRepository {
@@ -50,8 +75,8 @@ class LocalAuthRepository implements AuthRepository {
 
     return _profiles.cast<AppUserModel?>().firstWhere(
           (profile) => profile?.id == userId,
-      orElse: () => null,
-    );
+          orElse: () => null,
+        );
   }
 
   @override
@@ -69,10 +94,11 @@ class LocalAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    final normalizedEmail = _normalizeEmail(email);
     final credential = _credentials.cast<AuthCredentialModel?>().firstWhere(
-          (item) => item?.email.toLowerCase() == email.trim().toLowerCase(),
-      orElse: () => null,
-    );
+          (item) => item?.email.toLowerCase() == normalizedEmail,
+          orElse: () => null,
+        );
 
     if (credential == null) {
       throw const AppException('user_not_found');
@@ -88,14 +114,14 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUserModel> signUp({
+  Future<AuthSignUpResult> signUp({
     required String fullName,
     required String email,
     required String password,
   }) async {
-    final normalizedEmail = email.trim().toLowerCase();
+    final normalizedEmail = _normalizeEmail(email);
     final hasDuplicate =
-    _credentials.any((item) => item.email.toLowerCase() == normalizedEmail);
+        _credentials.any((item) => item.email.toLowerCase() == normalizedEmail);
 
     if (hasDuplicate) {
       throw const AppException('duplicate_email');
@@ -104,12 +130,13 @@ class LocalAuthRepository implements AuthRepository {
     final now = DateTime.now();
     final preferredLanguage =
         _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
+    final trimmedFullName = fullName.trim();
     final user = AppUserModel(
       id: _uuid.v4(),
-      fullName: fullName.trim(),
+      fullName: trimmedFullName,
       email: normalizedEmail,
       avatarUrl: null,
-      username: _suggestUsername(fullName, normalizedEmail),
+      username: _suggestUsername(trimmedFullName, normalizedEmail),
       bio: '',
       university: null,
       department: null,
@@ -133,28 +160,29 @@ class LocalAuthRepository implements AuthRepository {
     await _writeCredentials(credentials);
     await _storage.writeString(AppConstants.authSessionKey, user.id);
 
-    return user;
+    return AuthSignUpResult.authenticated(user);
   }
 
   @override
   Future<AppUserModel> signInWithDemo() async {
     final demoUser = _profiles.cast<AppUserModel?>().firstWhere(
           (profile) =>
-      profile?.email.toLowerCase() ==
-          AppConstants.demoEmail.toLowerCase(),
-      orElse: () => null,
-    );
+              profile?.email.toLowerCase() ==
+              AppConstants.demoEmail.toLowerCase(),
+          orElse: () => null,
+        );
 
     if (demoUser != null) {
       await _storage.writeString(AppConstants.authSessionKey, demoUser.id);
       return demoUser;
     }
 
-    return signUp(
+    final result = await signUp(
       fullName: 'StudyFlow Student',
       email: AppConstants.demoEmail,
       password: AppConstants.demoPassword,
     );
+    return result.user!;
   }
 
   @override
@@ -163,15 +191,15 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUserModel> signInWithGoogle() async {
-    return signInWithDemo();
+  Future<void> signInWithGoogle() async {
+    await signInWithDemo();
   }
 
   @override
   Future<void> sendPasswordReset(String email) async {
-    final exists = _credentials.any(
-          (item) => item.email.toLowerCase() == email.trim().toLowerCase(),
-    );
+    final normalizedEmail = _normalizeEmail(email);
+    final exists =
+        _credentials.any((item) => item.email.toLowerCase() == normalizedEmail);
 
     if (!exists) {
       throw const AppException('user_not_found');
@@ -188,13 +216,13 @@ class LocalAuthRepository implements AuthRepository {
     final credentials = _credentials
         .map(
           (item) => item.userId == userId
-          ? AuthCredentialModel(
-        userId: item.userId,
-        email: item.email,
-        password: password,
-      )
-          : item,
-    )
+              ? AuthCredentialModel(
+                  userId: item.userId,
+                  email: item.email,
+                  password: password,
+                )
+              : item,
+        )
         .toList();
 
     await _writeCredentials(credentials);
@@ -223,17 +251,16 @@ class LocalAuthRepository implements AuthRepository {
 
   List<AppUserModel> get _profiles {
     final stored =
-    decodeCollection(_storage.readString(AppConstants.profilesKey))
-        .map(AppUserModel.fromJson)
-        .toList();
+        decodeCollection(_storage.readString(AppConstants.profilesKey))
+            .map(AppUserModel.fromJson)
+            .toList();
     return stored.isEmpty ? [_demoUser] : stored;
   }
 
   List<AuthCredentialModel> get _credentials {
-    final stored =
-    decodeCollection(_storage.readString(AppConstants.authCredentialsKey))
-        .map(AuthCredentialModel.fromJson)
-        .toList();
+    final stored = decodeCollection(
+      _storage.readString(AppConstants.authCredentialsKey),
+    ).map(AuthCredentialModel.fromJson).toList();
     return stored.isEmpty ? [_demoCredential] : stored;
   }
 
@@ -249,7 +276,7 @@ class LocalAuthRepository implements AuthRepository {
       university: 'Istanbul Technical University',
       department: 'Human-Computer Interaction',
       preferredLanguage:
-      _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
+          _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
       themeMode: 'system',
       createdAt: now.subtract(const Duration(days: 30)),
       updatedAt: now.subtract(const Duration(days: 1)),
@@ -257,10 +284,10 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   AuthCredentialModel get _demoCredential => const AuthCredentialModel(
-    userId: _demoUserId,
-    email: AppConstants.demoEmail,
-    password: AppConstants.demoPassword,
-  );
+        userId: _demoUserId,
+        email: AppConstants.demoEmail,
+        password: AppConstants.demoPassword,
+      );
 
   Future<void> _writeProfiles(List<AppUserModel> profiles) async {
     await _storage.writeString(
@@ -290,7 +317,7 @@ class SupabaseAuthRepository implements AuthRepository {
       return null;
     }
 
-    return _fetchProfile(user);
+    return _ensureProfile(user);
   }
 
   @override
@@ -309,7 +336,7 @@ class SupabaseAuthRepository implements AuthRepository {
     required String password,
   }) async {
     final response = await _client.auth.signInWithPassword(
-      email: email.trim(),
+      email: _normalizeEmail(email),
       password: password,
     );
 
@@ -318,22 +345,27 @@ class SupabaseAuthRepository implements AuthRepository {
       throw const AppException('invalid_credentials');
     }
 
-    return _fetchProfile(user);
+    return _ensureProfile(user);
   }
 
   @override
-  Future<AppUserModel> signUp({
+  Future<AuthSignUpResult> signUp({
     required String fullName,
     required String email,
     required String password,
   }) async {
-    final preferredLanguage =
-        _storage.readString(AppConstants.localePreferenceKey) ?? 'en';
+    final trimmedFullName = fullName.trim();
+    final normalizedEmail = _normalizeEmail(email);
+    final preferredLanguage = _normalizeLanguage(
+      _storage.readString(AppConstants.localePreferenceKey),
+    );
+
     final response = await _client.auth.signUp(
-      email: email.trim(),
+      email: normalizedEmail,
       password: password,
       data: {
-        'full_name': fullName.trim(),
+        'full_name': trimmedFullName,
+        'username': _suggestUsername(trimmedFullName, normalizedEmail),
         'preferred_language': preferredLanguage,
         'theme_mode': 'system',
       },
@@ -345,10 +377,12 @@ class SupabaseAuthRepository implements AuthRepository {
     }
 
     if (response.session == null) {
-      throw const AppException('email_confirmation_required');
+      return AuthSignUpResult.emailConfirmationRequired(
+        email: normalizedEmail,
+      );
     }
 
-    return _fetchProfile(user);
+    return AuthSignUpResult.authenticated(await _ensureProfile(user));
   }
 
   @override
@@ -362,37 +396,17 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUserModel> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     final launched = await _client.auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: AppConstants.supabaseAuthRedirectUrl,
+      redirectTo: AppConstants.supabaseAuthRedirectUri.toString(),
+      queryParams: const {
+        'access_type': 'offline',
+        'prompt': 'select_account',
+      },
     );
 
     if (!launched) {
-      throw const AppException('google_oauth_incomplete');
-    }
-
-    try {
-      final authState = await _client.auth.onAuthStateChange
-          .firstWhere(
-            (event) =>
-        event.event == AuthChangeEvent.signedIn ||
-            event.session?.user != null,
-      )
-          .timeout(const Duration(minutes: 2));
-
-      final user = authState.session?.user ?? _client.auth.currentUser;
-      if (user == null) {
-        throw const AppException('google_oauth_incomplete');
-      }
-
-      return _fetchProfile(user);
-    } on TimeoutException {
-      final user = _client.auth.currentUser;
-      if (user != null) {
-        return _fetchProfile(user);
-      }
-
       throw const AppException('google_oauth_incomplete');
     }
   }
@@ -400,8 +414,8 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> sendPasswordReset(String email) async {
     await _client.auth.resetPasswordForEmail(
-      email.trim(),
-      redirectTo: AppConstants.supabaseAuthRedirectUrl,
+      _normalizeEmail(email),
+      redirectTo: AppConstants.supabaseAuthRedirectUri.toString(),
     );
   }
 
@@ -418,8 +432,19 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<AppUserModel> updateProfile(AppUserModel user) async {
-    await _client.from('profiles').upsert(user.toJson());
-    return user;
+    final existingProfile = await _fetchExistingProfile(user.id);
+    final normalized = _normalizeProfile(
+      user,
+      existingProfile: existingProfile,
+    );
+
+    await _client.from('profiles').upsert(
+          normalized.toJson(),
+          onConflict: 'id',
+        );
+    await _syncAuthMetadata(normalized);
+
+    return normalized;
   }
 
   @override
@@ -441,50 +466,184 @@ class SupabaseAuthRepository implements AuthRepository {
     }
 
     await _client.storage.from('avatars').uploadBinary(
-      objectPath,
-      bytes,
-      fileOptions: const FileOptions(upsert: true),
-    );
+          objectPath,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
 
     final publicUrl = _client.storage.from('avatars').getPublicUrl(objectPath);
-    final updated = user.copyWith(
-      avatarUrl: publicUrl,
-      updatedAt: DateTime.now(),
+    final updated = await updateProfile(
+      user.copyWith(
+        avatarUrl: publicUrl,
+        updatedAt: _now(),
+      ),
     );
-    await _client.from('profiles').upsert(updated.toJson());
+
     return updated;
   }
 
-  Future<AppUserModel> _fetchProfile(User user) async {
-    final data =
-    await _client.from('profiles').select().eq('id', user.id).maybeSingle();
+  Future<AppUserModel> _ensureProfile(User user) async {
+    final existingProfile = await _fetchExistingProfile(user.id);
+    final metadata = user.userMetadata ?? const <String, dynamic>{};
+    final email = _normalizeEmail(
+      user.email ?? _readMetadataString(metadata['email']),
+    );
+    final fullName = _readMetadataString(metadata['full_name']);
+    final preferredLanguageFromMetadata =
+        _readMetadataString(metadata['preferred_language']);
+    final preferredLanguage = _normalizeLanguage(
+      preferredLanguageFromMetadata.isNotEmpty
+          ? preferredLanguageFromMetadata
+          : _storage.readString(AppConstants.localePreferenceKey),
+    );
 
-    if (data == null) {
-      final now = DateTime.now();
-      final created = AppUserModel(
+    final profile = _normalizeProfile(
+      AppUserModel(
         id: user.id,
-        fullName: (user.userMetadata?['full_name'] as String?) ?? '',
-        email: user.email ?? '',
-        avatarUrl: null,
-        username: _suggestUsername(
-          (user.userMetadata?['full_name'] as String?) ?? '',
-          user.email ?? '',
+        fullName: fullName,
+        email: email,
+        avatarUrl: _cleanNullable(_readMetadataString(metadata['avatar_url'])),
+        username: _cleanNullable(_readMetadataString(metadata['username'])),
+        bio: _readMetadataString(metadata['bio']),
+        university: _cleanNullable(_readMetadataString(metadata['university'])),
+        department: _cleanNullable(_readMetadataString(metadata['department'])),
+        preferredLanguage: preferredLanguage,
+        themeMode: _normalizeThemeMode(
+          _readMetadataString(metadata['theme_mode']),
         ),
-        bio: '',
-        university: null,
-        department: null,
-        preferredLanguage:
-        _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
-        themeMode: 'system',
-        createdAt: now,
-        updatedAt: now,
-      );
-      await _client.from('profiles').upsert(created.toJson());
-      return created;
+        createdAt: existingProfile?.createdAt ?? _now(),
+        updatedAt: _now(),
+      ),
+      existingProfile: existingProfile,
+    );
+
+    await _client.from('profiles').upsert(
+          profile.toJson(),
+          onConflict: 'id',
+        );
+    return profile;
+  }
+
+  Future<AppUserModel?> _fetchExistingProfile(String userId) async {
+    final data =
+        await _client.from('profiles').select().eq('id', userId).maybeSingle();
+    if (data == null) {
+      return null;
     }
 
     return AppUserModel.fromJson(Map<String, dynamic>.from(data));
   }
+
+  Future<void> _syncAuthMetadata(AppUserModel profile) async {
+    final authUser = _client.auth.currentUser;
+    if (authUser == null || authUser.id != profile.id) {
+      return;
+    }
+
+    final data = <String, dynamic>{
+      'full_name': profile.fullName,
+      'preferred_language': profile.preferredLanguage,
+      'theme_mode': profile.themeMode,
+      'bio': profile.bio,
+      if (profile.username != null) 'username': profile.username,
+      if (profile.avatarUrl != null) 'avatar_url': profile.avatarUrl,
+      if (profile.university != null) 'university': profile.university,
+      if (profile.department != null) 'department': profile.department,
+    };
+
+    await _client.auth.updateUser(UserAttributes(data: data));
+  }
+}
+
+String _normalizeEmail(String email) => email.trim().toLowerCase();
+
+String _readMetadataString(Object? value) {
+  if (value is String) {
+    return value.trim();
+  }
+  return '';
+}
+
+String? _cleanNullable(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
+    return null;
+  }
+  return trimmed;
+}
+
+String _pickValue(String current, String? fallback, {String empty = ''}) {
+  final normalizedCurrent = current.trim();
+  if (normalizedCurrent.isNotEmpty) {
+    return normalizedCurrent;
+  }
+
+  final normalizedFallback = fallback?.trim();
+  if (normalizedFallback != null && normalizedFallback.isNotEmpty) {
+    return normalizedFallback;
+  }
+
+  return empty;
+}
+
+String _normalizeLanguage(String? value) {
+  return switch (value?.trim().toLowerCase()) {
+    'tr' => 'tr',
+    'ar' => 'ar',
+    _ => 'en',
+  };
+}
+
+String _normalizeThemeMode(String? value) {
+  return switch (value?.trim().toLowerCase()) {
+    'light' => 'light',
+    'dark' => 'dark',
+    _ => 'system',
+  };
+}
+
+DateTime _now() => DateTime.now().toUtc();
+
+AppUserModel _normalizeProfile(
+  AppUserModel user, {
+  AppUserModel? existingProfile,
+}) {
+  final normalizedEmail = _normalizeEmail(
+    _pickValue(user.email, existingProfile?.email),
+  );
+  final normalizedFullName =
+      _pickValue(user.fullName, existingProfile?.fullName);
+  final normalizedBio = _pickValue(user.bio, existingProfile?.bio);
+  final normalizedUsername = _cleanNullable(user.username) ??
+      _cleanNullable(existingProfile?.username) ??
+      _suggestUsername(normalizedFullName, normalizedEmail);
+
+  return AppUserModel(
+    id: user.id,
+    fullName: normalizedFullName,
+    email: normalizedEmail,
+    avatarUrl: _cleanNullable(user.avatarUrl) ?? existingProfile?.avatarUrl,
+    username: normalizedUsername,
+    bio: normalizedBio,
+    university: _cleanNullable(user.university) ?? existingProfile?.university,
+    department: _cleanNullable(user.department) ?? existingProfile?.department,
+    preferredLanguage: _normalizeLanguage(
+      _pickValue(
+        user.preferredLanguage,
+        existingProfile?.preferredLanguage,
+        empty: 'en',
+      ),
+    ),
+    themeMode: _normalizeThemeMode(
+      _pickValue(
+        user.themeMode,
+        existingProfile?.themeMode,
+        empty: 'system',
+      ),
+    ),
+    createdAt: existingProfile?.createdAt ?? user.createdAt.toUtc(),
+    updatedAt: _now(),
+  );
 }
 
 String _suggestUsername(String fullName, String email) {

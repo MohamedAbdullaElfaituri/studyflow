@@ -6,7 +6,8 @@ class AppConstants {
   static const iosDisplayName = 'StudyFlow';
 
   static const supabaseUrl = 'https://rjnxrgzxytpjqdbqaizj.supabase.co';
-  static const supabaseAnonKey = 'sb_publishable_vezyohPqlUwDnmO94ABFEg_lg7f_OBn';
+  static const supabaseAnonKey =
+      'sb_publishable_vezyohPqlUwDnmO94ABFEg_lg7f_OBn';
 
   static const demoEmail = 'student@studyflow.app';
   static const demoPassword = 'studyflow123';
@@ -16,6 +17,8 @@ class AppConstants {
 
   static String get supabaseAuthRedirectUrl =>
       '$supabaseAuthRedirectScheme://$supabaseAuthRedirectHost/';
+
+  static Uri get supabaseAuthRedirectUri => Uri.parse(supabaseAuthRedirectUrl);
 
   static const supportedLocales = [
     Locale('en'),
