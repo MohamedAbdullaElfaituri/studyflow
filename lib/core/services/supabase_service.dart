@@ -38,7 +38,7 @@ class SupabaseService {
     if (!_initialized) {
       throw StateError(
         'Supabase is not initialized. Provide SUPABASE_URL and SUPABASE_ANON_KEY, '
-        'or use the local demo mode.',
+            'or use the local demo mode.',
       );
     }
     return Supabase.instance.client;

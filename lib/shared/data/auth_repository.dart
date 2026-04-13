@@ -50,8 +50,8 @@ class LocalAuthRepository implements AuthRepository {
 
     return _profiles.cast<AppUserModel?>().firstWhere(
           (profile) => profile?.id == userId,
-          orElse: () => null,
-        );
+      orElse: () => null,
+    );
   }
 
   @override
@@ -71,8 +71,8 @@ class LocalAuthRepository implements AuthRepository {
   }) async {
     final credential = _credentials.cast<AuthCredentialModel?>().firstWhere(
           (item) => item?.email.toLowerCase() == email.trim().toLowerCase(),
-          orElse: () => null,
-        );
+      orElse: () => null,
+    );
 
     if (credential == null) {
       throw const AppException('user_not_found');
@@ -95,7 +95,7 @@ class LocalAuthRepository implements AuthRepository {
   }) async {
     final normalizedEmail = email.trim().toLowerCase();
     final hasDuplicate =
-        _credentials.any((item) => item.email.toLowerCase() == normalizedEmail);
+    _credentials.any((item) => item.email.toLowerCase() == normalizedEmail);
 
     if (hasDuplicate) {
       throw const AppException('duplicate_email');
@@ -140,10 +140,10 @@ class LocalAuthRepository implements AuthRepository {
   Future<AppUserModel> signInWithDemo() async {
     final demoUser = _profiles.cast<AppUserModel?>().firstWhere(
           (profile) =>
-              profile?.email.toLowerCase() ==
-              AppConstants.demoEmail.toLowerCase(),
-          orElse: () => null,
-        );
+      profile?.email.toLowerCase() ==
+          AppConstants.demoEmail.toLowerCase(),
+      orElse: () => null,
+    );
 
     if (demoUser != null) {
       await _storage.writeString(AppConstants.authSessionKey, demoUser.id);
@@ -170,7 +170,7 @@ class LocalAuthRepository implements AuthRepository {
   @override
   Future<void> sendPasswordReset(String email) async {
     final exists = _credentials.any(
-      (item) => item.email.toLowerCase() == email.trim().toLowerCase(),
+          (item) => item.email.toLowerCase() == email.trim().toLowerCase(),
     );
 
     if (!exists) {
@@ -188,13 +188,13 @@ class LocalAuthRepository implements AuthRepository {
     final credentials = _credentials
         .map(
           (item) => item.userId == userId
-              ? AuthCredentialModel(
-                  userId: item.userId,
-                  email: item.email,
-                  password: password,
-                )
-              : item,
-        )
+          ? AuthCredentialModel(
+        userId: item.userId,
+        email: item.email,
+        password: password,
+      )
+          : item,
+    )
         .toList();
 
     await _writeCredentials(credentials);
@@ -223,17 +223,17 @@ class LocalAuthRepository implements AuthRepository {
 
   List<AppUserModel> get _profiles {
     final stored =
-        decodeCollection(_storage.readString(AppConstants.profilesKey))
-            .map(AppUserModel.fromJson)
-            .toList();
+    decodeCollection(_storage.readString(AppConstants.profilesKey))
+        .map(AppUserModel.fromJson)
+        .toList();
     return stored.isEmpty ? [_demoUser] : stored;
   }
 
   List<AuthCredentialModel> get _credentials {
     final stored =
-        decodeCollection(_storage.readString(AppConstants.authCredentialsKey))
-            .map(AuthCredentialModel.fromJson)
-            .toList();
+    decodeCollection(_storage.readString(AppConstants.authCredentialsKey))
+        .map(AuthCredentialModel.fromJson)
+        .toList();
     return stored.isEmpty ? [_demoCredential] : stored;
   }
 
@@ -249,7 +249,7 @@ class LocalAuthRepository implements AuthRepository {
       university: 'Istanbul Technical University',
       department: 'Human-Computer Interaction',
       preferredLanguage:
-          _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
+      _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
       themeMode: 'system',
       createdAt: now.subtract(const Duration(days: 30)),
       updatedAt: now.subtract(const Duration(days: 1)),
@@ -257,10 +257,10 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   AuthCredentialModel get _demoCredential => const AuthCredentialModel(
-        userId: _demoUserId,
-        email: AppConstants.demoEmail,
-        password: AppConstants.demoPassword,
-      );
+    userId: _demoUserId,
+    email: AppConstants.demoEmail,
+    password: AppConstants.demoPassword,
+  );
 
   Future<void> _writeProfiles(List<AppUserModel> profiles) async {
     await _storage.writeString(
@@ -376,9 +376,9 @@ class SupabaseAuthRepository implements AuthRepository {
       final authState = await _client.auth.onAuthStateChange
           .firstWhere(
             (event) =>
-                event.event == AuthChangeEvent.signedIn ||
-                event.session?.user != null,
-          )
+        event.event == AuthChangeEvent.signedIn ||
+            event.session?.user != null,
+      )
           .timeout(const Duration(minutes: 2));
 
       final user = authState.session?.user ?? _client.auth.currentUser;
@@ -441,10 +441,10 @@ class SupabaseAuthRepository implements AuthRepository {
     }
 
     await _client.storage.from('avatars').uploadBinary(
-          objectPath,
-          bytes,
-          fileOptions: const FileOptions(upsert: true),
-        );
+      objectPath,
+      bytes,
+      fileOptions: const FileOptions(upsert: true),
+    );
 
     final publicUrl = _client.storage.from('avatars').getPublicUrl(objectPath);
     final updated = user.copyWith(
@@ -457,7 +457,7 @@ class SupabaseAuthRepository implements AuthRepository {
 
   Future<AppUserModel> _fetchProfile(User user) async {
     final data =
-        await _client.from('profiles').select().eq('id', user.id).maybeSingle();
+    await _client.from('profiles').select().eq('id', user.id).maybeSingle();
 
     if (data == null) {
       final now = DateTime.now();
@@ -474,7 +474,7 @@ class SupabaseAuthRepository implements AuthRepository {
         university: null,
         department: null,
         preferredLanguage:
-            _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
+        _storage.readString(AppConstants.localePreferenceKey) ?? 'en',
         themeMode: 'system',
         createdAt: now,
         updatedAt: now,

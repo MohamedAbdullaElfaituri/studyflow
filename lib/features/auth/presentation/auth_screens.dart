@@ -75,10 +75,10 @@ class SplashScreen extends ConsumerWidget {
         final target = value.requiresPasswordReset
             ? ResetPasswordScreen.routePath
             : !value.onboardingCompleted
-                ? OnboardingScreen.routePath
-                : value.isAuthenticated
-                    ? HomeScreen.routePath
-                    : LoginScreen.routePath;
+            ? OnboardingScreen.routePath
+            : value.isAuthenticated
+            ? HomeScreen.routePath
+            : LoginScreen.routePath;
 
         if (GoRouterState.of(context).uri.toString() != target) {
           context.go(target);
@@ -97,9 +97,9 @@ class SplashScreen extends ConsumerWidget {
               Text(
                 context.l10n.appName,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
               SizedBox(
@@ -180,8 +180,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Text(
             context.l10n.noAccountPrompt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           TextButton(
             onPressed: () => context.push(SignupScreen.routePath),
@@ -198,17 +198,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(
               context.l10n.loginTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.loginSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -257,12 +257,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               onPressed: isLoading
                   ? null
                   : () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      await ref.read(authControllerProvider.notifier).signIn(
-                            email: _emailController.text,
-                            password: _passwordController.text,
-                          );
-                    },
+                if (!_formKey.currentState!.validate()) return;
+                await ref.read(authControllerProvider.notifier).signIn(
+                  email: _emailController.text,
+                  password: _passwordController.text,
+                );
+              },
               child: _AsyncLabel(
                   isLoading: isLoading, label: context.l10n.loginAction),
             ),
@@ -353,17 +353,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             Text(
               context.l10n.signUpTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.signUpSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -440,13 +440,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               onPressed: isLoading
                   ? null
                   : () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      await ref.read(authControllerProvider.notifier).signUp(
-                            fullName: _nameController.text,
-                            email: _emailController.text,
-                            password: _passwordController.text,
-                          );
-                    },
+                if (!_formKey.currentState!.validate()) return;
+                await ref.read(authControllerProvider.notifier).signUp(
+                  fullName: _nameController.text,
+                  email: _emailController.text,
+                  password: _passwordController.text,
+                );
+              },
               child: _AsyncLabel(
                 isLoading: isLoading,
                 label: context.l10n.createAccountAction,
@@ -525,17 +525,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           Text(
             context.l10n.forgotPasswordTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.3,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.forgotPasswordSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
 
@@ -551,7 +551,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon:
-                        const Icon(Icons.mail_outline_rounded, size: 20),
+                    const Icon(Icons.mail_outline_rounded, size: 20),
                   ),
                   validator: (v) =>
                       context.validationMessage(Validators.email(v)),
@@ -561,28 +561,28 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   onPressed: _isSubmitting
                       ? null
                       : () async {
-                          if (!_formKey.currentState!.validate()) return;
-                          setState(() => _isSubmitting = true);
-                          try {
-                            await ref
-                                .read(authControllerProvider.notifier)
-                                .sendPasswordReset(_emailController.text);
-                            if (!mounted) return;
-                            context.showSuccessNotification(
-                              context.l10n.resetPasswordSentMessage,
-                            );
-                            context.pop();
-                          } catch (error) {
-                            if (!mounted) return;
-                            context.showErrorNotification(
-                              context.resolveError(error),
-                            );
-                          } finally {
-                            if (mounted) {
-                              setState(() => _isSubmitting = false);
-                            }
-                          }
-                        },
+                    if (!_formKey.currentState!.validate()) return;
+                    setState(() => _isSubmitting = true);
+                    try {
+                      await ref
+                          .read(authControllerProvider.notifier)
+                          .sendPasswordReset(_emailController.text);
+                      if (!mounted) return;
+                      context.showSuccessNotification(
+                        context.l10n.resetPasswordSentMessage,
+                      );
+                      context.pop();
+                    } catch (error) {
+                      if (!mounted) return;
+                      context.showErrorNotification(
+                        context.resolveError(error),
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isSubmitting = false);
+                      }
+                    }
+                  },
                   child: _AsyncLabel(
                     isLoading: _isSubmitting,
                     label: context.l10n.sendResetLinkAction,
@@ -661,17 +661,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             Text(
               _resetPasswordFlowTitle(context),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               _resetPasswordFlowSubtitle(context),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: AppSpacing.xl),
             TextFormField(
@@ -716,11 +716,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               onPressed: isLoading
                   ? null
                   : () async {
-                      if (!_formKey.currentState!.validate()) return;
-                      await ref
-                          .read(authControllerProvider.notifier)
-                          .updatePassword(_passwordController.text);
-                    },
+                if (!_formKey.currentState!.validate()) return;
+                await ref
+                    .read(authControllerProvider.notifier)
+                    .updatePassword(_passwordController.text);
+              },
               child: _AsyncLabel(
                 isLoading: isLoading,
                 label: _resetPasswordFlowAction(context),
@@ -782,7 +782,7 @@ class _AuthShell extends StatelessWidget {
                         ),
                       SizedBox(height: canPop ? AppSpacing.lg : AppSpacing.xxl),
                       if (isWide)
-                        // ── Wide: side by side ──
+                      // ── Wide: side by side ──
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -830,11 +830,11 @@ class _LogoPanel extends StatelessWidget {
         Text(
           context.l10n.appName,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -1.2,
-                height: 1.05,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1.2,
+            height: 1.05,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ],
     );
@@ -865,7 +865,7 @@ class _FormCard extends StatelessWidget {
           BoxShadow(
             color: scheme.shadow.withValues(
               alpha:
-                  Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
+              Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
             ),
             blurRadius: 32,
             offset: const Offset(0, 8),
@@ -977,8 +977,8 @@ class _AuthDivider extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ),
         const Expanded(child: Divider()),
@@ -1077,22 +1077,22 @@ class _AsyncLabel extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       child: isLoading
           ? SizedBox(
-              key: const ValueKey('loading'),
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            )
+        key: const ValueKey('loading'),
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+      )
           : Text(
-              key: const ValueKey('label'),
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
+        key: const ValueKey('label'),
+        label,
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+      ),
     );
   }
 }

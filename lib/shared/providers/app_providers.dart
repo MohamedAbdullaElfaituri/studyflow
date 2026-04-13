@@ -18,18 +18,18 @@ import '../data/supabase_study_repository.dart';
 import '../models/app_models.dart';
 
 final localStorageServiceProvider = Provider<LocalStorageService>(
-  (ref) => throw UnimplementedError(),
+      (ref) => throw UnimplementedError(),
 );
 
 final reminderServiceProvider = Provider<ReminderService>(
-  (ref) => throw UnimplementedError(),
+      (ref) => throw UnimplementedError(),
 );
 
 final backendModeProvider =
-    Provider<BackendMode>((ref) => SupabaseService.backendMode);
+Provider<BackendMode>((ref) => SupabaseService.backendMode);
 
 final isCloudSyncEnabledProvider = Provider<bool>(
-  (ref) => ref.watch(backendModeProvider) == BackendMode.supabase,
+      (ref) => ref.watch(backendModeProvider) == BackendMode.supabase,
 );
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -68,7 +68,7 @@ class AppLocalePreferenceController extends Notifier<String?> {
 }
 
 final appLocalePreferenceProvider =
-    NotifierProvider<AppLocalePreferenceController, String?>(
+NotifierProvider<AppLocalePreferenceController, String?>(
   AppLocalePreferenceController.new,
 );
 
@@ -101,7 +101,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
 
     if (isCloudSyncEnabled) {
       final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
-        (event) async {
+            (event) async {
           final currentUser = event.session?.user;
           final onboardingComplete = await repository.hasCompletedOnboarding();
 
@@ -125,7 +125,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
               user: refreshedUser ?? state.valueOrNull?.user,
               onboardingCompleted: onboardingComplete,
               requiresPasswordReset:
-                  event.event == AuthChangeEvent.passwordRecovery,
+              event.event == AuthChangeEvent.passwordRecovery,
             ),
           );
         },
@@ -303,7 +303,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
 }
 
 final authControllerProvider =
-    AsyncNotifierProvider<AuthController, AuthViewState>(AuthController.new);
+AsyncNotifierProvider<AuthController, AuthViewState>(AuthController.new);
 
 class StudyDataState {
   const StudyDataState({
@@ -381,11 +381,11 @@ class StudyDataState {
     return activeTasks
         .where(
           (task) =>
-              task.dueDateTime != null &&
-              task.dueDateTime!.year == now.year &&
-              task.dueDateTime!.month == now.month &&
-              task.dueDateTime!.day == now.day,
-        )
+      task.dueDateTime != null &&
+          task.dueDateTime!.year == now.year &&
+          task.dueDateTime!.month == now.month &&
+          task.dueDateTime!.day == now.day,
+    )
         .toList();
   }
 
@@ -394,10 +394,10 @@ class StudyDataState {
     return activeTasks
         .where(
           (task) =>
-              task.status != TaskStatus.completed &&
-              task.dueDateTime != null &&
-              task.dueDateTime!.isAfter(now.subtract(const Duration(hours: 1))),
-        )
+      task.status != TaskStatus.completed &&
+          task.dueDateTime != null &&
+          task.dueDateTime!.isAfter(now.subtract(const Duration(hours: 1))),
+    )
         .take(5)
         .toList();
   }
@@ -431,10 +431,10 @@ class StudyDataState {
     return sessions
         .where(
           (item) =>
-              item.startTime.year == now.year &&
-              item.startTime.month == now.month &&
-              item.startTime.day == now.day,
-        )
+      item.startTime.year == now.year &&
+          item.startTime.month == now.month &&
+          item.startTime.day == now.day,
+    )
         .fold(0, (sum, item) => sum + item.durationMinutes);
   }
 
@@ -450,9 +450,9 @@ class StudyDataState {
     return sessions
         .where(
           (item) =>
-              item.startTime.year == now.year &&
-              item.startTime.month == now.month,
-        )
+      item.startTime.year == now.year &&
+          item.startTime.month == now.month,
+    )
         .fold(0, (sum, item) => sum + item.durationMinutes);
   }
 
@@ -463,7 +463,7 @@ class StudyDataState {
 
     final studyDays = sessions
         .map((session) => DateTime(session.startTime.year,
-            session.startTime.month, session.startTime.day))
+        session.startTime.month, session.startTime.day))
         .toSet()
         .toList()
       ..sort((a, b) => b.compareTo(a));
@@ -489,12 +489,12 @@ class StudyDataState {
 
   int get totalXp =>
       completedTasks.length * 25 +
-      sessions.length * 40 +
-      completedHabits.length * 18 +
-      upcomingExams
+          sessions.length * 40 +
+          completedHabits.length * 18 +
+          upcomingExams
               .where((item) => item.priority == TaskPriority.urgent)
               .length *
-          12;
+              12;
 
   int get level => (totalXp ~/ 180) + 1;
 
@@ -538,39 +538,39 @@ class StudyDataState {
       sessions.where((session) => session.courseId == courseId).toList();
 
   List<AchievementModel> get achievements => [
-        AchievementModel(
-          id: 'first-focus',
-          title: 'Focus Starter',
-          description: 'Complete 3 focus sessions',
-          progress: sessions.length,
-          target: 3,
-          icon: 'timer',
-        ),
-        AchievementModel(
-          id: 'task-run',
-          title: 'Task Finisher',
-          description: 'Complete 5 tasks',
-          progress: completedTasks.length,
-          target: 5,
-          icon: 'check_circle',
-        ),
-        AchievementModel(
-          id: 'streak',
-          title: 'Consistency',
-          description: 'Maintain a 4 day streak',
-          progress: streakCount,
-          target: 4,
-          icon: 'local_fire_department',
-        ),
-        AchievementModel(
-          id: 'habit',
-          title: 'Ritual Builder',
-          description: 'Complete 3 habits in one day',
-          progress: completedHabits.length,
-          target: 3,
-          icon: 'repeat',
-        ),
-      ];
+    AchievementModel(
+      id: 'first-focus',
+      title: 'Focus Starter',
+      description: 'Complete 3 focus sessions',
+      progress: sessions.length,
+      target: 3,
+      icon: 'timer',
+    ),
+    AchievementModel(
+      id: 'task-run',
+      title: 'Task Finisher',
+      description: 'Complete 5 tasks',
+      progress: completedTasks.length,
+      target: 5,
+      icon: 'check_circle',
+    ),
+    AchievementModel(
+      id: 'streak',
+      title: 'Consistency',
+      description: 'Maintain a 4 day streak',
+      progress: streakCount,
+      target: 4,
+      icon: 'local_fire_department',
+    ),
+    AchievementModel(
+      id: 'habit',
+      title: 'Ritual Builder',
+      description: 'Complete 3 habits in one day',
+      progress: completedHabits.length,
+      target: 3,
+      icon: 'repeat',
+    ),
+  ];
 }
 
 class StudyDataController extends AsyncNotifier<StudyDataState> {
@@ -666,9 +666,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       subtasks: task.subtasks
           .map(
             (item) => item.id == subtask.id
-                ? item.copyWith(isCompleted: !item.isCompleted)
-                : item,
-          )
+            ? item.copyWith(isCompleted: !item.isCompleted)
+            : item,
+      )
           .toList(),
       updatedAt: DateTime.now(),
     );
@@ -680,10 +680,10 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     if (current == null) return;
 
     for (final task
-        in current.completedTasks.where((item) => !item.isArchived)) {
+    in current.completedTasks.where((item) => !item.isArchived)) {
       await ref.read(studyRepositoryProvider).saveTask(
-            task.copyWith(isArchived: true, updatedAt: DateTime.now()),
-          );
+        task.copyWith(isArchived: true, updatedAt: DateTime.now()),
+      );
     }
     await _softRefresh();
   }
@@ -729,15 +729,15 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
         ? habit.goalCount
         : habit.completedCount + 1;
     await ref.read(studyRepositoryProvider).saveHabit(
-          habit.copyWith(
-            completedCount: nextCompleted,
-            streakCount: nextCompleted >= habit.goalCount
-                ? habit.streakCount + 1
-                : habit.streakCount,
-            lastCompletedAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
-        );
+      habit.copyWith(
+        completedCount: nextCompleted,
+        streakCount: nextCompleted >= habit.goalCount
+            ? habit.streakCount + 1
+            : habit.streakCount,
+        lastCompletedAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+    );
     HapticFeedback.lightImpact();
     await _softRefresh();
   }
@@ -781,12 +781,12 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
 
     if (authState?.user != null) {
       await ref.read(authControllerProvider.notifier).updateProfile(
-            authState!.user!.copyWith(
-              preferredLanguage: settings.languageCode,
-              themeMode: settings.themeMode,
-              updatedAt: DateTime.now(),
-            ),
-          );
+        authState!.user!.copyWith(
+          preferredLanguage: settings.languageCode,
+          themeMode: settings.themeMode,
+          updatedAt: DateTime.now(),
+        ),
+      );
     }
 
     await _softRefresh();
@@ -810,12 +810,12 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
 }
 
 final studyDataControllerProvider =
-    AsyncNotifierProvider<StudyDataController, StudyDataState>(
+AsyncNotifierProvider<StudyDataController, StudyDataState>(
   StudyDataController.new,
 );
 
 final currentUserProvider = Provider<AppUserModel?>(
-  (ref) => ref.watch(authControllerProvider).valueOrNull?.user,
+      (ref) => ref.watch(authControllerProvider).valueOrNull?.user,
 );
 
 final localeProvider = Provider<Locale?>((ref) {
@@ -847,9 +847,9 @@ final themeModeProvider = Provider<ThemeMode>((ref) {
 
 final accessibilityModeProvider = Provider<bool>((ref) {
   return ref
-          .watch(studyDataControllerProvider)
-          .valueOrNull
-          ?.settings
-          .accessibilityMode ??
+      .watch(studyDataControllerProvider)
+      .valueOrNull
+      ?.settings
+      .accessibilityMode ??
       false;
 });
