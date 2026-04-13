@@ -79,6 +79,8 @@ extension BuildContextX on BuildContext {
         'invalid_credentials' => l10n.errorInvalidCredentials,
         'duplicate_email' => l10n.errorDuplicateEmail,
         'missing_user' => l10n.errorMissingUser,
+        'email_confirmation_required' => _emailConfirmationRequiredMessage(),
+        'google_oauth_incomplete' => _googleOAuthIncompleteMessage(),
         _ => l10n.genericErrorMessage,
       };
     }
@@ -98,9 +100,36 @@ extension BuildContextX on BuildContext {
       if (message.contains('password should be at least')) {
         return l10n.validationMinLength(6);
       }
+      if (message.contains('email not confirmed')) {
+        return _emailConfirmationRequiredMessage();
+      }
+      if (message.contains('provider is not enabled') ||
+          message.contains('unsupported provider') ||
+          message.contains('oauth')) {
+        return _googleOAuthIncompleteMessage();
+      }
       return l10n.genericErrorMessage;
     }
 
     return l10n.genericErrorMessage;
+  }
+
+  String _emailConfirmationRequiredMessage() {
+    return switch (Localizations.localeOf(this).languageCode) {
+      'ar' => 'تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول.',
+      'tr' => 'Hesabini onaylamak icin e-postani kontrol et, sonra giris yap.',
+      _ => 'Check your email to confirm your account, then sign in.',
+    };
+  }
+
+  String _googleOAuthIncompleteMessage() {
+    return switch (Localizations.localeOf(this).languageCode) {
+      'ar' =>
+        'لم يكتمل تسجيل الدخول عبر Google. تحقق من Client ID وClient Secret داخل Supabase، ومن رابط callback، ومن test users في Google Console.',
+      'tr' =>
+        'Google girisi tamamlanmadi. Supabase icindeki Client ID ve Client Secret ayarlarini, callback URL adresini ve Google test users listesini kontrol et.',
+      _ =>
+        'Google sign-in did not finish. Verify the Client ID and Client Secret in Supabase, the callback URL, and your Google test users.',
+    };
   }
 }

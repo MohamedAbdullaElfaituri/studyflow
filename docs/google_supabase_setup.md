@@ -6,10 +6,17 @@ This guide matches the current mobile auth flow in the app.
 
 - Supabase mode is enabled only when you pass `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
 - If those values are missing, the app now falls back to local demo mode.
+- The current project ref in this repo is `rjnxrgzxytpjqdbqaizj`.
 - The mobile auth deep link used by the app is:
 
 ```text
 com.mohamedahmet.studyflow://login-callback/
+```
+
+- The Supabase OAuth callback for this project is:
+
+```text
+https://rjnxrgzxytpjqdbqaizj.supabase.co/auth/v1/callback
 ```
 
 ## 2. Files involved in auth
@@ -78,6 +85,23 @@ Paste:
 
 Then save.
 
+Important for the current `Study Flow` project:
+
+- The `Client ID` saved in Supabase must exactly match the active Google Cloud OAuth client.
+- Based on the configuration captured on April 13, 2026, the correct Google web client ID is:
+
+```text
+698379169954-ilukq8diso8eo2v87b383mcjad80vq0p.apps.googleusercontent.com
+```
+
+- If Supabase still shows a different client such as:
+
+```text
+698379169954-si1o2kvvadvlai7lfs2beq3jfibqufpq.apps.googleusercontent.com
+```
+
+  replace it with the correct one above and save again. A mismatched client ID and secret pair will break Google sign-in.
+
 ## 4. Google Cloud Console setup
 
 ### 4.1 Create or choose a project
@@ -111,10 +135,8 @@ This is correct for Supabase Google auth because Google redirects to Supabase fi
 Add this exact URI in Google Cloud:
 
 ```text
-https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
+https://rjnxrgzxytpjqdbqaizj.supabase.co/auth/v1/callback
 ```
-
-Replace `YOUR_PROJECT_REF` with your real Supabase project ref.
 
 You do not put the mobile custom scheme in Google Cloud for this Supabase flow.
 The custom scheme belongs in Supabase `Redirect URLs`.
@@ -201,9 +223,11 @@ Test these flows on a real phone:
 Check all of these:
 
 - Google provider is enabled in Supabase
-- Google client ID and secret are saved in Supabase
-- Google Cloud redirect URI is exactly `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+- Google client ID and secret are saved in Supabase and belong to the same Google OAuth client
+- Supabase Google `Client ID` is `698379169954-ilukq8diso8eo2v87b383mcjad80vq0p.apps.googleusercontent.com`
+- Google Cloud redirect URI is exactly `https://rjnxrgzxytpjqdbqaizj.supabase.co/auth/v1/callback`
 - Supabase `Redirect URLs` contains `com.mohamedahmet.studyflow://login-callback/`
+- If Google Cloud is still in `Testing`, your sign-in email is added under `Test users`
 
 ### Password reset email sends, but the app does not open the reset screen
 
@@ -221,7 +245,17 @@ Check all of these:
 - `SUPABASE_URL` is not empty
 - `SUPABASE_ANON_KEY` is not empty
 
-## 10. Useful commands
+## 10. Current fix summary
+
+The most important fixes for this repo and project are:
+
+1. In Supabase `Authentication -> Providers -> Google`, replace the old client ID with the Google Cloud client ID that ends in `ilukq8diso8eo2v87b383mcjad80vq0p`.
+2. Keep Supabase `Redirect URLs` set to `com.mohamedahmet.studyflow://login-callback/`.
+3. Keep Google Cloud `Authorized redirect URIs` set to `https://rjnxrgzxytpjqdbqaizj.supabase.co/auth/v1/callback`.
+4. If `Publishing status` is still `Testing`, add every email that will test sign-in under `Test users`.
+5. Run the new SQL migration in [supabase/migrations/003_auth_profile_defaults.sql](/c:/Users/moham/studyflow/supabase/migrations/003_auth_profile_defaults.sql) so new users inherit the correct profile defaults from auth metadata.
+
+## 11. Useful commands
 
 ```bash
 flutter pub get

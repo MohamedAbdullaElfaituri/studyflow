@@ -32,11 +32,19 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+
+
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/branding/app_icon.png"
+  image_path: "assets/branding/app_logo.png"
 flutter:
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
   uses-material-design: true
   generate: true
   assets:

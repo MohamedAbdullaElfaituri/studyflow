@@ -344,24 +344,11 @@ class SupabaseAuthRepository implements AuthRepository {
       throw const AppException('missing_user');
     }
 
-    final now = DateTime.now();
-    final profile = AppUserModel(
-      id: user.id,
-      fullName: fullName.trim(),
-      email: email.trim(),
-      avatarUrl: null,
-      username: _suggestUsername(fullName, email),
-      bio: '',
-      university: null,
-      department: null,
-      preferredLanguage: preferredLanguage,
-      themeMode: 'system',
-      createdAt: now,
-      updatedAt: now,
-    );
+    if (response.session == null) {
+      throw const AppException('email_confirmation_required');
+    }
 
-    await _client.from('profiles').upsert(profile.toJson());
-    return profile;
+    return _fetchProfile(user);
   }
 
   @override
@@ -382,23 +369,32 @@ class SupabaseAuthRepository implements AuthRepository {
     );
 
     if (!launched) {
-      throw const AppException('missing_user');
+      throw const AppException('google_oauth_incomplete');
     }
 
-    final authState = await _client.auth.onAuthStateChange
-        .firstWhere(
-          (event) =>
-              event.event == AuthChangeEvent.signedIn ||
-              event.session?.user != null,
-        )
-        .timeout(const Duration(minutes: 2));
+    try {
+      final authState = await _client.auth.onAuthStateChange
+          .firstWhere(
+            (event) =>
+                event.event == AuthChangeEvent.signedIn ||
+                event.session?.user != null,
+          )
+          .timeout(const Duration(minutes: 2));
 
-    final user = authState.session?.user ?? _client.auth.currentUser;
-    if (user == null) {
-      throw const AppException('missing_user');
+      final user = authState.session?.user ?? _client.auth.currentUser;
+      if (user == null) {
+        throw const AppException('google_oauth_incomplete');
+      }
+
+      return _fetchProfile(user);
+    } on TimeoutException {
+      final user = _client.auth.currentUser;
+      if (user != null) {
+        return _fetchProfile(user);
+      }
+
+      throw const AppException('google_oauth_incomplete');
     }
-
-    return _fetchProfile(user);
   }
 
   @override

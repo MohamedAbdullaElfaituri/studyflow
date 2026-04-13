@@ -131,7 +131,7 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         StatusPill(
                           label: isCloudSyncEnabled
-                              ? context.copy.googleOAuthReadyLabel
+                              ? 'Google OAuth'
                               : context.copy.workspaceDemoChip,
                           color: workspaceColor,
                         ),
