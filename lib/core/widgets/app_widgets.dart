@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class AppPage extends StatelessWidget {
           start: -20,
           child: _AmbientOrb(
             color: (isDark ? AppColors.secondary : AppColors.seed)
-                .withOpacity(0.16),
+                .withValues(alpha: 0.16),
             size: 160,
           ),
         ),
@@ -64,7 +65,7 @@ class AppPage extends StatelessWidget {
           top: 180,
           end: -30,
           child: _AmbientOrb(
-            color: AppColors.tertiary.withOpacity(0.12),
+            color: AppColors.tertiary.withValues(alpha: 0.12),
             size: 180,
           ),
         ),
@@ -72,7 +73,7 @@ class AppPage extends StatelessWidget {
           bottom: 90,
           start: 24,
           child: _AmbientOrb(
-            color: AppColors.success.withOpacity(0.1),
+            color: AppColors.success.withValues(alpha: 0.1),
             size: 120,
           ),
         ),
@@ -80,7 +81,7 @@ class AppPage extends StatelessWidget {
           top: 260,
           start: 110,
           child: _AmbientOrb(
-            color: AppColors.seed.withOpacity(isDark ? 0.08 : 0.06),
+            color: AppColors.seed.withValues(alpha: isDark ? 0.08 : 0.06),
             size: 110,
           ),
         ),
@@ -105,6 +106,64 @@ class AppPage extends StatelessWidget {
   }
 }
 
+enum _MainNavTab {
+  home,
+  tasks,
+  calendar,
+  focus,
+  profile,
+}
+
+class _MainNavItemData {
+  const _MainNavItemData({
+    required this.tab,
+    required this.label,
+    required this.shortLabel,
+    required this.icon,
+    required this.selectedIcon,
+    required this.accent,
+  });
+
+  final _MainNavTab tab;
+  final String label;
+  final String shortLabel;
+  final IconData icon;
+  final IconData selectedIcon;
+  final Color accent;
+}
+
+String _shortNavLabel(BuildContext context, _MainNavTab tab) {
+  final code = Localizations.localeOf(context).languageCode;
+
+  if (code == 'tr') {
+    return switch (tab) {
+      _MainNavTab.home => 'Ana',
+      _MainNavTab.tasks => 'Gorev',
+      _MainNavTab.calendar => 'Takvim',
+      _MainNavTab.focus => 'Odak',
+      _MainNavTab.profile => 'Profil',
+    };
+  }
+
+  if (code == 'ar') {
+    return switch (tab) {
+      _MainNavTab.home => 'الرئيسية',
+      _MainNavTab.tasks => 'المهام',
+      _MainNavTab.calendar => 'التقويم',
+      _MainNavTab.focus => 'التركيز',
+      _MainNavTab.profile => 'الملف',
+    };
+  }
+
+  return switch (tab) {
+    _MainNavTab.home => 'Home',
+    _MainNavTab.tasks => 'Tasks',
+    _MainNavTab.calendar => 'Plan',
+    _MainNavTab.focus => 'Focus',
+    _MainNavTab.profile => 'Profile',
+  };
+}
+
 class MainNavigationShell extends StatelessWidget {
   const MainNavigationShell({
     required this.navigationShell,
@@ -117,6 +176,48 @@ class MainNavigationShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final navItems = [
+      _MainNavItemData(
+        tab: _MainNavTab.home,
+        label: l10n.homeTab,
+        shortLabel: _shortNavLabel(context, _MainNavTab.home),
+        icon: Icons.dashboard_customize_outlined,
+        selectedIcon: Icons.dashboard_customize_rounded,
+        accent: AppColors.seed,
+      ),
+      _MainNavItemData(
+        tab: _MainNavTab.tasks,
+        label: l10n.tasksTab,
+        shortLabel: _shortNavLabel(context, _MainNavTab.tasks),
+        icon: Icons.task_alt_outlined,
+        selectedIcon: Icons.task_alt_rounded,
+        accent: AppColors.secondary,
+      ),
+      _MainNavItemData(
+        tab: _MainNavTab.calendar,
+        label: l10n.calendarTab,
+        shortLabel: _shortNavLabel(context, _MainNavTab.calendar),
+        icon: Icons.event_note_outlined,
+        selectedIcon: Icons.event_note_rounded,
+        accent: AppColors.tertiary,
+      ),
+      _MainNavItemData(
+        tab: _MainNavTab.focus,
+        label: l10n.focusTab,
+        shortLabel: _shortNavLabel(context, _MainNavTab.focus),
+        icon: Icons.timer_outlined,
+        selectedIcon: Icons.timer_rounded,
+        accent: AppColors.warning,
+      ),
+      _MainNavItemData(
+        tab: _MainNavTab.profile,
+        label: l10n.profileTab,
+        shortLabel: _shortNavLabel(context, _MainNavTab.profile),
+        icon: Icons.account_circle_outlined,
+        selectedIcon: Icons.account_circle_rounded,
+        accent: AppColors.success,
+      ),
+    ];
 
     return Stack(
       children: [
@@ -145,7 +246,8 @@ class MainNavigationShell extends StatelessWidget {
           top: -40,
           start: -20,
           child: _AmbientOrb(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.16),
+            color:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
             size: 160,
           ),
         ),
@@ -159,61 +261,242 @@ class MainNavigationShell extends StatelessWidget {
               AppSpacing.md,
               bottomInset > AppSpacing.sm ? bottomInset : AppSpacing.md,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.92),
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 28,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: NavigationBar(
-                backgroundColor: Colors.transparent,
-                selectedIndex: navigationShell.currentIndex,
-                labelBehavior:
-                    NavigationDestinationLabelBehavior.onlyShowSelected,
-                onDestinationSelected: (index) {
-                  navigationShell.goBranch(
-                    index,
-                    initialLocation: index == navigationShell.currentIndex,
-                  );
-                },
-                destinations: [
-                  NavigationDestination(
-                    icon: const Icon(Icons.dashboard_outlined),
-                    selectedIcon: const Icon(Icons.dashboard_rounded),
-                    label: l10n.homeTab,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.checklist_rtl_outlined),
-                    selectedIcon: const Icon(Icons.checklist_rtl_rounded),
-                    label: l10n.tasksTab,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    selectedIcon: const Icon(Icons.calendar_month_rounded),
-                    label: l10n.calendarTab,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.timer_outlined),
-                    selectedIcon: const Icon(Icons.timer_rounded),
-                    label: l10n.focusTab,
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.person_outline_rounded),
-                    selectedIcon: const Icon(Icons.person_rounded),
-                    label: l10n.profileTab,
-                  ),
-                ],
-              ),
+            child: _StudyFlowBottomBar(
+              currentIndex: navigationShell.currentIndex,
+              items: navItems,
+              onSelected: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                );
+              },
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StudyFlowBottomBar extends StatelessWidget {
+  const _StudyFlowBottomBar({
+    required this.currentIndex,
+    required this.items,
+    required this.onSelected,
+  });
+
+  final int currentIndex;
+  final List<_MainNavItemData> items;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 380;
+        final useShortLabel = constraints.maxWidth < 430;
+        final horizontalPadding = compact ? AppSpacing.xs : AppSpacing.sm;
+        final verticalPadding = compact ? AppSpacing.xs : AppSpacing.sm;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    scheme.surface.withValues(alpha: 0.92),
+                    scheme.surfaceContainerHigh.withValues(alpha: 0.88),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.34),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 32,
+                    offset: const Offset(0, 18),
+                  ),
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
+                ),
+                child: Row(
+                  textDirection: TextDirection.ltr,
+                  children: List.generate(items.length, (index) {
+                    final item = items[index];
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 2 : 4,
+                        ),
+                        child: _StudyFlowBottomBarItem(
+                          data: item,
+                          selected: index == currentIndex,
+                          useShortLabel: useShortLabel,
+                          compact: compact,
+                          onTap: () => onSelected(index),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StudyFlowBottomBarItem extends StatelessWidget {
+  const _StudyFlowBottomBarItem({
+    required this.data,
+    required this.selected,
+    required this.useShortLabel,
+    required this.compact,
+    required this.onTap,
+  });
+
+  final _MainNavItemData data;
+  final bool selected;
+  final bool useShortLabel;
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final label = useShortLabel ? data.shortLabel : data.label;
+    final iconSize = compact ? 18.0 : 20.0;
+    final bubbleSize = compact ? 38.0 : 42.0;
+    final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+          color: selected ? data.accent : scheme.onSurfaceVariant,
+          letterSpacing: 0.1,
+        );
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: data.label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 4 : 6,
+              vertical: compact ? 8 : 10,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: selected
+                  ? LinearGradient(
+                      colors: [
+                        data.accent.withValues(alpha: 0.24),
+                        data.accent.withValues(alpha: 0.08),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )
+                  : null,
+              border: Border.all(
+                color: selected
+                    ? data.accent.withValues(alpha: 0.3)
+                    : Colors.transparent,
+              ),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: data.accent.withValues(alpha: 0.18),
+                        blurRadius: 18,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : const [],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  width: bubbleSize,
+                  height: bubbleSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: selected
+                        ? LinearGradient(
+                            colors: [
+                              data.accent,
+                              data.accent.withValues(alpha: 0.72),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    color: selected
+                        ? null
+                        : scheme.surface.withValues(alpha: 0.42),
+                    border: Border.all(
+                      color: selected
+                          ? data.accent.withValues(alpha: 0.18)
+                          : scheme.outlineVariant.withValues(alpha: 0.26),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (selected ? data.accent : scheme.shadow)
+                            .withValues(alpha: selected ? 0.24 : 0.08),
+                        blurRadius: selected ? 18 : 10,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    selected ? data.selectedIcon : data.icon,
+                    size: iconSize,
+                    color:
+                        selected ? scheme.onPrimary : scheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: compact ? 5 : 6),
+                SizedBox(
+                  height: compact ? 14 : 16,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: labelStyle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -235,25 +518,30 @@ class SectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).colorScheme.surface.withOpacity(0.98),
-            Theme.of(context).colorScheme.surface.withOpacity(0.88),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.98),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.88),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.38),
+          color: Theme.of(context)
+              .colorScheme
+              .outlineVariant
+              .withValues(alpha: 0.38),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.07,
+            color: Colors.black.withValues(
+              alpha:
+                  Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.07,
             ),
             blurRadius: 32,
             offset: const Offset(0, 18),
           ),
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            color:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
             blurRadius: 22,
             offset: const Offset(0, 6),
           ),
@@ -296,7 +584,7 @@ class HeroMetricCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: color.withOpacity(0.16),
+                backgroundColor: color.withValues(alpha: 0.16),
                 child: Icon(icon, color: color),
               ),
               const Spacer(),
@@ -359,7 +647,8 @@ class GradientBanner extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.28),
+            color:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
             blurRadius: 30,
             offset: const Offset(0, 16),
           ),
@@ -462,7 +751,7 @@ class MetricTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: (color ?? scheme.primary).withOpacity(0.14),
+            backgroundColor: (color ?? scheme.primary).withValues(alpha: 0.14),
             child: Icon(icon, color: color ?? scheme.primary),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -683,7 +972,7 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -733,7 +1022,7 @@ class CourseAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: size / 2,
-      backgroundColor: Color(course.color).withOpacity(0.15),
+      backgroundColor: Color(course.color).withValues(alpha: 0.15),
       child: Text(
         (course.title.isEmpty ? '?' : course.title.substring(0, 1))
             .toUpperCase(),
@@ -774,7 +1063,9 @@ class QuickActionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: scheme.outlineVariant.withOpacity(0.6)),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.6),
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -929,7 +1220,7 @@ class ProgressRing extends StatelessWidget {
                 painter: _ProgressRingPainter(
                   progress: animatedProgress,
                   accent: color,
-                  track: scheme.outlineVariant.withOpacity(0.2),
+                  track: scheme.outlineVariant.withValues(alpha: 0.2),
                 ),
               );
             },
@@ -1000,8 +1291,8 @@ class WeekSparkBars extends StatelessWidget {
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        color.withOpacity(0.92),
-                        color.withOpacity(0.26),
+                        color.withValues(alpha: 0.92),
+                        color.withValues(alpha: 0.26),
                       ],
                     ),
                   ),
@@ -1064,7 +1355,7 @@ class _AmbientOrb extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
-            colors: [color, color.withOpacity(0)],
+            colors: [color, color.withValues(alpha: 0)],
           ),
         ),
       ),
@@ -1101,8 +1392,8 @@ class _ProgressRingPainter extends CustomPainter {
         startAngle: -math.pi / 2,
         endAngle: (math.pi * 2) - (math.pi / 2),
         colors: [
-          accent.withOpacity(0.22),
-          accent.withOpacity(0.78),
+          accent.withValues(alpha: 0.22),
+          accent.withValues(alpha: 0.78),
           accent,
         ],
       ).createShader(rect)

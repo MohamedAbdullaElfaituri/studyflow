@@ -80,6 +80,109 @@ String _resetPasswordFlowSuccess(BuildContext context) {
   return 'Your password was updated.';
 }
 
+String _localizedSplashCopy(
+  BuildContext context, {
+  required String en,
+  required String ar,
+  required String tr,
+}) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'tr') return tr;
+  if (code == 'ar') return ar;
+  return en;
+}
+
+String _splashEyebrow(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Your study space is getting ready',
+      ar: 'مساحتك الدراسية تستعد الآن',
+      tr: 'Calisma alani hazirlaniyor',
+    );
+
+String _splashLoadingTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Preparing everything for a smooth start',
+      ar: 'نجهّز كل شيء لبداية سلسة',
+      tr: 'Rahat bir baslangic icin her sey hazirlaniyor',
+    );
+
+String _splashLoadingBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'We are loading your tasks, focus tools, and study progress so the app opens ready to use.',
+      ar: 'نحمّل مهامك وأدوات التركيز وتقدّمك الدراسي حتى تفتح الواجهة وهي جاهزة للاستخدام.',
+      tr: 'Gorevlerin, odak araclarin ve calisma ilerlemen yukleniyor; uygulama hazir acilsin.',
+    );
+
+String _splashProgressLabel(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Opening your dashboard...',
+      ar: 'جاري فتح لوحتك...',
+      tr: 'Panelin aciliyor...',
+    );
+
+String _splashChipPhone(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Phone friendly',
+      ar: 'جاهز للهاتف',
+      tr: 'Telefon uyumlu',
+    );
+
+String _splashChipLanguages(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'EN • AR • TR',
+      ar: 'EN • AR • TR',
+      tr: 'EN • AR • TR',
+    );
+
+String _splashChipSync(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Secure sync',
+      ar: 'مزامنة آمنة',
+      tr: 'Guvenli senkron',
+    );
+
+String _splashTasksTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Tasks',
+      ar: 'المهام',
+      tr: 'Gorevler',
+    );
+
+String _splashTasksBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Your plans and priorities are being organized.',
+      ar: 'يتم ترتيب خططك وأولوياتك الآن.',
+      tr: 'Planlarin ve onceliklerin duzenleniyor.',
+    );
+
+String _splashFocusTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Focus',
+      ar: 'التركيز',
+      tr: 'Odak',
+    );
+
+String _splashFocusBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Sessions and routines are getting ready.',
+      ar: 'جلساتك وروتينك قيد التحضير.',
+      tr: 'Seanslarin ve rutinlerin hazirlaniyor.',
+    );
+
+String _splashProfileTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Profile',
+      ar: 'الملف الشخصي',
+      tr: 'Profil',
+    );
+
+String _splashProfileBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Preferences and language choices follow you.',
+      ar: 'تفضيلاتك واختيارات اللغة تبقى معك.',
+      tr: 'Tercihlerin ve dil secimin seninle gelir.',
+    );
+
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
@@ -88,32 +191,421 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppPage(
-      child: Center(
-        child: RevealOnBuild(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const _AppLogo(size: 88),
-              const SizedBox(height: AppSpacing.xl),
-              Text(
-                context.l10n.appName,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
+      padding: EdgeInsets.zero,
+      child: RevealOnBuild(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 920;
+            final isMedium = constraints.maxWidth >= 640;
+            final horizontalPadding = isWide
+                ? AppSpacing.xxxl
+                : (isMedium ? AppSpacing.xxl : AppSpacing.lg);
+            final verticalPadding =
+                constraints.maxHeight < 720 ? AppSpacing.lg : AppSpacing.xxl;
+
+            final content = isWide
+                ? const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 11,
+                        child: _SplashIntroPanel(isCompact: false),
+                      ),
+                      SizedBox(width: AppSpacing.xl),
+                      Expanded(
+                        flex: 10,
+                        child: _SplashVisualPanel(isCompact: false),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _SplashIntroPanel(isCompact: !isMedium),
+                      const SizedBox(height: AppSpacing.lg),
+                      _SplashVisualPanel(isCompact: !isMedium),
+                    ],
+                  );
+
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isWide ? 1120 : 760),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                        vertical: verticalPadding,
+                      ),
+                      child: content,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Theme.of(context).colorScheme.primary,
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashIntroPanel extends StatelessWidget {
+  const _SplashIntroPanel({required this.isCompact});
+
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return _FormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              _splashEyebrow(context),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: scheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _AppLogo(size: isCompact ? 64 : 72),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: isCompact ? 220 : 280),
+                child: Text(
+                  context.l10n.appName,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.2,
+                    height: 1.05,
+                    color: scheme.onSurface,
+                  ),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            _splashLoadingTitle(context),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontSize: isCompact ? 28 : 36,
+              fontWeight: FontWeight.w900,
+              height: 1.08,
+              letterSpacing: -1.1,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            _splashLoadingBody(context),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              height: 1.5,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: isCompact ? AppSpacing.lg : AppSpacing.xl),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              _SplashFeatureChip(
+                icon: Icons.phone_iphone_rounded,
+                label: _splashChipPhone(context),
+                accent: scheme.primary,
+              ),
+              _SplashFeatureChip(
+                icon: Icons.translate_rounded,
+                label: _splashChipLanguages(context),
+                accent: scheme.tertiary,
+              ),
+              _SplashFeatureChip(
+                icon: Icons.cloud_done_rounded,
+                label: _splashChipSync(context),
+                accent: scheme.secondary,
+              ),
+            ],
+          ),
+          SizedBox(height: isCompact ? AppSpacing.lg : AppSpacing.xl),
+          Text(
+            _splashProgressLabel(context),
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: LinearProgressIndicator(
+              minHeight: 8,
+              backgroundColor: scheme.primary.withValues(alpha: 0.12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SplashVisualPanel extends StatelessWidget {
+  const _SplashVisualPanel({required this.isCompact});
+
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return _FormCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              gradient: LinearGradient(
+                colors: [
+                  scheme.primaryContainer.withValues(alpha: 0.96),
+                  scheme.surfaceContainerHighest.withValues(alpha: 0.94),
+                  scheme.tertiaryContainer.withValues(alpha: 0.86),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.45),
+              ),
+            ),
+            child: AspectRatio(
+              aspectRatio: isCompact ? 1.08 : 1.18,
+              child: Stack(
+                children: [
+                  PositionedDirectional(
+                    top: -26,
+                    end: -18,
+                    child: _SplashOrb(
+                      size: isCompact ? 118 : 144,
+                      color: scheme.primary.withValues(alpha: 0.12),
+                    ),
+                  ),
+                  PositionedDirectional(
+                    bottom: -36,
+                    start: -10,
+                    child: _SplashOrb(
+                      size: isCompact ? 132 : 164,
+                      color: scheme.tertiary.withValues(alpha: 0.14),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.all(
+                        isCompact ? AppSpacing.lg : AppSpacing.xl,
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/illustrations/undraw_onboarding_dcq2.svg',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final tileWidth = constraints.maxWidth >= 600
+                  ? (constraints.maxWidth - (AppSpacing.md * 2)) / 3
+                  : constraints.maxWidth >= 380
+                      ? (constraints.maxWidth - AppSpacing.md) / 2
+                      : constraints.maxWidth;
+
+              return Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
+                children: [
+                  SizedBox(
+                    width: tileWidth,
+                    child: _SplashStatusTile(
+                      icon: Icons.task_alt_rounded,
+                      title: _splashTasksTitle(context),
+                      body: _splashTasksBody(context),
+                      accent: scheme.primary,
+                    ),
+                  ),
+                  SizedBox(
+                    width: tileWidth,
+                    child: _SplashStatusTile(
+                      icon: Icons.timer_rounded,
+                      title: _splashFocusTitle(context),
+                      body: _splashFocusBody(context),
+                      accent: scheme.secondary,
+                    ),
+                  ),
+                  SizedBox(
+                    width: tileWidth,
+                    child: _SplashStatusTile(
+                      icon: Icons.account_circle_rounded,
+                      title: _splashProfileTitle(context),
+                      body: _splashProfileBody(context),
+                      accent: scheme.tertiary,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SplashFeatureChip extends StatelessWidget {
+  const _SplashFeatureChip({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: accent.withValues(alpha: 0.18),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: accent,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SplashStatusTile extends StatelessWidget {
+  const _SplashStatusTile({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.68),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: accent, size: 22),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            body,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              height: 1.45,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SplashOrb extends StatelessWidget {
+  const _SplashOrb({
+    required this.size,
+    required this.color,
+  });
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
       ),
     );
   }
@@ -200,9 +692,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authControllerProvider.notifier).signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
     } catch (error) {
       if (!mounted) return;
       context.showErrorNotification(context.resolveError(error));
@@ -244,12 +736,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Text(
             context.l10n.noAccountPrompt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           TextButton(
             onPressed:
-            isBusy ? null : () => context.push(SignupScreen.routePath),
+                isBusy ? null : () => context.push(SignupScreen.routePath),
             child: Text(context.l10n.signUpAction),
           ),
         ],
@@ -262,17 +754,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(
               context.l10n.loginTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.loginSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
             TextFormField(
@@ -426,10 +918,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       final result = await ref.read(authControllerProvider.notifier).signUp(
-        fullName: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+            fullName: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
 
       if (!mounted) return;
 
@@ -482,17 +974,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             Text(
               context.l10n.signUpTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               context.l10n.signUpSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
             TextFormField(
@@ -535,7 +1027,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscurePassword,
                   onToggle: () => setState(
-                        () => _obscurePassword = !_obscurePassword,
+                    () => _obscurePassword = !_obscurePassword,
                   ),
                 ),
               ),
@@ -557,7 +1049,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscureConfirm,
                   onToggle: () => setState(
-                        () => _obscureConfirm = !_obscureConfirm,
+                    () => _obscureConfirm = !_obscureConfirm,
                   ),
                 ),
               ),
@@ -622,8 +1114,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     try {
       await ref.read(authControllerProvider.notifier).sendPasswordReset(
-        _emailController.text.trim(),
-      );
+            _emailController.text.trim(),
+          );
 
       if (!mounted) return;
 
@@ -651,17 +1143,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           Text(
             context.l10n.forgotPasswordTitle,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             context.l10n.forgotPasswordSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Form(
@@ -678,7 +1170,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   decoration: InputDecoration(
                     labelText: context.l10n.emailLabel,
                     prefixIcon:
-                    const Icon(Icons.mail_outline_rounded, size: 20),
+                        const Icon(Icons.mail_outline_rounded, size: 20),
                   ),
                   validator: (value) =>
                       context.validationMessage(Validators.email(value)),
@@ -763,17 +1255,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             Text(
               _resetPasswordFlowTitle(context),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               _resetPasswordFlowSubtitle(context),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: AppSpacing.xl),
             TextFormField(
@@ -789,7 +1281,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscurePassword,
                   onToggle: () => setState(
-                        () => _obscurePassword = !_obscurePassword,
+                    () => _obscurePassword = !_obscurePassword,
                   ),
                 ),
               ),
@@ -811,7 +1303,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 suffixIcon: _VisibilityToggle(
                   obscure: _obscureConfirm,
                   onToggle: () => setState(
-                        () => _obscureConfirm = !_obscureConfirm,
+                    () => _obscureConfirm = !_obscureConfirm,
                   ),
                 ),
               ),
@@ -924,11 +1416,11 @@ class _LogoPanel extends StatelessWidget {
         Text(
           context.l10n.appName,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.2,
-            height: 1.05,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1.2,
+                height: 1.05,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
       ],
     );
@@ -956,7 +1448,7 @@ class _FormCard extends StatelessWidget {
           BoxShadow(
             color: scheme.shadow.withValues(
               alpha:
-              Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
+                  Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.06,
             ),
             blurRadius: 32,
             offset: const Offset(0, 8),
@@ -1058,8 +1550,8 @@ class _AuthDivider extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
           ),
         ),
         const Expanded(child: Divider()),
@@ -1148,22 +1640,22 @@ class _AsyncLabel extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       child: isLoading
           ? SizedBox(
-        key: const ValueKey('loading'),
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      )
+              key: const ValueKey('loading'),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            )
           : Text(
-        key: const ValueKey('label'),
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      ),
+              key: const ValueKey('label'),
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
     );
   }
 }

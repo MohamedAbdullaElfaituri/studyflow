@@ -17,6 +17,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(studyDataControllerProvider);
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+    final explicitLanguagePreference = ref.watch(appLocalePreferenceProvider);
 
     return AppPage(
       child: data.when(
@@ -30,10 +31,12 @@ class SettingsScreen extends ConsumerWidget {
           const supportedLanguages = {'en', 'tr', 'ar'};
           const supportedThemes = {'system', 'light', 'dark'};
           final selectedLanguage = supportedLanguages.contains(
-            studyData.settings.languageCode,
+            explicitLanguagePreference,
           )
-              ? studyData.settings.languageCode
-              : 'en';
+              ? explicitLanguagePreference!
+              : supportedLanguages.contains(studyData.settings.languageCode)
+                  ? studyData.settings.languageCode
+                  : 'en';
           final selectedTheme = supportedThemes.contains(
             studyData.settings.themeMode,
           )
@@ -79,7 +82,8 @@ class SettingsScreen extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: workspaceColor.withOpacity(0.14),
+                          backgroundColor:
+                              workspaceColor.withValues(alpha: 0.14),
                           child: Icon(
                             isCloudSyncEnabled
                                 ? Icons.cloud_done_rounded
@@ -223,6 +227,7 @@ class SettingsScreen extends ConsumerWidget {
                                 .read(studyDataControllerProvider.notifier)
                                 .updateSettings(
                                   studyData.settings.copyWith(
+                                    languageCode: selectedLanguage,
                                     themeMode: 'system',
                                     updatedAt: DateTime.now(),
                                   ),
@@ -237,6 +242,7 @@ class SettingsScreen extends ConsumerWidget {
                                 .read(studyDataControllerProvider.notifier)
                                 .updateSettings(
                                   studyData.settings.copyWith(
+                                    languageCode: selectedLanguage,
                                     themeMode: 'light',
                                     updatedAt: DateTime.now(),
                                   ),
@@ -251,6 +257,7 @@ class SettingsScreen extends ConsumerWidget {
                                 .read(studyDataControllerProvider.notifier)
                                 .updateSettings(
                                   studyData.settings.copyWith(
+                                    languageCode: selectedLanguage,
                                     themeMode: 'dark',
                                     updatedAt: DateTime.now(),
                                   ),
@@ -350,6 +357,7 @@ class SettingsScreen extends ConsumerWidget {
                         .read(studyDataControllerProvider.notifier)
                         .updateSettings(
                           studyData.settings.copyWith(
+                            languageCode: selectedLanguage,
                             accessibilityMode: value,
                             updatedAt: DateTime.now(),
                           ),

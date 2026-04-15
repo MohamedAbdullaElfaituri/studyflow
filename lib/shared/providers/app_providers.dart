@@ -54,16 +54,19 @@ final studyRepositoryProvider = Provider<StudyRepository>((ref) {
 class AppLocalePreferenceController extends Notifier<String?> {
   @override
   String? build() {
-    return ref
-        .watch(localStorageServiceProvider)
-        .readString(AppConstants.localePreferenceKey);
+    return _normalizeLocaleCode(
+      ref
+          .watch(localStorageServiceProvider)
+          .readString(AppConstants.localePreferenceKey),
+    );
   }
 
   Future<void> setLocale(String code) async {
-    state = code;
+    final normalized = _normalizeLocaleCode(code);
+    state = normalized;
     await ref
         .read(localStorageServiceProvider)
-        .writeString(AppConstants.localePreferenceKey, code);
+        .writeString(AppConstants.localePreferenceKey, normalized);
   }
 }
 
@@ -831,19 +834,17 @@ final currentUserProvider = Provider<AppUserModel?>(
 );
 
 final localeProvider = Provider<Locale?>((ref) {
-  final data = ref.watch(studyDataControllerProvider).valueOrNull;
-  final devicePreference = ref.watch(appLocalePreferenceProvider);
-  final persistedSettingsLanguage = data?.settings.userId.isNotEmpty == true
-      ? data?.settings.languageCode
-      : null;
-  final code = devicePreference ??
-      persistedSettingsLanguage ??
-      ref.watch(currentUserProvider)?.preferredLanguage;
-  if (code == null || code.isEmpty) {
-    return null;
-  }
+  final code = _normalizeLocaleCode(ref.watch(appLocalePreferenceProvider));
   return Locale(code);
 });
+
+String _normalizeLocaleCode(String? code) {
+  return switch (code?.trim().toLowerCase()) {
+    'tr' => 'tr',
+    'ar' => 'ar',
+    _ => 'en',
+  };
+}
 
 final themeModeProvider = Provider<ThemeMode>((ref) {
   final theme =

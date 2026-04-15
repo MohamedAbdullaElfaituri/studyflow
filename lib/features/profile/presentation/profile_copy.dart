@@ -170,6 +170,41 @@ class ProfileCopy {
         tr: 'Avatar, biyografi ve akademik kimliği güncelle',
         ar: 'حدّث الصورة والنبذة والهوية الأكاديمية',
       );
+  String get livePreview => _pick(
+        en: 'Live preview',
+        tr: 'Canli onizleme',
+        ar: 'معاينة مباشرة',
+      );
+  String get livePreviewSubtitle => _pick(
+        en: 'A polished identity card for the rest of your workspace.',
+        tr: 'Calisma alaninin geri kalani icin duzenli bir kimlik karti.',
+        ar: 'بطاقة هوية مرتبة لبقية مساحة عملك داخل التطبيق.',
+      );
+  String get coreIdentity => _pick(
+        en: 'Core identity',
+        tr: 'Temel kimlik',
+        ar: 'الهوية الأساسية',
+      );
+  String get coreIdentitySubtitle => _pick(
+        en: 'Your name and handle stay visible across the app.',
+        tr: 'Adin ve kullanici adin uygulama genelinde gorunur kalir.',
+        ar: 'اسمك واسم المستخدم يبقيان ظاهرين في أنحاء التطبيق.',
+      );
+  String get academicContext => _pick(
+        en: 'Academic context',
+        tr: 'Akademik baglam',
+        ar: 'السياق الأكاديمي',
+      );
+  String get academicContextSubtitle => _pick(
+        en: 'Department and university help personalize your study flow.',
+        tr: 'Bolum ve universite calisma akisina daha kisisel bir dokunus katar.',
+        ar: 'القسم والجامعة يساعدان في تخصيص تجربتك الدراسية.',
+      );
+  String get bioSubtitle => _pick(
+        en: 'Keep it warm, short, and clear in any language.',
+        tr: 'Her dilde sicak, kisa ve net tut.',
+        ar: 'اجعلها قصيرة وواضحة ومريحة بكل لغة.',
+      );
   String get passwordAndSecurity => _pick(
         en: 'Password and security',
         tr: 'Şifre ve güvenlik',
@@ -195,6 +230,16 @@ class ProfileCopy {
         tr: 'Fotoğraf yükle',
         ar: 'رفع صورة',
       );
+  String get changePhoto => _pick(
+        en: 'Change photo',
+        tr: 'Fotografi degistir',
+        ar: 'تغيير الصورة',
+      );
+  String get profilePhoto => _pick(
+        en: 'Profile photo',
+        tr: 'Profil fotografi',
+        ar: 'صورة الملف الشخصي',
+      );
   String get uploadHint => _pick(
         en: 'Use a clean portrait for a stronger presentation identity.',
         tr: 'Sunumda daha güçlü bir kimlik için temiz bir portre kullan.',
@@ -219,6 +264,16 @@ class ProfileCopy {
         en: 'Save profile',
         tr: 'Profili kaydet',
         ar: 'حفظ الملف الشخصي',
+      );
+  String get savingProfile => _pick(
+        en: 'Saving...',
+        tr: 'Kaydediliyor...',
+        ar: 'جارٍ الحفظ...',
+      );
+  String get saveProfileHint => _pick(
+        en: 'Changes sync to your account and appear across the app.',
+        tr: 'Degisiklikler hesabinla eszamanlanir ve uygulama genelinde gorunur.',
+        ar: 'سيتم مزامنة التغييرات مع حسابك وستظهر في أنحاء التطبيق.',
       );
   String get managePreferences => _pick(
         en: 'Manage recovery, notifications, and theme preferences',
