@@ -67,6 +67,15 @@ class AppRouter {
               : ResetPasswordScreen.routePath;
         }
 
+        if (authState.isAuthenticated) {
+          if (location == SplashScreen.routePath ||
+              location == OnboardingScreen.routePath ||
+              _authPaths.contains(location)) {
+            return HomeScreen.routePath;
+          }
+          return null;
+        }
+
         if (!authState.onboardingCompleted) {
           return location == OnboardingScreen.routePath
               ? null
@@ -80,12 +89,6 @@ class AppRouter {
                 : null;
           }
           return LoginScreen.routePath;
-        }
-
-        if (location == SplashScreen.routePath ||
-            location == OnboardingScreen.routePath ||
-            _authPaths.contains(location)) {
-          return HomeScreen.routePath;
         }
 
         return null;

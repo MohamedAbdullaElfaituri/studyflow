@@ -627,9 +627,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   final _departmentController = TextEditingController();
   bool _initialized = false;
   bool _uploadingAvatar = false;
+  bool _removingAvatar = false;
   bool _savingProfile = false;
 
-  bool get _isBusy => _uploadingAvatar || _savingProfile;
+  bool get _isBusy => _uploadingAvatar || _removingAvatar || _savingProfile;
 
   @override
   void dispose() {
@@ -667,296 +668,34 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       padding: EdgeInsets.zero,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 980;
-          final isMedium = constraints.maxWidth >= 680;
-          final horizontalPadding = isWide
+          final useTwoColumns = constraints.maxWidth >= 720;
+          final horizontalPadding = constraints.maxWidth >= 960
               ? AppSpacing.xxxl
-              : (isMedium ? AppSpacing.xxl : AppSpacing.lg);
+              : (constraints.maxWidth >= 680 ? AppSpacing.xxl : AppSpacing.lg);
           final verticalPadding =
               constraints.maxHeight < 760 ? AppSpacing.lg : AppSpacing.xxl;
 
-          final sidebar = Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              RevealOnBuild(
-                child: _EditProfileHero(
-                  user: user,
-                  copy: copy,
-                  compact: !isMedium,
-                  uploadingAvatar: _uploadingAvatar,
-                  onPickAvatar: _isBusy ? null : () => _pickAvatar(context),
-                ),
+          final saveButton = FilledButton(
+            onPressed: _isBusy ? null : () => _saveProfile(context, user),
+            style: FilledButton.styleFrom(
+              minimumSize: Size(
+                useTwoColumns ? 220 : double.infinity,
+                56,
               ),
-              const SizedBox(height: AppSpacing.lg),
-              RevealOnBuild(
-                delay: const Duration(milliseconds: 120),
-                child: _EditProfileSecurityCard(
-                  copy: copy,
-                  onTap: () => context.push(SettingsScreen.routePath),
-                ),
-              ),
-            ],
-          );
-
-          final formColumn = Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                RevealOnBuild(
-                  delay: const Duration(milliseconds: 160),
-                  child: _EditProfileSectionCard(
-                    icon: Icons.badge_rounded,
-                    accent: Theme.of(context).colorScheme.primary,
-                    title: copy.coreIdentity,
-                    subtitle: copy.coreIdentitySubtitle,
-                    child: Column(
-                      children: [
-                        LayoutBuilder(
-                          builder: (context, sectionConstraints) {
-                            final twoColumns =
-                                sectionConstraints.maxWidth >= 520;
-                            final firstNameField = TextFormField(
-                              controller: _firstNameController,
-                              textInputAction: TextInputAction.next,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: _fieldDecoration(
-                                copy.firstName,
-                                Icons.person_outline_rounded,
-                              ),
-                              validator: (value) => context.validationMessage(
-                                Validators.requiredField(value),
-                              ),
-                            );
-                            final lastNameField = TextFormField(
-                              controller: _lastNameController,
-                              textInputAction: TextInputAction.next,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: _fieldDecoration(
-                                copy.lastName,
-                                Icons.badge_outlined,
-                              ),
-                            );
-
-                            if (!twoColumns) {
-                              return Column(
-                                children: [
-                                  firstNameField,
-                                  const SizedBox(height: AppSpacing.md),
-                                  lastNameField,
-                                ],
-                              );
-                            }
-
-                            return Row(
-                              children: [
-                                Expanded(child: firstNameField),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(child: lastNameField),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        TextFormField(
-                          controller: _usernameController,
-                          textInputAction: TextInputAction.next,
-                          decoration: _fieldDecoration(
-                            copy.username,
-                            Icons.alternate_email_rounded,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                RevealOnBuild(
-                  delay: const Duration(milliseconds: 220),
-                  child: _EditProfileSectionCard(
-                    icon: Icons.edit_note_rounded,
-                    accent: Theme.of(context).colorScheme.secondary,
-                    title: copy.bio,
-                    subtitle: copy.bioSubtitle,
-                    child: TextFormField(
-                      controller: _bioController,
-                      minLines: 4,
-                      maxLines: 5,
-                      textInputAction: TextInputAction.newline,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: _fieldDecoration(
-                        copy.bio,
-                        Icons.notes_rounded,
-                        hint: copy.defaultBio,
-                        alignLabelWithHint: true,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                RevealOnBuild(
-                  delay: const Duration(milliseconds: 280),
-                  child: _EditProfileSectionCard(
-                    icon: Icons.school_rounded,
-                    accent: Theme.of(context).colorScheme.tertiary,
-                    title: copy.academicContext,
-                    subtitle: copy.academicContextSubtitle,
-                    child: LayoutBuilder(
-                      builder: (context, sectionConstraints) {
-                        final twoColumns = sectionConstraints.maxWidth >= 520;
-                        final departmentField = TextFormField(
-                          controller: _departmentController,
-                          textInputAction: TextInputAction.next,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: _fieldDecoration(
-                            copy.department,
-                            Icons.auto_stories_outlined,
-                          ),
-                        );
-                        final universityField = TextFormField(
-                          controller: _universityController,
-                          textInputAction: TextInputAction.done,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: _fieldDecoration(
-                            copy.university,
-                            Icons.account_balance_outlined,
-                          ),
-                        );
-
-                        if (!twoColumns) {
-                          return Column(
-                            children: [
-                              departmentField,
-                              const SizedBox(height: AppSpacing.md),
-                              universityField,
-                            ],
-                          );
-                        }
-
-                        return Row(
-                          children: [
-                            Expanded(child: departmentField),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(child: universityField),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                RevealOnBuild(
-                  delay: const Duration(milliseconds: 340),
-                  child: SectionCard(
-                    child: LayoutBuilder(
-                      builder: (context, sectionConstraints) {
-                        final stacked = sectionConstraints.maxWidth < 430;
-                        final saveButton = FilledButton(
-                          onPressed: _isBusy
-                              ? null
-                              : () => _saveProfile(context, user),
-                          style: FilledButton.styleFrom(
-                            minimumSize: Size(
-                              stacked ? double.infinity : 220,
-                              56,
-                            ),
-                          ),
-                          child: _BusyButtonLabel(
-                            isBusy: _savingProfile,
-                            label: copy.saveProfile,
-                            busyLabel: copy.savingProfile,
-                          ),
-                        );
-
-                        if (stacked) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                copy.saveProfile,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                copy.saveProfileHint,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              saveButton,
-                            ],
-                          );
-                        }
-
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    copy.saveProfile,
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    copy.saveProfileHint,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.lg),
-                            saveButton,
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
+            ),
+            child: _BusyButtonLabel(
+              isBusy: _savingProfile,
+              label: copy.saveProfile,
+              busyLabel: copy.savingProfile,
             ),
           );
-
-          final content = isWide
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 10, child: sidebar),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(flex: 12, child: formColumn),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    sidebar,
-                    const SizedBox(height: AppSpacing.lg),
-                    formColumn,
-                  ],
-                );
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: isWide ? 1160 : 760,
+                  maxWidth: useTwoColumns ? 880 : 760,
                   minHeight: constraints.maxHeight,
                 ),
                 child: Padding(
@@ -964,15 +703,193 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     horizontal: horizontalPadding,
                     vertical: verticalPadding,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      RevealOnBuild(
-                        child: _EditProfileTopBar(copy: copy),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      content,
-                    ],
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        RevealOnBuild(
+                          child: _EditProfileTopBar(copy: copy),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        RevealOnBuild(
+                          delay: const Duration(milliseconds: 80),
+                          child: _EditProfileSummaryCard(
+                            user: user,
+                            copy: copy,
+                            uploadingAvatar: _uploadingAvatar,
+                            removingAvatar: _removingAvatar,
+                            onPickAvatar:
+                                _isBusy ? null : () => _pickAvatar(context),
+                            onDeleteAvatar:
+                                _isBusy ? null : () => _deleteAvatar(context),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        RevealOnBuild(
+                          delay: const Duration(milliseconds: 140),
+                          child: _EditProfileSectionCard(
+                            icon: Icons.badge_rounded,
+                            accent: Theme.of(context).colorScheme.primary,
+                            title: copy.coreIdentity,
+                            child: Column(
+                              children: [
+                                LayoutBuilder(
+                                  builder: (context, sectionConstraints) {
+                                    final twoColumns =
+                                        sectionConstraints.maxWidth >= 520;
+                                    final firstNameField = TextFormField(
+                                      controller: _firstNameController,
+                                      textInputAction: TextInputAction.next,
+                                      textCapitalization:
+                                          TextCapitalization.words,
+                                      decoration: _fieldDecoration(
+                                        copy.firstName,
+                                        Icons.person_outline_rounded,
+                                      ),
+                                      validator: (value) =>
+                                          context.validationMessage(
+                                        Validators.requiredField(value),
+                                      ),
+                                    );
+                                    final lastNameField = TextFormField(
+                                      controller: _lastNameController,
+                                      textInputAction: TextInputAction.next,
+                                      textCapitalization:
+                                          TextCapitalization.words,
+                                      decoration: _fieldDecoration(
+                                        copy.lastName,
+                                        Icons.badge_outlined,
+                                      ),
+                                    );
+
+                                    if (!twoColumns) {
+                                      return Column(
+                                        children: [
+                                          firstNameField,
+                                          const SizedBox(height: AppSpacing.md),
+                                          lastNameField,
+                                        ],
+                                      );
+                                    }
+
+                                    return Row(
+                                      children: [
+                                        Expanded(child: firstNameField),
+                                        const SizedBox(width: AppSpacing.md),
+                                        Expanded(child: lastNameField),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                TextFormField(
+                                  controller: _usernameController,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: _fieldDecoration(
+                                    copy.username,
+                                    Icons.alternate_email_rounded,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                _ReadOnlyProfileField(
+                                  label: copy.email,
+                                  value: user.email,
+                                  icon: Icons.mail_outline_rounded,
+                                  forceLtr: true,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        RevealOnBuild(
+                          delay: const Duration(milliseconds: 200),
+                          child: _EditProfileSectionCard(
+                            icon: Icons.edit_note_rounded,
+                            accent: Theme.of(context).colorScheme.secondary,
+                            title: copy.bio,
+                            child: TextFormField(
+                              controller: _bioController,
+                              minLines: 4,
+                              maxLines: 5,
+                              textInputAction: TextInputAction.newline,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: _fieldDecoration(
+                                copy.bio,
+                                Icons.notes_rounded,
+                                hint: copy.defaultBio,
+                                alignLabelWithHint: true,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        RevealOnBuild(
+                          delay: const Duration(milliseconds: 260),
+                          child: _EditProfileSectionCard(
+                            icon: Icons.school_rounded,
+                            accent: Theme.of(context).colorScheme.tertiary,
+                            title: copy.academicContext,
+                            child: LayoutBuilder(
+                              builder: (context, sectionConstraints) {
+                                final twoColumns =
+                                    sectionConstraints.maxWidth >= 520;
+                                final departmentField = TextFormField(
+                                  controller: _departmentController,
+                                  textInputAction: TextInputAction.next,
+                                  textCapitalization: TextCapitalization.words,
+                                  decoration: _fieldDecoration(
+                                    copy.department,
+                                    Icons.auto_stories_outlined,
+                                  ),
+                                );
+                                final universityField = TextFormField(
+                                  controller: _universityController,
+                                  textInputAction: TextInputAction.done,
+                                  textCapitalization: TextCapitalization.words,
+                                  decoration: _fieldDecoration(
+                                    copy.university,
+                                    Icons.account_balance_outlined,
+                                  ),
+                                );
+
+                                if (!twoColumns) {
+                                  return Column(
+                                    children: [
+                                      departmentField,
+                                      const SizedBox(height: AppSpacing.md),
+                                      universityField,
+                                    ],
+                                  );
+                                }
+
+                                return Row(
+                                  children: [
+                                    Expanded(child: departmentField),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(child: universityField),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        RevealOnBuild(
+                          delay: const Duration(milliseconds: 320),
+                          child: SectionCard(
+                            child: Align(
+                              alignment: useTwoColumns
+                                  ? Alignment.centerRight
+                                  : Alignment.center,
+                              child: saveButton,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1073,6 +990,38 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       }
     }
   }
+
+  Future<void> _deleteAvatar(BuildContext context) async {
+    if (_isBusy) {
+      return;
+    }
+
+    final user = ref.read(currentUserProvider);
+    if (user == null || user.avatarUrl?.isEmpty != false) {
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    final copy = ProfileCopy.of(context);
+
+    setState(() => _removingAvatar = true);
+    try {
+      await ref.read(authControllerProvider.notifier).deleteAvatar();
+      if (!mounted) {
+        return;
+      }
+      context.showSuccessNotification(copy.photoRemovedMessage);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      context.showErrorNotification(context.resolveError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _removingAvatar = false);
+      }
+    }
+  }
 }
 
 class _EditProfileTopBar extends StatelessWidget {
@@ -1091,26 +1040,144 @@ class _EditProfileTopBar extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
+          child: Text(
+            copy.editProfile,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EditProfileSummaryCard extends StatelessWidget {
+  const _EditProfileSummaryCard({
+    required this.user,
+    required this.copy,
+    required this.uploadingAvatar,
+    required this.removingAvatar,
+    required this.onPickAvatar,
+    required this.onDeleteAvatar,
+  });
+
+  final AppUserModel user;
+  final ProfileCopy copy;
+  final bool uploadingAvatar;
+  final bool removingAvatar;
+  final VoidCallback? onPickAvatar;
+  final VoidCallback? onDeleteAvatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final hasAvatar = user.avatarUrl?.isNotEmpty == true;
+
+    return SectionCard(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                copy.editProfile,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.42),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: scheme.outlineVariant.withValues(alpha: 0.32),
+                  ),
+                ),
+                child: _ProfileAvatar(user: user, radius: 56),
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                copy.editProfileSubtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  FilledButton.icon(
+                    onPressed: onPickAvatar,
+                    icon: Icon(
+                      uploadingAvatar
+                          ? Icons.sync_rounded
+                          : Icons.photo_library_rounded,
+                      size: 18,
                     ),
+                    label: Text(
+                      uploadingAvatar
+                          ? copy.uploading
+                          : (hasAvatar ? copy.changePhoto : copy.uploadPhoto),
+                    ),
+                  ),
+                  if (hasAvatar)
+                    OutlinedButton.icon(
+                      onPressed: onDeleteAvatar,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: scheme.error,
+                        side: BorderSide(
+                          color: scheme.error.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      icon: removingAvatar
+                          ? SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: scheme.error,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 18,
+                            ),
+                      label: Text(
+                        removingAvatar ? copy.deletingPhoto : copy.deletePhoto,
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+}
+
+class _ReadOnlyProfileField extends StatelessWidget {
+  const _ReadOnlyProfileField({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.forceLtr = false,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final bool forceLtr;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 20),
+      ),
+      child: Directionality(
+        textDirection:
+            forceLtr ? TextDirection.ltr : Directionality.of(context),
+        child: Text(
+          value,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: scheme.onSurface,
+              ),
+        ),
+      ),
     );
   }
 }
@@ -1524,14 +1591,12 @@ class _EditProfileSectionCard extends StatelessWidget {
     required this.icon,
     required this.accent,
     required this.title,
-    required this.subtitle,
     required this.child,
   });
 
   final IconData icon;
   final Color accent;
   final String title;
-  final String subtitle;
   final Widget child;
 
   @override
@@ -1544,11 +1609,11 @@ class _EditProfileSectionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, color: accent),
               ),
@@ -1561,15 +1626,6 @@ class _EditProfileSectionCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
-                          ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            height: 1.45,
                           ),
                     ),
                   ],

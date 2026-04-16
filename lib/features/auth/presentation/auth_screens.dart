@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
@@ -92,6 +89,7 @@ String _localizedSplashCopy(
   return en;
 }
 
+/*
 String _splashEyebrow(BuildContext context) => _localizedSplashCopy(
       context,
       en: 'Your study space is getting ready',
@@ -610,7 +608,186 @@ class _SplashOrb extends StatelessWidget {
     );
   }
 }
+*/
 
+String _splashBadge(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Getting ready',
+      ar: 'يتم التحضير الآن',
+      tr: 'Hazirlaniyor',
+    );
+
+/*
+String _splashLoadingTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Opening your calm study space',
+      ar: 'جارٍ فتح مساحة الدراسة الهادئة',
+      tr: 'Sakin calisma alanin aciliyor',
+    );
+
+String _splashLoadingBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Tasks, focus tools, and preferences are loading so you can continue without extra steps.',
+      ar: 'يتم تحميل المهام وأدوات التركيز والتفضيلات حتى تتابع مباشرة من دون خطوات إضافية.',
+      tr: 'Gorevler, odak araclari ve tercihlerin ek adim olmadan devam edebilmen icin yukleniyor.',
+    );
+
+String _splashProgressLabel(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Opening home...',
+      ar: 'جارٍ فتح الصفحة الرئيسية...',
+      tr: 'Ana sayfa aciliyor...',
+    );
+
+*/
+String _splashLoadingTitle(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Opening StudyFlow',
+      ar: 'جارٍ فتح StudyFlow',
+      tr: 'StudyFlow aciliyor',
+    );
+
+String _splashLoadingBody(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Please wait a moment.',
+      ar: 'يرجى الانتظار لحظة.',
+      tr: 'Lutfen kisa bir an bekleyin.',
+    );
+
+String _splashProgressLabel(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Loading...',
+      ar: 'جارٍ التحميل...',
+      tr: 'Yukleniyor...',
+    );
+
+/*
+String _splashChipLanguages(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'EN • TR • AR',
+      ar: 'EN • TR • AR',
+      tr: 'EN • TR • AR',
+    );
+
+String _splashChipTheme(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Light + dark',
+      ar: 'فاتح + داكن',
+      tr: 'Acik + koyu',
+    );
+
+String _splashChipSync(BuildContext context) => _localizedSplashCopy(
+      context,
+      en: 'Secure sync',
+      ar: 'مزامنة آمنة',
+      tr: 'Guvenli senkron',
+    );
+
+*/
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  static const routePath = '/splash';
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      padding: EdgeInsets.zero,
+      child: RevealOnBuild(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 380;
+            final verticalPadding =
+                constraints.maxHeight < 700 ? AppSpacing.xl : AppSpacing.xxxl;
+
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? AppSpacing.lg : AppSpacing.xl,
+                  vertical: verticalPadding,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 340),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Semantics(
+                        label:
+                            '${_splashBadge(context)} ${_splashLoadingTitle(context)} ${_splashLoadingBody(context)} ${_splashProgressLabel(context)}',
+                        child: _SplashLogoHalo(compact: isCompact),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashLogoHalo extends StatelessWidget {
+  const _SplashLogoHalo({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return _AppLogo(size: compact ? 68 : 76);
+  }
+}
+
+/*
+class _SplashStatusPill extends StatelessWidget {
+  const _SplashStatusPill({
+    required this.icon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: scheme.primary,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+*/
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -625,35 +802,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  StreamSubscription<AuthState>? _authSubscription;
-
   bool _obscure = true;
   bool _isSubmitting = false;
   bool _isGoogleSubmitting = false;
-  bool _hasNavigatedAfterAuth = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _listenForAuthChanges();
-    _checkExistingSession();
-  }
-
-  void _listenForAuthChanges() {
-    final supabase = Supabase.instance.client;
-
-    _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
-      final event = data.event;
-      final session = data.session;
-
-      debugPrint('AUTH EVENT: $event');
-      debugPrint('AUTH SESSION: $session');
-      debugPrint('AUTH USER: ${session?.user.email}');
-
-      if (!mounted || _hasNavigatedAfterAuth) return;
-
-      if (session != null) {
-        _hasNavigatedAfterAuth = true;
+  /*
         context.go('/home'); // BURAYI kendi ana ekran rotana göre değiştir
       }
     });
@@ -674,9 +826,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  */
   @override
   void dispose() {
-    _authSubscription?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -848,14 +1000,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
-  StreamSubscription<AuthState>? _authSubscription;
-
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _isSubmitting = false;
   bool _isGoogleSubmitting = false;
-  bool _hasNavigatedAfterAuth = false;
-
+  /*
   @override
   void initState() {
     super.initState();
@@ -898,9 +1047,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  */
   @override
   void dispose() {
-    _authSubscription?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
