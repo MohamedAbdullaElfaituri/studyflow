@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
 
 class AppTheme {
+  static const _fontFamily = 'PlusJakartaSans';
+
   static ThemeData light(
     Locale? locale, {
     bool accessibilityMode = false,
@@ -58,42 +60,106 @@ class AppTheme {
     Locale? locale, {
     required bool accessibilityMode,
   }) {
-    final isArabic = locale?.languageCode == 'ar';
-    final baseTextTheme = isArabic
-        ? GoogleFonts.notoSansArabicTextTheme()
-        : GoogleFonts.plusJakartaSansTextTheme();
+    final baseTextTheme = ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+    ).textTheme;
 
-    final textTheme = baseTextTheme.copyWith(
-      headlineMedium: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(fontWeight: FontWeight.w700),
-      titleLarge: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(fontWeight: FontWeight.w700),
-      titleMedium: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(fontWeight: FontWeight.w600),
-      bodyLarge: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(height: 1.4),
-      bodyMedium: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(height: 1.4),
-      labelLarge: (isArabic
-              ? GoogleFonts.notoSansArabic()
-              : GoogleFonts.plusJakartaSans())
-          .copyWith(fontWeight: FontWeight.w600),
-    );
+    final textTheme = baseTextTheme
+        .apply(
+          fontFamily: _fontFamily,
+          bodyColor: scheme.onSurface,
+          displayColor: scheme.onSurface,
+        )
+        .copyWith(
+          headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 30,
+            height: 1.12,
+          ),
+          headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 26,
+            height: 1.14,
+          ),
+          headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 22,
+            height: 1.16,
+          ),
+          titleLarge: baseTextTheme.titleLarge?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height: 1.2,
+          ),
+          titleMedium: baseTextTheme.titleMedium?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+            height: 1.24,
+          ),
+          titleSmall: baseTextTheme.titleSmall?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            height: 1.24,
+          ),
+          bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w400,
+            fontSize: 16,
+            height: 1.45,
+          ),
+          bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            height: 1.45,
+          ),
+          bodySmall: baseTextTheme.bodySmall?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+            height: 1.4,
+          ),
+          labelLarge: baseTextTheme.labelLarge?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+          labelMedium: baseTextTheme.labelMedium?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+          labelSmall: baseTextTheme.labelSmall?.copyWith(
+            fontFamily: _fontFamily,
+            fontWeight: FontWeight.w700,
+            fontSize: 11,
+          ),
+        );
+
+    final overlayStyle = brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.light,
+          )
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          );
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
+      fontFamily: _fontFamily,
       textTheme: textTheme,
       materialTapTargetSize: accessibilityMode
           ? MaterialTapTargetSize.padded
@@ -120,7 +186,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(56),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
           ),
           textStyle: textTheme.labelLarge,
         ),
@@ -130,7 +196,7 @@ class AppTheme {
           minimumSize: const Size.fromHeight(56),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
           ),
           textStyle: textTheme.labelLarge,
         ),
@@ -140,9 +206,25 @@ class AppTheme {
           minimumSize: const Size.fromHeight(56),
           side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.7)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
           ),
           textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          textStyle: textTheme.labelLarge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(44, 44),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -153,15 +235,15 @@ class AppTheme {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: scheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: scheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: scheme.primary, width: 1.4),
         ),
       ),
@@ -175,6 +257,17 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: scheme.surface.withValues(alpha: 0.84),
+        selectedColor: scheme.primaryContainer,
+        disabledColor: scheme.surfaceContainerHighest,
+        labelStyle: textTheme.labelMedium,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
@@ -193,13 +286,6 @@ class AppTheme {
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant.withValues(alpha: 0.55),
         space: 24,
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: scheme.surface.withValues(alpha: 0.72),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        side: BorderSide(color: scheme.outlineVariant),
       ),
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
@@ -232,7 +318,9 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        scrolledUnderElevation: 0,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: overlayStyle,
         titleTextStyle: textTheme.titleLarge?.copyWith(
           color: scheme.onSurface,
         ),

@@ -102,22 +102,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.dailyAgendaTitle(
-                        DateTimeUtils.friendlyDate(_selectedDay, locale),
+              if (tasksForDay.isEmpty &&
+                  sessionsForDay.isEmpty &&
+                  examsForDay.isEmpty)
+                EmptyState(
+                  title: context.l10n.dailyAgendaTitle(
+                    DateTimeUtils.friendlyDate(_selectedDay, locale),
+                  ),
+                  description: context.l10n.emptyAgendaDescription,
+                  icon: Icons.event_busy_rounded,
+                )
+              else
+                SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.dailyAgendaTitle(
+                          DateTimeUtils.friendlyDate(_selectedDay, locale),
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    if (tasksForDay.isEmpty &&
-                        sessionsForDay.isEmpty &&
-                        examsForDay.isEmpty)
-                      Text(context.l10n.emptyAgendaDescription)
-                    else ...[
+                      const SizedBox(height: AppSpacing.md),
                       ...examsForDay.map(
                         (exam) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -167,9 +173,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
             ],
           );
         },

@@ -28,212 +28,197 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
+  Future<void> _finish() async {
+    await ref.read(authControllerProvider.notifier).completeOnboarding();
+    if (!mounted) {
+      return;
+    }
+    context.go(LoginScreen.routePath);
+  }
+
   @override
   Widget build(BuildContext context) {
     const supportedLanguageCodes = {'en', 'tr', 'ar'};
     final rawLanguage = ref.watch(appLocalePreferenceProvider) ?? 'en';
     final selectedLanguage =
-    supportedLanguageCodes.contains(rawLanguage) ? rawLanguage : 'en';
+        supportedLanguageCodes.contains(rawLanguage) ? rawLanguage : 'en';
+    final scheme = Theme.of(context).colorScheme;
 
     final slides = [
       (
-      icon: Icons.auto_graph_rounded,
-      title: context.l10n.onboardingTitleOne,
-      subtitle: context.l10n.onboardingSubtitleOne,
+        icon: Icons.checklist_rounded,
+        title: context.l10n.onboardingTitleOne,
+        subtitle: context.l10n.onboardingSubtitleOne,
       ),
       (
-      icon: Icons.insights_rounded,
-      title: context.l10n.onboardingTitleTwo,
-      subtitle: context.l10n.onboardingSubtitleTwo,
+        icon: Icons.insights_rounded,
+        title: context.l10n.onboardingTitleTwo,
+        subtitle: context.l10n.onboardingSubtitleTwo,
       ),
       (
-      icon: Icons.language_rounded,
-      title: context.l10n.onboardingTitleThree,
-      subtitle: context.l10n.onboardingSubtitleThree,
+        icon: Icons.translate_rounded,
+        title: context.l10n.onboardingTitleThree,
+        subtitle: context.l10n.onboardingSubtitleThree,
       ),
     ];
 
-    final lastPage = _index == slides.length - 1;
-    final scheme = Theme.of(context).colorScheme;
+    final isLastPage = _index == slides.length - 1;
 
     return AppPage(
-      child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.copy.chooseLanguageTitle,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        await ref
-                            .read(authControllerProvider.notifier)
-                            .completeOnboarding();
-                        if (!mounted) return;
-                        context.go(LoginScreen.routePath);
-                      },
-                      child: Text(context.l10n.skipAction),
-                    ),
-                  ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const AppLogo(size: 44),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  context.l10n.appName,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  context.copy.chooseLanguageSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              ),
+              TextButton(
+                onPressed: _finish,
+                child: Text(context.l10n.skipAction),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            context.copy.chooseLanguageTitle,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.copy.chooseLanguageSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _LanguageChip(
-                      label: context.l10n.englishLabel,
-                      selected: selectedLanguage == 'en',
-                      onSelected: () async {
-                        HapticFeedback.selectionClick();
-                        await ref
-                            .read(appLocalePreferenceProvider.notifier)
-                            .setLocale('en');
-                      },
-                    ),
-                    _LanguageChip(
-                      label: context.l10n.turkishLabel,
-                      selected: selectedLanguage == 'tr',
-                      onSelected: () async {
-                        HapticFeedback.selectionClick();
-                        await ref
-                            .read(appLocalePreferenceProvider.notifier)
-                            .setLocale('tr');
-                      },
-                    ),
-                    _LanguageChip(
-                      label: context.l10n.arabicLabel,
-                      selected: selectedLanguage == 'ar',
-                      onSelected: () async {
-                        HapticFeedback.selectionClick();
-                        await ref
-                            .read(appLocalePreferenceProvider.notifier)
-                            .setLocale('ar');
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _controller,
-                    itemCount: slides.length,
-                    onPageChanged: (value) => setState(() => _index = value),
-                    itemBuilder: (context, index) {
-                      final slide = slides[index];
-                      return SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight * 0.45,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              _LanguageChip(
+                label: context.l10n.englishLabel,
+                selected: selectedLanguage == 'en',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('en');
+                },
+              ),
+              _LanguageChip(
+                label: context.l10n.turkishLabel,
+                selected: selectedLanguage == 'tr',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('tr');
+                },
+              ),
+              _LanguageChip(
+                label: context.l10n.arabicLabel,
+                selected: selectedLanguage == 'ar',
+                onSelected: () async {
+                  HapticFeedback.selectionClick();
+                  await ref
+                      .read(appLocalePreferenceProvider.notifier)
+                      .setLocale('ar');
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Expanded(
+            child: PageView.builder(
+              controller: _controller,
+              onPageChanged: (value) => setState(() => _index = value),
+              itemCount: slides.length,
+              itemBuilder: (context, index) {
+                final slide = slides[index];
+                return RevealOnBuild(
+                  key: ValueKey(index),
+                  child: SectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 88,
+                          height: 88,
+                          decoration: BoxDecoration(
+                            color: scheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(26),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GradientBanner(
-                                colors: [
-                                  scheme.primary,
-                                  scheme.secondary,
-                                  scheme.tertiary,
-                                ],
-                                child: const SizedBox(
-                                  width: 240,
-                                  height: 220,
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.auto_graph_rounded,
-                                      size: 92,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xxl),
-                              Text(
-                                slide.title,
-                                style:
-                                Theme.of(context).textTheme.headlineMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.lg,
-                                ),
-                                child: Text(
-                                  slide.subtitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
+                          child: Icon(
+                            slide.icon,
+                            size: 42,
+                            color: scheme.primary,
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    slides.length,
-                        (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: _index == index ? 28 : 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: _index == index
-                            ? scheme.primary
-                            : scheme.outlineVariant.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+                        const SizedBox(height: AppSpacing.xl),
+                        Text(
+                          slide.title,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          slide.subtitle,
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              slides.length,
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _index == index ? 26 : 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: _index == index
+                      ? scheme.primary
+                      : scheme.outlineVariant.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                FilledButton(
-                  onPressed: () async {
-                    if (lastPage) {
-                      await ref
-                          .read(authControllerProvider.notifier)
-                          .completeOnboarding();
-                      if (!mounted) return;
-                      context.go(LoginScreen.routePath);
-                    } else {
-                      await _controller.nextPage(
-                        duration: const Duration(milliseconds: 320),
-                        curve: Curves.easeOutCubic,
-                      );
-                    }
-                  },
-                  child: Text(
-                    lastPage
-                        ? context.l10n.finishAction
-                        : context.l10n.nextAction,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(
+            onPressed: () async {
+              if (isLastPage) {
+                await _finish();
+              } else {
+                await _controller.nextPage(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                );
+              }
+            },
+            child: Text(
+              isLastPage ? context.l10n.finishAction : context.l10n.nextAction,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -253,14 +238,9 @@ class _LanguageChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceChip(
-      label: Text(
-        label,
-        overflow: TextOverflow.ellipsis,
-      ),
+      label: Text(label),
       selected: selected,
-      onSelected: (_) {
-        onSelected();
-      },
+      onSelected: (_) => onSelected(),
     );
   }
 }

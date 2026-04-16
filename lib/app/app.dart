@@ -28,6 +28,8 @@ class StudyFlowApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
+        final appChild = child ?? const SizedBox.shrink();
+
         return MediaQuery(
           data: mediaQuery.copyWith(
             disableAnimations:
@@ -36,7 +38,16 @@ class StudyFlowApp extends ConsumerWidget {
                 ? const TextScaler.linear(1.05)
                 : mediaQuery.textScaler,
           ),
-          child: child ?? const SizedBox.shrink(),
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey(locale?.languageCode ?? 'system'),
+            duration: const Duration(milliseconds: 160),
+            tween: Tween(begin: 0.0, end: 1.0),
+            curve: Curves.easeOut,
+            child: appChild,
+            builder: (context, value, child) {
+              return Opacity(opacity: value, child: child);
+            },
+          ),
         );
       },
     );

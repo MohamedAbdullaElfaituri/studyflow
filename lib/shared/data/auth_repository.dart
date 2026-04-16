@@ -31,6 +31,7 @@ abstract class AuthRepository {
     required AppUserModel user,
     required String filePath,
   });
+  Future<AppUserModel> deleteAvatar(AppUserModel user);
 }
 
 class AuthSignUpResult {
@@ -244,6 +245,15 @@ class LocalAuthRepository implements AuthRepository {
   }) async {
     final updated = user.copyWith(
       avatarUrl: filePath,
+      updatedAt: DateTime.now(),
+    );
+    return updateProfile(updated);
+  }
+
+  @override
+  Future<AppUserModel> deleteAvatar(AppUserModel user) async {
+    final updated = user.copyWith(
+      avatarUrl: null,
       updatedAt: DateTime.now(),
     );
     return updateProfile(updated);
@@ -482,6 +492,34 @@ class SupabaseAuthRepository implements AuthRepository {
     return updated;
   }
 
+  @override
+  Future<AppUserModel> deleteAvatar(AppUserModel user) async {
+    final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
+    if (previousObjectPath != null) {
+      try {
+        await _client.storage.from('avatars').remove([previousObjectPath]);
+      } catch (_) {}
+    }
+
+    final existingProfile = await _fetchExistingProfile(user.id);
+    final normalized = _normalizeProfile(
+      user.copyWith(
+        avatarUrl: null,
+        updatedAt: _now(),
+      ),
+      existingProfile: existingProfile,
+      clearAvatar: true,
+    );
+
+    await _client.from('profiles').upsert(
+          normalized.toJson(),
+          onConflict: 'id',
+        );
+    await _syncAuthMetadata(normalized, clearAvatar: true);
+
+    return normalized;
+  }
+
   Future<AppUserModel> _ensureProfile(User user) async {
     final existingProfile = await _fetchExistingProfile(user.id);
     final metadata = user.userMetadata ?? const <String, dynamic>{};
@@ -534,7 +572,10 @@ class SupabaseAuthRepository implements AuthRepository {
     return AppUserModel.fromJson(Map<String, dynamic>.from(data));
   }
 
-  Future<void> _syncAuthMetadata(AppUserModel profile) async {
+  Future<void> _syncAuthMetadata(
+    AppUserModel profile, {
+    bool clearAvatar = false,
+  }) async {
     final authUser = _client.auth.currentUser;
     if (authUser == null || authUser.id != profile.id) {
       return;
@@ -546,7 +587,8 @@ class SupabaseAuthRepository implements AuthRepository {
       'theme_mode': profile.themeMode,
       'bio': profile.bio,
       if (profile.username != null) 'username': profile.username,
-      if (profile.avatarUrl != null) 'avatar_url': profile.avatarUrl,
+      if (clearAvatar || profile.avatarUrl != null)
+        'avatar_url': profile.avatarUrl,
       if (profile.university != null) 'university': profile.university,
       if (profile.department != null) 'department': profile.department,
     };
@@ -607,6 +649,7 @@ DateTime _now() => DateTime.now().toUtc();
 AppUserModel _normalizeProfile(
   AppUserModel user, {
   AppUserModel? existingProfile,
+  bool clearAvatar = false,
 }) {
   final normalizedEmail = _normalizeEmail(
     _pickValue(user.email, existingProfile?.email),
@@ -622,7 +665,9 @@ AppUserModel _normalizeProfile(
     id: user.id,
     fullName: normalizedFullName,
     email: normalizedEmail,
-    avatarUrl: _cleanNullable(user.avatarUrl) ?? existingProfile?.avatarUrl,
+    avatarUrl: clearAvatar
+        ? null
+        : _cleanNullable(user.avatarUrl) ?? existingProfile?.avatarUrl,
     username: normalizedUsername,
     bio: normalizedBio,
     university: _cleanNullable(user.university) ?? existingProfile?.university,

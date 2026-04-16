@@ -239,6 +239,24 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     );
   }
 
+  Future<void> deleteAvatar() async {
+    final repository = ref.read(authRepositoryProvider);
+    final current = state.valueOrNull;
+    final user = current?.user;
+    if (user == null) {
+      return;
+    }
+
+    final updated = await repository.deleteAvatar(user);
+    state = AsyncData(
+      AuthViewState(
+        user: updated,
+        onboardingCompleted: current?.onboardingCompleted ?? true,
+        requiresPasswordReset: current?.requiresPasswordReset ?? false,
+      ),
+    );
+  }
+
   Future<void> _handleAuthStateChange(AuthState authState) async {
     try {
       if (authState.event == AuthChangeEvent.signedOut ||
@@ -272,7 +290,12 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   }) async {
     final repository = ref.read(authRepositoryProvider);
     final studyRepository = ref.read(studyRepositoryProvider);
-    final onboardingCompleted = await repository.hasCompletedOnboarding();
+    var onboardingCompleted = await repository.hasCompletedOnboarding();
+
+    if (!onboardingCompleted) {
+      await repository.completeOnboarding();
+      onboardingCompleted = true;
+    }
 
     await studyRepository.ensureSeeded(user);
 
@@ -296,6 +319,8 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       ),
     );
   }
+
+  Future<void> removeAvatar() async {}
 }
 
 final authControllerProvider =
@@ -789,10 +814,10 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
   Future<void> updateSettings(UserSettingsModel settings) async {
     final repository = ref.read(studyRepositoryProvider);
     final authState = ref.read(authControllerProvider).valueOrNull;
-    await repository.saveUserSettings(settings);
     await ref
         .read(appLocalePreferenceProvider.notifier)
         .setLocale(settings.languageCode);
+    await repository.saveUserSettings(settings);
 
     if (authState?.user != null) {
       await ref.read(authControllerProvider.notifier).updateProfile(

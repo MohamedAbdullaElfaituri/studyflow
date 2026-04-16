@@ -235,6 +235,16 @@ class ProfileCopy {
         tr: 'Fotografi degistir',
         ar: 'تغيير الصورة',
       );
+  String get deletePhoto => _pick(
+        en: 'Delete photo',
+        tr: 'Fotografi sil',
+        ar: 'حذف الصورة',
+      );
+  String get deletingPhoto => _pick(
+        en: 'Deleting...',
+        tr: 'Siliniyor...',
+        ar: 'جارٍ الحذف...',
+      );
   String get profilePhoto => _pick(
         en: 'Profile photo',
         tr: 'Profil fotografi',
@@ -284,6 +294,11 @@ class ProfileCopy {
         en: 'Profile photo updated',
         tr: 'Profil fotoğrafı güncellendi',
         ar: 'تم تحديث صورة الملف الشخصي',
+      );
+  String get photoRemovedMessage => _pick(
+        en: 'Profile photo removed',
+        tr: 'Profil fotografi kaldirildi',
+        ar: 'تم حذف صورة الملف الشخصي',
       );
 
   String achievementTitle(String id) {
@@ -345,4 +360,10 @@ class ProfileCopy {
         ),
     };
   }
+
+  String get profileUpdatedSuccessfully => _pick(
+        en: 'Profile updated successfully',
+        tr: 'Profil başarıyla güncellendi',
+        ar: 'تم تحديث الملف الشخصي بنجاح',
+      );
 }
