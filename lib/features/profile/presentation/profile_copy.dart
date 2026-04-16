@@ -360,4 +360,10 @@ class ProfileCopy {
         ),
     };
   }
+
+  String get profileUpdatedSuccessfully => _pick(
+        en: 'Profile updated successfully',
+        tr: 'Profil başarıyla güncellendi',
+        ar: 'تم تحديث الملف الشخصي بنجاح',
+      );
 }

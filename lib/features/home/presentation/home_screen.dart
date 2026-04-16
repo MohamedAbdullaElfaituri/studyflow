@@ -27,7 +27,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(currentUserProvider);
     final data = ref.watch(studyDataControllerProvider);
-    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final locale = Localizations.localeOf(context).languageCode;
 
     return AppPage(
@@ -62,6 +61,8 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
+                    const AppLogo(size: 44),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,13 +105,13 @@ class HomeScreen extends ConsumerWidget {
                               width: 72,
                               height: 72,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.16),
+                                color: Colors.white.withValues(alpha: 0.16),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: const Icon(
-                                Icons.auto_graph_rounded,
-                                color: Colors.white,
-                                size: 34,
+                              child: const AppLogo(
+                                size: 72,
+                                framed: false,
+                                elevation: false,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.md),
@@ -128,7 +129,7 @@ class HomeScreen extends ConsumerWidget {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                    color: Colors.white.withOpacity(0.82),
+                                    color: Colors.white.withValues(alpha: 0.82),
                                   ),
                             ),
                           ],
@@ -154,7 +155,8 @@ class HomeScreen extends ConsumerWidget {
                                         .textTheme
                                         .bodyMedium
                                         ?.copyWith(
-                                          color: Colors.white.withOpacity(0.82),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.82),
                                         ),
                                   ),
                                 ],
@@ -165,13 +167,13 @@ class HomeScreen extends ConsumerWidget {
                               width: 72,
                               height: 72,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.16),
+                                color: Colors.white.withValues(alpha: 0.16),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: const Icon(
-                                Icons.auto_graph_rounded,
-                                color: Colors.white,
-                                size: 34,
+                              child: const AppLogo(
+                                size: 72,
+                                framed: false,
+                                elevation: false,
                               ),
                             ),
                           ],
@@ -202,26 +204,8 @@ class HomeScreen extends ConsumerWidget {
                           value: studyData.levelProgress,
                           minHeight: 10,
                           color: Colors.white,
-                          backgroundColor: Colors.white.withOpacity(0.16),
+                          backgroundColor: Colors.white.withValues(alpha: 0.16),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          StatusPill(
-                            label: isCloudSyncEnabled
-                                ? context.copy.workspaceCloudChip
-                                : context.copy.workspaceDemoChip,
-                            color: Colors.white,
-                          ),
-                          if (isCloudSyncEnabled)
-                            const StatusPill(
-                              label: 'Google OAuth',
-                              color: Colors.white,
-                            ),
-                        ],
                       ),
                     ],
                   ),
@@ -456,7 +440,7 @@ class HomeScreen extends ConsumerWidget {
                           children: [
                             CircleAvatar(
                               backgroundColor: priorityColor(exam.priority)
-                                  .withOpacity(0.16),
+                                  .withValues(alpha: 0.16),
                               child: Icon(
                                 Icons.event_note_rounded,
                                 color: priorityColor(exam.priority),
@@ -805,7 +789,7 @@ class _HeroPill extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.16),
+        color: Colors.white.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

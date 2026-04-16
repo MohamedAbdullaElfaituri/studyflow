@@ -96,27 +96,45 @@ class AppRouter {
       routes: [
         GoRoute(
           path: SplashScreen.routePath,
-          builder: (context, state) => const SplashScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const SplashScreen(),
+          ),
         ),
         GoRoute(
           path: OnboardingScreen.routePath,
-          builder: (context, state) => const OnboardingScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const OnboardingScreen(),
+          ),
         ),
         GoRoute(
           path: LoginScreen.routePath,
-          builder: (context, state) => const LoginScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const LoginScreen(),
+          ),
         ),
         GoRoute(
           path: SignupScreen.routePath,
-          builder: (context, state) => const SignupScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const SignupScreen(),
+          ),
         ),
         GoRoute(
           path: ForgotPasswordScreen.routePath,
-          builder: (context, state) => const ForgotPasswordScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const ForgotPasswordScreen(),
+          ),
         ),
         GoRoute(
           path: ResetPasswordScreen.routePath,
-          builder: (context, state) => const ResetPasswordScreen(),
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const ResetPasswordScreen(),
+          ),
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) =>
@@ -166,81 +184,169 @@ class AppRouter {
         ),
         GoRoute(
           path: CoursesScreen.routePath,
-          builder: (context, state) => const CoursesScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const CoursesScreen(),
+          ),
         ),
         GoRoute(
           path: CourseDetailScreen.routePath,
-          builder: (context, state) =>
-              CourseDetailScreen(courseId: state.pathParameters['courseId']!),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            CourseDetailScreen(courseId: state.pathParameters['courseId']!),
+          ),
         ),
         GoRoute(
           path: CourseEditorScreen.routePath,
-          builder: (context, state) => CourseEditorScreen(
-              courseId: state.uri.queryParameters['courseId']),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            CourseEditorScreen(
+              courseId: state.uri.queryParameters['courseId'],
+            ),
+          ),
         ),
         GoRoute(
           path: TaskDetailScreen.routePath,
-          builder: (context, state) =>
-              TaskDetailScreen(taskId: state.pathParameters['taskId']!),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            TaskDetailScreen(taskId: state.pathParameters['taskId']!),
+          ),
         ),
         GoRoute(
           path: TaskEditorScreen.routePath,
-          builder: (context, state) =>
-              TaskEditorScreen(taskId: state.uri.queryParameters['taskId']),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            TaskEditorScreen(taskId: state.uri.queryParameters['taskId']),
+          ),
         ),
         GoRoute(
           path: NotesScreen.routePath,
-          builder: (context, state) => const NotesScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const NotesScreen(),
+          ),
         ),
         GoRoute(
           path: ExamsScreen.routePath,
-          builder: (context, state) => const ExamsScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const ExamsScreen(),
+          ),
         ),
         GoRoute(
           path: ExamEditorScreen.routePath,
-          builder: (context, state) =>
-              ExamEditorScreen(examId: state.uri.queryParameters['examId']),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            ExamEditorScreen(examId: state.uri.queryParameters['examId']),
+          ),
         ),
         GoRoute(
           path: HabitsScreen.routePath,
-          builder: (context, state) => const HabitsScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const HabitsScreen(),
+          ),
         ),
         GoRoute(
           path: HabitEditorScreen.routePath,
-          builder: (context, state) =>
-              HabitEditorScreen(habitId: state.uri.queryParameters['habitId']),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            HabitEditorScreen(habitId: state.uri.queryParameters['habitId']),
+          ),
         ),
         GoRoute(
           path: SearchScreen.routePath,
-          builder: (context, state) => const SearchScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const SearchScreen(),
+          ),
         ),
         GoRoute(
           path: NoteEditorScreen.routePath,
-          builder: (context, state) =>
-              NoteEditorScreen(noteId: state.uri.queryParameters['noteId']),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            NoteEditorScreen(noteId: state.uri.queryParameters['noteId']),
+          ),
         ),
         GoRoute(
           path: AnalyticsScreen.routePath,
-          builder: (context, state) => const AnalyticsScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const AnalyticsScreen(),
+          ),
         ),
         GoRoute(
           path: GoalsScreen.routePath,
-          builder: (context, state) => const GoalsScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const GoalsScreen(),
+          ),
         ),
         GoRoute(
           path: SettingsScreen.routePath,
-          builder: (context, state) => const SettingsScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const SettingsScreen(),
+          ),
         ),
         GoRoute(
           path: ProfileEditScreen.routePath,
-          builder: (context, state) => const ProfileEditScreen(),
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            const ProfileEditScreen(),
+          ),
         ),
       ],
-      errorBuilder: (context, state) => Scaffold(
-        body: Center(
-          child: Text(context.l10n.genericNavigationError),
+      errorBuilder: (context, state) => AppPage(
+        child: Center(
+          child: ErrorStateCard(
+            message: context.l10n.genericNavigationError,
+            onRetry: () => context.go(HomeScreen.routePath),
+          ),
         ),
       ),
     );
   }
+}
+
+CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 180),
+    reverseTransitionDuration: const Duration(milliseconds: 140),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final fade = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut,
+      );
+      return FadeTransition(
+        opacity: fade,
+        child: child,
+      );
+    },
+  );
+}
+
+CustomTransitionPage<void> _slidePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 200),
+    reverseTransitionDuration: const Duration(milliseconds: 160),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      final offset = Tween<Offset>(
+        begin: const Offset(0.04, 0.02),
+        end: Offset.zero,
+      ).animate(curved);
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(position: offset, child: child),
+      );
+    },
+  );
 }

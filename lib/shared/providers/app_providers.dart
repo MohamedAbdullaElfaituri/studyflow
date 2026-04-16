@@ -319,6 +319,8 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       ),
     );
   }
+
+  Future<void> removeAvatar() async {}
 }
 
 final authControllerProvider =
@@ -812,10 +814,10 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
   Future<void> updateSettings(UserSettingsModel settings) async {
     final repository = ref.read(studyRepositoryProvider);
     final authState = ref.read(authControllerProvider).valueOrNull;
-    await repository.saveUserSettings(settings);
     await ref
         .read(appLocalePreferenceProvider.notifier)
         .setLocale(settings.languageCode);
+    await repository.saveUserSettings(settings);
 
     if (authState?.user != null) {
       await ref.read(authControllerProvider.notifier).updateProfile(

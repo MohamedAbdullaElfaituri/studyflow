@@ -2,7 +2,11 @@ import 'dart:ui';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
+
+export 'branding/app_logo.dart';
 
 import '../../shared/extensions/build_context_x.dart';
 import '../../shared/models/app_models.dart';
@@ -28,80 +32,43 @@ class AppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final overlayStyle = isDark
+        ? SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.light,
+          )
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          );
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? const [
-                        Color(0xFF06101F),
-                        Color(0xFF0C162A),
-                        Color(0xFF132546),
-                      ]
-                    : const [
-                        Color(0xFFF9FBFF),
-                        Color(0xFFF0F4FF),
-                        Color(0xFFE7F1FF),
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return _AppBackdrop(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          behavior: HitTestBehavior.translucent,
+          child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            backgroundColor: Colors.transparent,
+            appBar: appBar,
+            floatingActionButton: floatingActionButton,
+            bottomNavigationBar: bottomNavigationBar,
+            body: SafeArea(
+              child: Padding(
+                padding: padding ??
+                    const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                child: child,
               ),
             ),
           ),
         ),
-        PositionedDirectional(
-          top: -40,
-          start: -20,
-          child: _AmbientOrb(
-            color: (isDark ? AppColors.secondary : AppColors.seed)
-                .withValues(alpha: 0.16),
-            size: 160,
-          ),
-        ),
-        PositionedDirectional(
-          top: 180,
-          end: -30,
-          child: _AmbientOrb(
-            color: AppColors.tertiary.withValues(alpha: 0.12),
-            size: 180,
-          ),
-        ),
-        PositionedDirectional(
-          bottom: 90,
-          start: 24,
-          child: _AmbientOrb(
-            color: AppColors.success.withValues(alpha: 0.1),
-            size: 120,
-          ),
-        ),
-        PositionedDirectional(
-          top: 260,
-          start: 110,
-          child: _AmbientOrb(
-            color: AppColors.seed.withValues(alpha: isDark ? 0.08 : 0.06),
-            size: 110,
-          ),
-        ),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: appBar,
-          floatingActionButton: floatingActionButton,
-          bottomNavigationBar: bottomNavigationBar,
-          body: SafeArea(
-            child: Padding(
-              padding: padding ??
-                  const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-              child: child,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -219,61 +186,29 @@ class MainNavigationShell extends StatelessWidget {
       ),
     ];
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? const [
-                        Color(0xFF06101F),
-                        Color(0xFF0C162A),
-                        Color(0xFF132546),
-                      ]
-                    : const [
-                        Color(0xFFF9FBFF),
-                        Color(0xFFF0F4FF),
-                        Color(0xFFE7F1FF),
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
+    return _AppBackdrop(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: navigationShell,
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            0,
+            AppSpacing.md,
+            bottomInset > AppSpacing.sm ? bottomInset : AppSpacing.md,
+          ),
+          child: _StudyFlowBottomBar(
+            currentIndex: navigationShell.currentIndex,
+            items: navItems,
+            onSelected: (index) {
+              navigationShell.goBranch(
+                index,
+                initialLocation: index == navigationShell.currentIndex,
+              );
+            },
           ),
         ),
-        PositionedDirectional(
-          top: -40,
-          start: -20,
-          child: _AmbientOrb(
-            color:
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
-            size: 160,
-          ),
-        ),
-        Scaffold(
-          backgroundColor: Colors.transparent,
-          body: navigationShell,
-          bottomNavigationBar: Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              0,
-              AppSpacing.md,
-              bottomInset > AppSpacing.sm ? bottomInset : AppSpacing.md,
-            ),
-            child: _StudyFlowBottomBar(
-              currentIndex: navigationShell.currentIndex,
-              items: navItems,
-              onSelected: (index) {
-                navigationShell.goBranch(
-                  index,
-                  initialLocation: index == navigationShell.currentIndex,
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -482,10 +417,13 @@ class _StudyFlowBottomBarItem extends StatelessWidget {
                 SizedBox(height: compact ? 5 : 6),
                 SizedBox(
                   height: compact ? 14 : 16,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
                     child: Text(
                       label,
+                      key: ValueKey<String>(label),
                       maxLines: 1,
                       textAlign: TextAlign.center,
                       style: labelStyle,
@@ -784,26 +722,44 @@ class EmptyState extends StatelessWidget {
     required this.description,
     super.key,
     this.icon = Icons.inbox_rounded,
+    this.animationAsset,
+    this.animationRepeat = false,
+    this.animationSize = 96,
     this.action,
   });
 
   final String title;
   final String description;
   final IconData icon;
+  final String? animationAsset;
+  final bool animationRepeat;
+  final double animationSize;
   final Widget? action;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return SectionCard(
-      child: Column(
-        children: [
-          CircleAvatar(
+    final header = animationAsset == null
+        ? CircleAvatar(
             radius: 30,
             backgroundColor: scheme.primaryContainer,
             child: Icon(icon, size: 28, color: scheme.primary),
-          ),
+          )
+        : SizedBox(
+            width: animationSize,
+            height: animationSize,
+            child: Lottie.asset(
+              animationAsset!,
+              repeat: animationRepeat,
+              fit: BoxFit.contain,
+            ),
+          );
+
+    return SectionCard(
+      child: Column(
+        children: [
+          header,
           const SizedBox(height: AppSpacing.md),
           Text(
             title,
@@ -844,6 +800,8 @@ class ErrorStateCard extends StatelessWidget {
       title: context.l10n.errorStateTitle,
       description: message,
       icon: Icons.error_outline_rounded,
+      animationAsset: 'assets/animations/Error animation.json',
+      animationRepeat: true,
       action: FilledButton(
         onPressed: onRetry,
         child: Text(context.l10n.tryAgain),
@@ -1359,6 +1317,69 @@ class _AmbientOrb extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AppBackdrop extends StatelessWidget {
+  const _AppBackdrop({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isDark
+                    ? const [
+                        Color(0xFF08111F),
+                        Color(0xFF0E1727),
+                        Color(0xFF162236),
+                      ]
+                    : const [
+                        Color(0xFFF8FAFE),
+                        Color(0xFFF1F5FB),
+                        Color(0xFFEAF1FA),
+                      ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
+        PositionedDirectional(
+          top: -56,
+          start: -32,
+          child: _AmbientOrb(
+            color: (isDark ? AppColors.secondary : AppColors.seed)
+                .withValues(alpha: 0.16),
+            size: 180,
+          ),
+        ),
+        PositionedDirectional(
+          top: 140,
+          end: -48,
+          child: _AmbientOrb(
+            color: AppColors.tertiary.withValues(alpha: isDark ? 0.1 : 0.12),
+            size: 180,
+          ),
+        ),
+        PositionedDirectional(
+          bottom: 80,
+          start: 18,
+          child: _AmbientOrb(
+            color: AppColors.success.withValues(alpha: isDark ? 0.08 : 0.1),
+            size: 128,
+          ),
+        ),
+        child,
+      ],
     );
   }
 }

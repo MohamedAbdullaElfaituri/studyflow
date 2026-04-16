@@ -31,7 +31,8 @@ class ExamsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final exams = studyData.upcomingExams;
@@ -44,7 +45,11 @@ class ExamsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               GradientBanner(
-                colors: const [Color(0xFF18456B), Color(0xFF1F6FEB), Color(0xFF24A19C)],
+                colors: const [
+                  Color(0xFF18456B),
+                  Color(0xFF1F6FEB),
+                  Color(0xFF24A19C)
+                ],
                 child: isCompact
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,8 +62,11 @@ class ExamsScreen extends ConsumerWidget {
                           const SizedBox(height: AppSpacing.md),
                           Text(
                             context.copy.examsQuickCardTitle,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.88),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.88),
                                 ),
                           ),
                           const SizedBox(height: AppSpacing.sm),
@@ -72,8 +80,11 @@ class ExamsScreen extends ConsumerWidget {
                           const SizedBox(height: AppSpacing.xs),
                           Text(
                             context.copy.examsQuickCardSubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.82),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.82),
                                 ),
                           ),
                         ],
@@ -90,7 +101,8 @@ class ExamsScreen extends ConsumerWidget {
                                       .textTheme
                                       .titleMedium
                                       ?.copyWith(
-                                        color: Colors.white.withOpacity(0.88),
+                                        color: Colors.white
+                                            .withValues(alpha: 0.88),
                                       ),
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
@@ -108,7 +120,8 @@ class ExamsScreen extends ConsumerWidget {
                                       .textTheme
                                       .bodyMedium
                                       ?.copyWith(
-                                        color: Colors.white.withOpacity(0.82),
+                                        color: Colors.white
+                                            .withValues(alpha: 0.82),
                                       ),
                                 ),
                               ],
@@ -138,7 +151,8 @@ class ExamsScreen extends ConsumerWidget {
                 ...exams.map(
                   (exam) {
                     final course = studyData.courseById(exam.courseId);
-                    final countdown = exam.dateTime.difference(DateTime.now()).inDays;
+                    final countdown =
+                        exam.dateTime.difference(DateTime.now()).inDays;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: InkWell(
@@ -156,11 +170,14 @@ class ExamsScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       exam.title,
-                                      style: Theme.of(context).textTheme.titleLarge,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                     StatusPill(
-                                      label: context.copy.examCountdown(countdown),
+                                      label:
+                                          context.copy.examCountdown(countdown),
                                       color: priorityColor(exam.priority),
                                     ),
                                   ],
@@ -177,7 +194,8 @@ class ExamsScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     StatusPill(
-                                      label: context.copy.examCountdown(countdown),
+                                      label:
+                                          context.copy.examCountdown(countdown),
                                       color: priorityColor(exam.priority),
                                     ),
                                   ],
@@ -185,7 +203,10 @@ class ExamsScreen extends ConsumerWidget {
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 exam.description,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurfaceVariant,
@@ -198,7 +219,8 @@ class ExamsScreen extends ConsumerWidget {
                                 children: [
                                   StatusPill(
                                     label: _examTypeLabel(context, exam.type),
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                   if (course != null)
                                     StatusPill(
@@ -206,8 +228,10 @@ class ExamsScreen extends ConsumerWidget {
                                       color: Color(course.color),
                                     ),
                                   StatusPill(
-                                    label: DateTimeUtils.friendlyDate(exam.dateTime, locale),
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    label: DateTimeUtils.friendlyDate(
+                                        exam.dateTime, locale),
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                 ],
                               ),
@@ -266,7 +290,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final existing =
@@ -346,8 +371,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
                         initialValue: selectedCourseId,
-                        decoration:
-                            InputDecoration(labelText: context.l10n.courseLabel),
+                        decoration: InputDecoration(
+                            labelText: context.l10n.courseLabel),
                         items: [
                           DropdownMenuItem<String?>(
                             value: null,
@@ -375,11 +400,13 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                                   .map(
                                     (value) => DropdownMenuItem<ExamType>(
                                       value: value,
-                                      child: Text(_examTypeLabel(context, value)),
+                                      child:
+                                          Text(_examTypeLabel(context, value)),
                                     ),
                                   )
                                   .toList(),
-                              onChanged: (value) => setState(() => _type = value!),
+                              onChanged: (value) =>
+                                  setState(() => _type = value!),
                             ),
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskPriority>(
@@ -391,7 +418,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                                   .map(
                                     (value) => DropdownMenuItem<TaskPriority>(
                                       value: value,
-                                      child: Text(_priorityLabel(context, value)),
+                                      child:
+                                          Text(_priorityLabel(context, value)),
                                     ),
                                   )
                                   .toList(),
@@ -413,7 +441,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                                     .map(
                                       (value) => DropdownMenuItem<ExamType>(
                                         value: value,
-                                        child: Text(_examTypeLabel(context, value)),
+                                        child: Text(
+                                            _examTypeLabel(context, value)),
                                       ),
                                     )
                                     .toList(),
@@ -432,7 +461,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                                     .map(
                                       (value) => DropdownMenuItem<TaskPriority>(
                                         value: value,
-                                        child: Text(_priorityLabel(context, value)),
+                                        child: Text(
+                                            _priorityLabel(context, value)),
                                       ),
                                     )
                                     .toList(),
@@ -449,7 +479,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             context: context,
                             firstDate: DateTime.now()
                                 .subtract(const Duration(days: 30)),
-                            lastDate: DateTime.now().add(const Duration(days: 730)),
+                            lastDate:
+                                DateTime.now().add(const Duration(days: 730)),
                             initialDate: _dateTime,
                           );
                           if (pickedDate == null || !mounted) return;

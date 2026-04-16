@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_widgets.dart';
@@ -16,7 +17,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(studyDataControllerProvider);
-    final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
     final explicitLanguagePreference = ref.watch(appLocalePreferenceProvider);
 
     return AppPage(
@@ -24,8 +24,7 @@ class SettingsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () =>
-              ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           const supportedLanguages = {'en', 'tr', 'ar'};
@@ -42,234 +41,183 @@ class SettingsScreen extends ConsumerWidget {
           )
               ? studyData.settings.themeMode
               : 'system';
-          final workspaceTitle = isCloudSyncEnabled
-              ? context.copy.workspaceCloudTitle
-              : context.copy.workspaceDemoTitle;
-          final workspaceDescription = isCloudSyncEnabled
-              ? context.copy.workspaceCloudDescription
-              : context.copy.workspaceDemoDescription;
-          final workspaceChip = isCloudSyncEnabled
-              ? context.copy.workspaceCloudChip
-              : context.copy.workspaceDemoChip;
-          final workspaceColor = isCloudSyncEnabled
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.tertiary;
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: Navigator.of(context).pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.settingsTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor:
-                              workspaceColor.withValues(alpha: 0.14),
-                          child: Icon(
-                            isCloudSyncEnabled
-                                ? Icons.cloud_done_rounded
-                                : Icons.rocket_launch_rounded,
-                            color: workspaceColor,
+                    IconButton.filledTonal(
+                      onPressed: Navigator.of(context).pop,
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Hero(
+                      tag: 'settings_logo',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: SvgPicture.asset(
+                          'assets/branding/app_logo.svg',
+                          height: 48,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).colorScheme.primary,
+                            BlendMode.srcIn,
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.copy.workspaceModeTitle,
-                                style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Text(
+                        context.l10n.settingsTitle,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.languageSectionTitle,
+                subtitle: context.copy.chooseLanguageSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    _SettingsChoiceChip(
+                      label: context.l10n.englishLabel,
+                      selected: selectedLanguage == 'en',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: 'en',
+                                updatedAt: DateTime.now(),
                               ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                workspaceTitle,
-                                style: Theme.of(context).textTheme.titleMedium,
+                            );
+                      },
+                    ),
+                    _SettingsChoiceChip(
+                      label: context.l10n.turkishLabel,
+                      selected: selectedLanguage == 'tr',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: 'tr',
+                                updatedAt: DateTime.now(),
                               ),
-                            ],
-                          ),
-                        ),
-                        StatusPill(
-                          label: workspaceChip,
-                          color: workspaceColor,
-                        ),
-                      ],
+                            );
+                      },
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      workspaceDescription,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        StatusPill(
-                          label: isCloudSyncEnabled
-                              ? 'Supabase'
-                              : 'SharedPreferences',
-                          color: workspaceColor,
-                        ),
-                        StatusPill(
-                          label: isCloudSyncEnabled
-                              ? 'Google OAuth'
-                              : context.copy.workspaceDemoChip,
-                          color: workspaceColor,
-                        ),
-                      ],
+                    _SettingsChoiceChip(
+                      label: context.l10n.arabicLabel,
+                      selected: selectedLanguage == 'ar',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: 'ar',
+                                updatedAt: DateTime.now(),
+                              ),
+                            );
+                      },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.themeSectionTitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
               SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
                   children: [
-                    Text(
-                      context.l10n.languageSectionTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
+                    _SettingsChoiceChip(
+                      label: context.l10n.themeSystem,
+                      selected: selectedTheme == 'system',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: selectedLanguage,
+                                themeMode: 'system',
+                                updatedAt: DateTime.now(),
+                              ),
+                            );
+                      },
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        _SettingsChoiceChip(
-                          label: context.l10n.englishLabel,
-                          selected: selectedLanguage == 'en',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: 'en',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                        _SettingsChoiceChip(
-                          label: context.l10n.turkishLabel,
-                          selected: selectedLanguage == 'tr',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: 'tr',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                        _SettingsChoiceChip(
-                          label: context.l10n.arabicLabel,
-                          selected: selectedLanguage == 'ar',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: 'ar',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                      ],
+                    _SettingsChoiceChip(
+                      label: context.l10n.themeLight,
+                      selected: selectedTheme == 'light',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: selectedLanguage,
+                                themeMode: 'light',
+                                updatedAt: DateTime.now(),
+                              ),
+                            );
+                      },
+                    ),
+                    _SettingsChoiceChip(
+                      label: context.l10n.themeDark,
+                      selected: selectedTheme == 'dark',
+                      onSelected: () async {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .updateSettings(
+                              studyData.settings.copyWith(
+                                languageCode: selectedLanguage,
+                                themeMode: 'dark',
+                                updatedAt: DateTime.now(),
+                              ),
+                            );
+                      },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.themeSectionTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        _SettingsChoiceChip(
-                          label: context.l10n.themeSystem,
-                          selected: selectedTheme == 'system',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: selectedLanguage,
-                                    themeMode: 'system',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                        _SettingsChoiceChip(
-                          label: context.l10n.themeLight,
-                          selected: selectedTheme == 'light',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: selectedLanguage,
-                                    themeMode: 'light',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                        _SettingsChoiceChip(
-                          label: context.l10n.themeDark,
-                          selected: selectedTheme == 'dark',
-                          onSelected: () async {
-                            await ref
-                                .read(studyDataControllerProvider.notifier)
-                                .updateSettings(
-                                  studyData.settings.copyWith(
-                                    languageCode: selectedLanguage,
-                                    themeMode: 'dark',
-                                    updatedAt: DateTime.now(),
-                                  ),
-                                );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.copy.notificationPermissionsAction,
+                subtitle: context.copy.notificationPermissionsHint,
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.md),
               SectionCard(
                 child: Column(
                   children: [
@@ -344,12 +292,17 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.copy.accessibilityModeTitle,
+                subtitle: context.copy.accessibilityModeDescription,
+              ),
+              const SizedBox(height: AppSpacing.md),
               SectionCard(
                 child: SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  value: studyData.settings.accessibilityMode,
                   secondary: const Icon(Icons.accessibility_new_rounded),
+                  value: studyData.settings.accessibilityMode,
                   title: Text(context.copy.accessibilityModeTitle),
                   subtitle: Text(context.copy.accessibilityModeDescription),
                   onChanged: (value) async {
@@ -365,58 +318,37 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               SectionCard(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.sync_rounded),
-                      title: Text(context.copy.syncStatusTitle),
-                      subtitle: Text(context.copy.syncReadyLabel),
+                    Row(
+                      children: [
+                        const AppLogo(size: 42),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            context.l10n.appName,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                      ],
                     ),
-                    const Divider(),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.info_outline_rounded),
-                      title: Text(context.copy.aboutLabel),
-                      onTap: () => _showPlaceholderSheet(
-                        context,
-                        context.copy.aboutLabel,
-                      ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.shield_outlined),
-                      title: Text(context.copy.privacyLabel),
-                      onTap: () => _showPlaceholderSheet(
-                        context,
-                        context.copy.privacyLabel,
-                      ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.description_outlined),
-                      title: Text(context.copy.termsLabel),
-                      onTap: () => _showPlaceholderSheet(
-                        context,
-                        context.copy.termsLabel,
-                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                    OutlinedButton(
+                      onPressed: () async {
+                        await ref
+                            .read(authControllerProvider.notifier)
+                            .signOut();
+                        if (context.mounted) {
+                          context.go(LoginScreen.routePath);
+                        }
+                      },
+                      child: Text(context.l10n.logoutAction),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              OutlinedButton(
-                onPressed: () async {
-                  await ref.read(authControllerProvider.notifier).signOut();
-                  if (context.mounted) {
-                    context.go(LoginScreen.routePath);
-                  }
-                },
-                child: Text(context.l10n.logoutAction),
               ),
             ],
           );
@@ -424,27 +356,6 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-void _showPlaceholderSheet(BuildContext context, String title) {
-  showModalBottomSheet<void>(
-    context: context,
-    builder: (sheetContext) => Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            context.copy.placeholderLegalBody,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    ),
-  );
 }
 
 class _SettingsChoiceChip extends StatelessWidget {
@@ -461,14 +372,9 @@ class _SettingsChoiceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceChip(
-      label: Text(
-        label,
-        overflow: TextOverflow.ellipsis,
-      ),
+      label: Text(label),
       selected: selected,
-      onSelected: (_) {
-        onSelected();
-      },
+      onSelected: (_) => onSelected(),
     );
   }
 }

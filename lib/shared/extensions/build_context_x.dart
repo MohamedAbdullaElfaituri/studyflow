@@ -124,12 +124,9 @@ extension BuildContextX on BuildContext {
 
   String _googleOAuthIncompleteMessage() {
     return switch (Localizations.localeOf(this).languageCode) {
-      'ar' =>
-        'لم يكتمل تسجيل الدخول عبر Google. تحقق من Client ID وClient Secret داخل Supabase، ومن رابط callback، ومن test users في Google Console.',
-      'tr' =>
-        'Google girisi tamamlanmadi. Supabase icindeki Client ID ve Client Secret ayarlarini, callback URL adresini ve Google test users listesini kontrol et.',
-      _ =>
-        'Google sign-in did not finish. Verify the Client ID and Client Secret in Supabase, the callback URL, and your Google test users.',
+      'ar' => 'تعذّر إكمال تسجيل الدخول عبر Google. حاول مرة أخرى.',
+      'tr' => 'Google ile giris tamamlanamadi. Lutfen tekrar dene.',
+      _ => 'Google sign-in could not be completed. Please try again.',
     };
   }
 }

@@ -29,7 +29,8 @@ class HabitsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final habits = studyData.activeHabits;
@@ -101,8 +102,8 @@ class HabitsScreen extends ConsumerWidget {
               else
                 ...habits.map(
                   (habit) {
-                    final progress =
-                        (habit.completedCount / habit.goalCount).clamp(0.0, 1.0);
+                    final progress = (habit.completedCount / habit.goalCount)
+                        .clamp(0.0, 1.0);
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: InkWell(
@@ -122,7 +123,9 @@ class HabitsScreen extends ConsumerWidget {
                                       children: [
                                         CircleAvatar(
                                           backgroundColor:
-                                              Color(habit.color).withOpacity(0.14),
+                                              Color(habit.color).withValues(
+                                            alpha: 0.14,
+                                          ),
                                           child: Icon(
                                             Icons.repeat_rounded,
                                             color: Color(habit.color),
@@ -140,7 +143,8 @@ class HabitsScreen extends ConsumerWidget {
                                                     .textTheme
                                                     .titleMedium,
                                               ),
-                                              const SizedBox(height: AppSpacing.xs),
+                                              const SizedBox(
+                                                  height: AppSpacing.xs),
                                               Text(
                                                 habit.description,
                                                 style: Theme.of(context)
@@ -176,7 +180,9 @@ class HabitsScreen extends ConsumerWidget {
                                   children: [
                                     CircleAvatar(
                                       backgroundColor:
-                                          Color(habit.color).withOpacity(0.14),
+                                          Color(habit.color).withValues(
+                                        alpha: 0.14,
+                                      ),
                                       child: Icon(
                                         Icons.repeat_rounded,
                                         color: Color(habit.color),
@@ -240,14 +246,18 @@ class HabitsScreen extends ConsumerWidget {
                                     color: Color(habit.color),
                                   ),
                                   StatusPill(
-                                    label: context.copy.habitStreak(habit.streakCount),
-                                    color: Theme.of(context).colorScheme.tertiary,
+                                    label: context.copy
+                                        .habitStreak(habit.streakCount),
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
                                   ),
                                   StatusPill(
-                                    label: habit.frequency == HabitFrequency.daily
-                                        ? context.copy.habitDaily
-                                        : context.copy.habitWeekly,
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    label:
+                                        habit.frequency == HabitFrequency.daily
+                                            ? context.copy.habitDaily
+                                            : context.copy.habitWeekly,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                 ],
                               ),
@@ -313,11 +323,13 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
-          final existing =
-              widget.habitId == null ? null : studyData.habitById(widget.habitId!);
+          final existing = widget.habitId == null
+              ? null
+              : studyData.habitById(widget.habitId!);
           final isCompact = MediaQuery.sizeOf(context).width < 390;
 
           if (!_initialized) {
@@ -437,7 +449,8 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                                 ),
                                 items: HabitFrequency.values
                                     .map(
-                                      (value) => DropdownMenuItem<HabitFrequency>(
+                                      (value) =>
+                                          DropdownMenuItem<HabitFrequency>(
                                         value: value,
                                         child: Text(
                                           value == HabitFrequency.daily
@@ -494,7 +507,9 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: _color == value
-                                          ? Theme.of(context).colorScheme.onSurface
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
                                           : Colors.transparent,
                                       width: 2,
                                     ),
