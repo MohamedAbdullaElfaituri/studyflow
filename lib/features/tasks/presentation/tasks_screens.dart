@@ -47,6 +47,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         icon: const Icon(Icons.add_rounded),
       ),
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -259,6 +261,8 @@ class TaskDetailScreen extends ConsumerWidget {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -414,6 +418,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),

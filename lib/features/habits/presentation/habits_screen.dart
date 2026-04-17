@@ -26,6 +26,8 @@ class HabitsScreen extends ConsumerWidget {
         icon: const Icon(Icons.add_rounded),
       ),
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -323,6 +325,8 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),

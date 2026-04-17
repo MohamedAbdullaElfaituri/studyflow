@@ -78,6 +78,16 @@ class AppRouter {
         }
 
         if (authState.isAuthenticated) {
+          final studyDataAsync = ref.read(studyDataControllerProvider);
+          final isStudyDataBootstrapping =
+              studyDataAsync.isLoading && !studyDataAsync.hasValue;
+
+          if (isStudyDataBootstrapping) {
+            return location == AuthLoadingScreen.routePath
+                ? null
+                : AuthLoadingScreen.routePath;
+          }
+
           if (location == SplashScreen.routePath ||
               location == AuthLoadingScreen.routePath ||
               location == OnboardingScreen.routePath ||

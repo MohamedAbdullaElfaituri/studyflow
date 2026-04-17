@@ -28,6 +28,8 @@ class ExamsScreen extends ConsumerWidget {
         icon: const Icon(Icons.add_rounded),
       ),
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -285,6 +287,8 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),

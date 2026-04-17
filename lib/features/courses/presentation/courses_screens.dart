@@ -26,6 +26,8 @@ class CoursesScreen extends ConsumerWidget {
         icon: const Icon(Icons.add_rounded),
       ),
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -123,6 +125,8 @@ class CourseDetailScreen extends ConsumerWidget {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
@@ -313,6 +317,8 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),

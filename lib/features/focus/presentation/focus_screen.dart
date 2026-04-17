@@ -42,6 +42,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),

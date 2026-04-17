@@ -31,6 +31,8 @@ class HomeScreen extends ConsumerWidget {
 
     return AppPage(
       child: data.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
         loading: () =>
             const SingleChildScrollView(child: LoadingColumn(itemCount: 5)),
         error: (error, _) => ErrorStateCard(
