@@ -141,14 +141,14 @@ class AppRouter {
         ),
         GoRoute(
           path: LoginScreen.routePath,
-          pageBuilder: (context, state) => _fadePage(
+          pageBuilder: (context, state) => _authSwapPage(
             state,
             const LoginScreen(),
           ),
         ),
         GoRoute(
           path: SignupScreen.routePath,
-          pageBuilder: (context, state) => _fadePage(
+          pageBuilder: (context, state) => _authSwapPage(
             state,
             const SignupScreen(),
           ),
@@ -354,6 +354,72 @@ CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
       return FadeTransition(
         opacity: fade,
         child: child,
+      );
+    },
+  );
+}
+
+CustomTransitionPage<void> _authSwapPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 360),
+    reverseTransitionDuration: const Duration(milliseconds: 300),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final disableAnimations =
+          MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+      if (disableAnimations) {
+        return child;
+      }
+
+      final isRtl = Directionality.of(context) == TextDirection.rtl;
+      final enteringDx = isRtl ? -0.12 : 0.12;
+      final leavingDx = -enteringDx * 0.42;
+
+      final entrance = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      final exit = CurvedAnimation(
+        parent: secondaryAnimation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      final entranceFade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0, 0.82, curve: Curves.easeOut),
+        reverseCurve: Curves.easeIn,
+      );
+
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: Offset.zero,
+          end: Offset(leavingDx, 0),
+        ).animate(exit),
+        child: FadeTransition(
+          opacity: Tween<double>(
+            begin: 1,
+            end: 0.74,
+          ).animate(exit),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(enteringDx, 0),
+              end: Offset.zero,
+            ).animate(entrance),
+            child: ScaleTransition(
+              scale: Tween<double>(
+                begin: 0.985,
+                end: 1,
+              ).animate(entrance),
+              alignment: Alignment.topCenter,
+              child: FadeTransition(
+                opacity: entranceFade,
+                child: child,
+              ),
+            ),
+          ),
+        ),
       );
     },
   );
