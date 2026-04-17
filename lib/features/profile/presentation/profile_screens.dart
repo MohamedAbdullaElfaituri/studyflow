@@ -1,8 +1,5 @@
-// ignore_for_file: unused_element
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
@@ -28,7 +25,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
     final data = ref.watch(studyDataControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final copy = ProfileCopy.of(context);
 
     return AppPage(
       child: data.when(
@@ -44,256 +41,177 @@ class ProfileScreen extends ConsumerWidget {
             return const SizedBox.shrink();
           }
 
-          final copy = ProfileCopy.of(context);
           final isCompact = MediaQuery.sizeOf(context).width < 390;
-          final screenWidth = MediaQuery.sizeOf(context).width;
-          final completedRate = studyData.tasks.isEmpty
+          final completionRate = studyData.tasks.isEmpty
               ? 0.0
               : studyData.completedTasks.length / studyData.tasks.length;
-          final weeklyProgress = studyData.goals.weeklyTargetMinutes == 0
-              ? 0.0
-              : studyData.weeklyStudyMinutes /
-                  studyData.goals.weeklyTargetMinutes;
-          final profileDepth = _profileDepth(currentUser);
 
           return ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.xl, AppSpacing.lg, AppSpacing.xl),
             children: [
-              // Beautiful Simple Header Profile
-              RevealOnBuild(
+              PageHeader(
+                title: context.l10n.profileTab,
+                subtitle: context.l10n.profileOverviewSubtitle,
+                leading: _ProfileAvatar(user: currentUser, radius: 24),
+                trailing: IconButton.filledTonal(
+                  onPressed: () => context.push(SettingsScreen.routePath),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
                 child: Column(
                   children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Decorative background ring for avatar
-                        Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                                Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Hero(
-                          tag: 'profile_avatar',
-                          child: _ProfileAvatar(user: currentUser, radius: 56),
-                        ),
-                      ],
-                    ),
+                    _ProfileAvatar(user: currentUser, radius: 46),
                     const SizedBox(height: AppSpacing.md),
                     Text(
                       currentUser.fullName.isEmpty
                           ? copy.fallbackUserName
                           : currentUser.fullName,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      '@${currentUser.username ?? currentUser.email.split('@').first}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      '@${_username(currentUser)}',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                       textAlign: TextAlign.center,
                     ),
                     if (currentUser.bio.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: Text(
-                          currentUser.bio,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                height: 1.5,
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        currentUser.bio,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
                       ),
                     ],
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: Lottie.asset(
+                        'assets/animations/Success.json',
+                        repeat: false,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xxl),
-
-              // Quick Stats (3 cards)
-              Wrap(
-                  spacing: AppSpacing.md,
-                  runSpacing: AppSpacing.md,
+              const SizedBox(height: AppSpacing.xl),
+              if (isCompact)
+                Column(
                   children: [
-                    SizedBox(
-                      width: (screenWidth - AppSpacing.lg * 2 - AppSpacing.md * 2) / 3,
-                      child: RevealOnBuild(
-                        delay: const Duration(milliseconds: 100),
-                        child: _StatCardSimple(
-                          icon: Icons.local_fire_department_rounded,
-                          label: copy.consistency,
-                          value: '${studyData.streakCount}',
-                          unit: 'd',
-                          isDark: isDark,
-                        ),
+                    MetricTile(
+                      label: copy.weeklyFocus,
+                      value: '${studyData.weeklyStudyMinutes}',
+                      icon: Icons.timer_outlined,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    MetricTile(
+                      label: context.l10n.completedTasksLabel,
+                      value: '${studyData.completedTasks.length}',
+                      icon: Icons.task_alt_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    MetricTile(
+                      label: context.l10n.streakLabel,
+                      value: '${studyData.streakCount}',
+                      icon: Icons.local_fire_department_rounded,
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: MetricTile(
+                        label: copy.weeklyFocus,
+                        value: '${studyData.weeklyStudyMinutes}',
+                        icon: Icons.timer_outlined,
                       ),
                     ),
-                    SizedBox(
-                      width: (screenWidth - AppSpacing.lg * 2 - AppSpacing.md * 2) / 3,
-                      child: RevealOnBuild(
-                        delay: const Duration(milliseconds: 150),
-                        child: _StatCardSimple(
-                          icon: Icons.task_alt_rounded,
-                          lottieAsset: 'assets/animations/Success.json',
-                          label: copy.completedTasks,
-                          value: '${studyData.completedTasks.length}',
-                          isDark: isDark,
-                        ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.completedTasksLabel,
+                        value: '${studyData.completedTasks.length}',
+                        icon: Icons.task_alt_rounded,
                       ),
                     ),
-                    SizedBox(
-                      width: (screenWidth - AppSpacing.lg * 2 - AppSpacing.md * 2) / 3,
-                      child: RevealOnBuild(
-                        delay: const Duration(milliseconds: 200),
-                        child: _StatCardSimple(
-                          icon: Icons.star_rounded,
-                          label: copy.xpLevel,
-                          value: '${studyData.level}',
-                          isDark: isDark,
-                        ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: MetricTile(
+                        label: context.l10n.streakLabel,
+                        value: '${studyData.streakCount}',
+                        icon: Icons.local_fire_department_rounded,
                       ),
                     ),
                   ],
-              ),
+                ),
               const SizedBox(height: AppSpacing.xl),
-
-              // Performance Metrics (2 rows)
-              isCompact
-                  ? Column(
-                      children: [
-                        _MetricCardLarge(
-                          icon: Icons.trending_up_rounded,
-                          label: copy.weeklyFocus,
-                          value: '${studyData.weeklyStudyMinutes}m',
-                          percentage:
-                              '${(weeklyProgress.clamp(0, 1) * 100).round()}%',
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        _MetricCardLarge(
-                          icon: Icons.person_search_rounded,
-                          label: copy.profileDepth,
-                          value: '${profileDepth.toStringAsFixed(0)}%',
-                          isDark: isDark,
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: _MetricCardLarge(
-                            icon: Icons.trending_up_rounded,
-                            label: copy.weeklyFocus,
-                            value: '${studyData.weeklyStudyMinutes}m',
-                            percentage:
-                                '${(weeklyProgress.clamp(0, 1) * 100).round()}%',
-                            isDark: isDark,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _MetricCardLarge(
-                            icon: Icons.person_search_rounded,
-                            label: copy.profileDepth,
-                            value: '${profileDepth.toStringAsFixed(0)}%',
-                            isDark: isDark,
-                          ),
-                        ),
-                      ],
-                    ),
-              const SizedBox(height: AppSpacing.lg),
-
-              // Additional metrics
-              Row(
-                children: [
-                  Expanded(
-                    child: _MetricCardCompact(
-                      icon: Icons.done_all_rounded,
-                      label: copy.taskCompletion,
-                      value: '${(completedRate * 100).toStringAsFixed(0)}%',
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: _MetricCardCompact(
-                      icon: Icons.repeat_rounded,
-                      label: copy.habitsLocked,
-                      value: '${studyData.completedHabits.length}',
-                      isDark: isDark,
-                    ),
-                  ),
-                ],
+              SectionHeader(
+                title: context.l10n.profileOverviewTitle,
+                subtitle: _progressSubtitle(context, completionRate),
               ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Identity Details Card
-              RevealOnBuild(
-                delay: const Duration(milliseconds: 300),
-                child: _InfoCard(
-                  title: copy.identityDetails,
-                  isDark: isDark,
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                child: Column(
                   children: [
-                    _InfoRow(
+                    DetailRow(
                       label: copy.email,
                       value: currentUser.email,
+                      icon: Icons.mail_outline_rounded,
                     ),
-                    _InfoRow(
+                    DetailRow(
                       label: copy.username,
                       value: '@${_username(currentUser)}',
+                      icon: Icons.alternate_email_rounded,
                     ),
-                    _InfoRow(
+                    DetailRow(
                       label: copy.university,
                       value: currentUser.university ?? copy.notAddedYet,
+                      icon: Icons.school_outlined,
                     ),
-                    _InfoRow(
+                    DetailRow(
                       label: copy.department,
                       value: currentUser.department ?? copy.notAddedYet,
+                      icon: Icons.menu_book_outlined,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-
-              // Actions
-              RevealOnBuild(
-                delay: const Duration(milliseconds: 350),
-                child: _ActionsCard(
-                  isDark: isDark,
-                  onEditProfile: () =>
-                      context.push(ProfileEditScreen.routePath),
-                  onSettings: () =>
-                      context.push(SettingsScreen.routePath),
-                  onLogOut: () async {
-                    await ref
-                        .read(authControllerProvider.notifier)
-                        .signOut();
-                    if (context.mounted) {
-                      context.go(LoginScreen.routePath);
-                    }
-                  },
-                  copy: copy,
+              SectionCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FilledButton(
+                      onPressed: () =>
+                          context.push(ProfileEditScreen.routePath),
+                      child: Text(context.l10n.editProfileAction),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton(
+                      onPressed: () => context.push(SettingsScreen.routePath),
+                      child: Text(context.l10n.settingsTitle),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextButton(
+                      onPressed: () async {
+                        await ref
+                            .read(authControllerProvider.notifier)
+                            .signOut();
+                        if (context.mounted) {
+                          context.go(LoginScreen.routePath);
+                        }
+                      },
+                      child: Text(context.l10n.logoutAction),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
             ],
           );
         },
@@ -301,527 +219,72 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  static double _profileDepth(AppUserModel user) {
-    double depth = 0;
-    if (user.fullName.isNotEmpty) depth += 25;
-    if (user.bio.isNotEmpty) depth += 25;
-    if (user.university != null && user.university!.isNotEmpty) depth += 25;
-    if (user.avatarUrl != null && user.avatarUrl!.isNotEmpty) depth += 25;
-    return depth;
-  }
-
-  static List<double> _weekSeries(List<StudySessionModel> sessions) {
-    final now = DateTime.now();
-    final days = List.generate(7, (i) {
-      final date = now.subtract(Duration(days: 6 - i));
-      return sessions
-          .where((s) =>
-              s.startTime.year == date.year &&
-              s.startTime.month == date.month &&
-              s.startTime.day == date.day)
-          .fold<int>(
-              0,
-              (prev, session) =>
-                  prev +
-                  session.endTime.difference(session.startTime).inMinutes);
-    });
-    final max = days.isEmpty ? 1.0 : days.reduce((a, b) => a > b ? a : b);
-    return days.map((v) => v / max).toList();
-  }
-
-  static List<String> _weekLabels(String locale) {
-    final labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    if (locale == 'ar') {
-      return ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
-    }
-    return labels;
-  }
-
   static String _username(AppUserModel user) {
-    if (user.username != null && user.username!.isNotEmpty) {
-      return user.username!;
+    if (user.username != null && user.username!.trim().isNotEmpty) {
+      return user.username!.trim();
     }
     return user.email.split('@').first;
   }
-}
 
-// Removed unused duplicate header classes
-
-// Simple Stat Card
-class _StatCardSimple extends StatelessWidget {
-  final IconData icon;
-  final String? lottieAsset;
-  final String label;
-  final String value;
-  final String? unit;
-  final bool isDark;
-
-  const _StatCardSimple({
-    required this.icon,
-    this.lottieAsset,
-    required this.label,
-    required this.value,
-    this.unit,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (lottieAsset != null && int.tryParse(value) != null && int.parse(value) > 0)
-            SizedBox(
-              height: 28,
-              width: 28,
-              child: Lottie.asset(lottieAsset!, repeat: false),
-            )
-          else
-            Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-              ),
-              if (unit != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text(
-                    unit!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
+  String _progressSubtitle(BuildContext context, double completionRate) {
+    final percent = (completionRate * 100).round();
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Mevcut gorev tamamlama oranin $percent% seviyesinde.',
+      'ar' => 'معدل إكمال المهام الحالي لديك هو $percent٪.',
+      _ => 'Your current task completion rate is $percent%.',
+    };
   }
 }
 
-// Large Metric Card
-class _MetricCardLarge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String? percentage;
-  final bool isDark;
-
-  const _MetricCardLarge({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.percentage,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
-              if (percentage != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    percentage!,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Compact Metric Card
-class _MetricCardCompact extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isDark;
-
-  const _MetricCardCompact({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Theme.of(context).colorScheme.secondary, size: 22),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Info Card
-class _InfoCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-  final bool isDark;
-
-  const _InfoCard({
-    required this.title,
-    required this.children,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          ...children.map((child) {
-            final index = children.indexOf(child);
-            return Column(
-              children: [
-                child,
-                if (index < children.length - 1)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: Divider(
-                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.1),
-                    ),
-                  ),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-// Info Row
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Actions Card
-class _ActionsCard extends StatelessWidget {
-  final bool isDark;
-  final VoidCallback onEditProfile;
-  final VoidCallback onSettings;
-  final VoidCallback onLogOut;
-  final ProfileCopy copy;
-
-  const _ActionsCard({
-    required this.isDark,
-    required this.onEditProfile,
-    required this.onSettings,
-    required this.onLogOut,
-    required this.copy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _ActionTile(
-            icon: Icons.edit_outlined,
-            title: copy.editProfile,
-            subtitle: copy.editProfileSubtitle,
-            onTap: onEditProfile,
-            showDivider: true,
-          ),
-          _ActionTile(
-            icon: Icons.shield_outlined,
-            title: copy.passwordAndSecurity,
-            subtitle: copy.passwordAndSecuritySubtitle,
-            onTap: onSettings,
-            showDivider: true,
-          ),
-          _ActionTile(
-            icon: Icons.logout_rounded,
-            title: copy.logOut,
-            onTap: onLogOut,
-            isDanger: true,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Action Tile
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final bool showDivider;
-  final bool isDanger;
-
-  const _ActionTile({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.onTap,
-    this.showDivider = false,
-    this.isDanger = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          leading: Icon(
-            icon,
-            color: isDanger
-                ? Theme.of(context).colorScheme.error
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          title: Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDanger
-                      ? Theme.of(context).colorScheme.error
-                      : null,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-          subtitle: subtitle != null
-              ? Text(
-                  subtitle!,
-                  style: Theme.of(context).textTheme.bodySmall,
-                )
-              : null,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          onTap: onTap,
-        ),
-        if (showDivider)
-          Divider(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.1),
-            height: 1,
-            indent: AppSpacing.lg,
-            endIndent: AppSpacing.lg,
-          ),
-      ],
-    );
-  }
-}
-
-// Profile Avatar
 class _ProfileAvatar extends StatelessWidget {
-  final AppUserModel user;
-  final double radius;
-
   const _ProfileAvatar({
     required this.user,
     required this.radius,
   });
 
+  final AppUserModel user;
+  final double radius;
+
   @override
   Widget build(BuildContext context) {
+    final diameter = radius * 2;
+    final initials = user.fullName.trim().isEmpty
+        ? '?'
+        : user.fullName
+            .trim()
+            .split(RegExp(r'\s+'))
+            .take(2)
+            .map((part) => part.isEmpty ? '' : part[0])
+            .join()
+            .toUpperCase();
+
     return Container(
-      width: radius * 2,
-      height: radius * 2,
+      width: diameter,
+      height: diameter,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 2,
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-          ? CircleAvatar(
-              radius: radius,
-              backgroundImage: NetworkImage(user.avatarUrl!),
+          ? ClipOval(
+              child: Image.network(
+                user.avatarUrl!,
+                fit: BoxFit.cover,
+              ),
             )
           : CircleAvatar(
               radius: radius,
-              backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               child: Text(
-                user.fullName.isNotEmpty
-                    ? user.fullName.split(' ').map((e) => e.isNotEmpty ? e[0] : '').join().toUpperCase()
-                    : '?',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
+                initials,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
               ),
             ),
     );
   }
 }
-

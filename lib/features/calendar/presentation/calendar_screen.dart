@@ -32,7 +32,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final tasksForDay = studyData.tasks
@@ -43,17 +44,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               )
               .toList();
           final examsForDay = studyData.exams
-              .where((exam) => DateTimeUtils.isSameDay(exam.dateTime, _selectedDay))
+              .where((exam) =>
+                  DateTimeUtils.isSameDay(exam.dateTime, _selectedDay))
               .toList();
           final sessionsForDay = studyData.sessions
               .where(
-                (session) => DateTimeUtils.isSameDay(session.startTime, _selectedDay),
+                (session) =>
+                    DateTimeUtils.isSameDay(session.startTime, _selectedDay),
               )
               .toList();
 
           return ListView(
             children: [
-              SectionHeader(
+              PageHeader(
+                leading: const AppLogo(size: 44, radius: 18),
                 title: context.l10n.calendarTitle,
                 subtitle: context.l10n.calendarSubtitle,
               ),
@@ -81,7 +85,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     );
                     items.addAll(
                       studyData.sessions.where(
-                        (session) => DateTimeUtils.isSameDay(session.startTime, day),
+                        (session) =>
+                            DateTimeUtils.isSameDay(session.startTime, day),
                       ),
                     );
                     items.addAll(
@@ -148,7 +153,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 child: Text(task.title),
                               ),
                               if (task.dueDateTime != null)
-                                Text(DateTimeUtils.time(task.dueDateTime!, locale)),
+                                Text(DateTimeUtils.time(
+                                    task.dueDateTime!, locale)),
                             ],
                           ),
                         ),

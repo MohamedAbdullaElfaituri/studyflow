@@ -1,7 +1,7 @@
 {
   "@@locale": "ar",
   "appName": "StudyFlow",
-  "splashSubtitle": "تخطيط دراسي مميز لحياة جامعية أكثر تركيزًا.",
+  "splashSubtitle": "تخطيط دراسي بسيط لتقدم يومي واضح.",
   "genericNavigationError": "حدثت مشكلة أثناء فتح هذه الشاشة.",
   "genericErrorMessage": "حدث خطأ ما. حاول مرة أخرى.",
   "errorStateTitle": "واجهنا مشكلة بسيطة",
@@ -296,7 +296,7 @@
       }
     }
   },
-  "profileFallbackName": "طالب StudyFlow",
+  "profileFallbackName": "طالب",
   "editProfileAction": "تعديل الملف الشخصي",
   "profileOverviewTitle": "نظرة عامة على الملف الشخصي",
   "profileOverviewSubtitle": "لقطة سريعة لهويتك الدراسية الحالية وزخمك.",
@@ -315,7 +315,7 @@
   "taskRemindersLabel": "تذكيرات المهام",
   "studyRemindersLabel": "تذكيرات الدراسة",
   "dailyReminderLabel": "تذكير يومي",
-  "notificationPreviewTitle": "تذكير StudyFlow",
+  "notificationPreviewTitle": "تذكير دراسي",
   "notificationPreviewBody": "جلسة تركيز قصيرة قد تدفع يومك إلى الأمام.",
   "previewNotificationAction": "معاينة الإشعار",
   "accessibilityPlaceholderTitle": "دعم إمكانية الوصول",

@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @splashSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Premium study planning for focused university life.'**
+  /// **'Simple study planning for everyday progress.'**
   String get splashSubtitle;
 
   /// No description provided for @genericNavigationError.
@@ -1261,7 +1261,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileFallbackName.
   ///
   /// In en, this message translates to:
-  /// **'StudyFlow Student'**
+  /// **'Student'**
   String get profileFallbackName;
 
   /// No description provided for @editProfileAction.
@@ -1375,7 +1375,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationPreviewTitle.
   ///
   /// In en, this message translates to:
-  /// **'StudyFlow reminder'**
+  /// **'Study reminder'**
   String get notificationPreviewTitle;
 
   /// No description provided for @notificationPreviewBody.

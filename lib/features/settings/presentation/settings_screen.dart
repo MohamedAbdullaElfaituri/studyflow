@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_widgets.dart';
@@ -24,7 +23,8 @@ class SettingsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           const supportedLanguages = {'en', 'tr', 'ar'};
@@ -44,56 +44,58 @@ class SettingsScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                      Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
+              PageHeader(
+                title: context.l10n.settingsTitle,
+                subtitle: _settingsSubtitle(context),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton.filledTonal(
-                      onPressed: Navigator.of(context).pop,
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Hero(
-                      tag: 'settings_logo',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: SvgPicture.asset(
-                          'assets/branding/app_logo.svg',
-                          height: 48,
-                          colorFilter: ColorFilter.mode(
-                            Theme.of(context).colorScheme.primary,
-                            BlendMode.srcIn,
+                    Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withValues(alpha: 0.72),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Image.asset(
+                            'assets/branding/app_logo.png',
+                            fit: BoxFit.contain,
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: Text(
-                        context.l10n.settingsTitle,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.appName,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                _appSummary(context),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -112,44 +114,29 @@ class SettingsScreen extends ConsumerWidget {
                     _SettingsChoiceChip(
                       label: context.l10n.englishLabel,
                       selected: selectedLanguage == 'en',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: 'en',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateLanguage(
+                        ref,
+                        studyData,
+                        'en',
+                      ),
                     ),
                     _SettingsChoiceChip(
                       label: context.l10n.turkishLabel,
                       selected: selectedLanguage == 'tr',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: 'tr',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateLanguage(
+                        ref,
+                        studyData,
+                        'tr',
+                      ),
                     ),
                     _SettingsChoiceChip(
                       label: context.l10n.arabicLabel,
                       selected: selectedLanguage == 'ar',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: 'ar',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateLanguage(
+                        ref,
+                        studyData,
+                        'ar',
+                      ),
                     ),
                   ],
                 ),
@@ -157,6 +144,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
               SectionHeader(
                 title: context.l10n.themeSectionTitle,
+                subtitle: _themeSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.md),
               SectionCard(
@@ -167,47 +155,32 @@ class SettingsScreen extends ConsumerWidget {
                     _SettingsChoiceChip(
                       label: context.l10n.themeSystem,
                       selected: selectedTheme == 'system',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: selectedLanguage,
-                                themeMode: 'system',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateTheme(
+                        ref,
+                        studyData,
+                        selectedLanguage,
+                        'system',
+                      ),
                     ),
                     _SettingsChoiceChip(
                       label: context.l10n.themeLight,
                       selected: selectedTheme == 'light',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: selectedLanguage,
-                                themeMode: 'light',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateTheme(
+                        ref,
+                        studyData,
+                        selectedLanguage,
+                        'light',
+                      ),
                     ),
                     _SettingsChoiceChip(
                       label: context.l10n.themeDark,
                       selected: selectedTheme == 'dark',
-                      onSelected: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateSettings(
-                              studyData.settings.copyWith(
-                                languageCode: selectedLanguage,
-                                themeMode: 'dark',
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
+                      onSelected: () => _updateTheme(
+                        ref,
+                        studyData,
+                        selectedLanguage,
+                        'dark',
+                      ),
                     ),
                   ],
                 ),
@@ -320,34 +293,14 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        const AppLogo(size: 42),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Text(
-                            context.l10n.appName,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    OutlinedButton(
-                      onPressed: () async {
-                        await ref
-                            .read(authControllerProvider.notifier)
-                            .signOut();
-                        if (context.mounted) {
-                          context.go(LoginScreen.routePath);
-                        }
-                      },
-                      child: Text(context.l10n.logoutAction),
-                    ),
-                  ],
+                child: OutlinedButton(
+                  onPressed: () async {
+                    await ref.read(authControllerProvider.notifier).signOut();
+                    if (context.mounted) {
+                      context.go(LoginScreen.routePath);
+                    }
+                  },
+                  child: Text(context.l10n.logoutAction),
                 ),
               ),
             ],
@@ -355,6 +308,59 @@ class SettingsScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _updateLanguage(
+    WidgetRef ref,
+    StudyDataState studyData,
+    String code,
+  ) async {
+    await ref.read(studyDataControllerProvider.notifier).updateSettings(
+          studyData.settings.copyWith(
+            languageCode: code,
+            updatedAt: DateTime.now(),
+          ),
+        );
+  }
+
+  Future<void> _updateTheme(
+    WidgetRef ref,
+    StudyDataState studyData,
+    String languageCode,
+    String themeMode,
+  ) async {
+    await ref.read(studyDataControllerProvider.notifier).updateSettings(
+          studyData.settings.copyWith(
+            languageCode: languageCode,
+            themeMode: themeMode,
+            updatedAt: DateTime.now(),
+          ),
+        );
+  }
+
+  String _settingsSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' =>
+        'Dil, gorunum, bildirimler ve erisilebilirlik ayarlarini duzenle.',
+      'ar' => 'عدّل اللغة والمظهر والإشعارات وإعدادات سهولة الوصول.',
+      _ => 'Adjust language, appearance, notifications, and accessibility.',
+    };
+  }
+
+  String _themeSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Acik, koyu veya sistem gorunumunu sec.',
+      'ar' => 'اختر المظهر الفاتح أو الداكن أو مظهر النظام.',
+      _ => 'Choose light, dark, or system appearance.',
+    };
+  }
+
+  String _appSummary(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Sade bir calisma duzeni icin temel ayarlari burada tut.',
+      'ar' => 'احتفظ هنا بالإعدادات الأساسية لتجربة دراسة بسيطة ومريحة.',
+      _ => 'Keep the essentials here for a calm and simple study experience.',
+    };
   }
 }
 

@@ -39,9 +39,9 @@ class ExamsScreen extends ConsumerWidget {
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           return ListView(
             children: [
-              SectionHeader(
-                title: context.copy.examsTitle,
-                subtitle: context.copy.examsSubtitle,
+              PageHeader(
+                title: _examsTitle(context),
+                subtitle: _examsSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
               GradientBanner(
@@ -61,7 +61,7 @@ class ExamsScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: AppSpacing.md),
                           Text(
-                            context.copy.examsQuickCardTitle,
+                            _examsQuickCardTitle(context),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -79,7 +79,7 @@ class ExamsScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            context.copy.examsQuickCardSubtitle,
+                            _examsQuickCardSubtitle(context),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -96,7 +96,7 @@ class ExamsScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  context.copy.examsQuickCardTitle,
+                                  _examsQuickCardTitle(context),
                                   style: Theme.of(context)
                                       .textTheme
                                       .titleMedium
@@ -115,7 +115,7 @@ class ExamsScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
-                                  context.copy.examsQuickCardSubtitle,
+                                  _examsQuickCardSubtitle(context),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
@@ -139,12 +139,12 @@ class ExamsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
               if (exams.isEmpty)
                 EmptyState(
-                  title: context.copy.emptyExamsTitle,
-                  description: context.copy.emptyExamsDescription,
+                  title: _emptyExamsTitle(context),
+                  description: _emptyExamsDescription(context),
                   icon: Icons.event_busy_rounded,
                   action: FilledButton.tonal(
                     onPressed: () => context.push(ExamEditorScreen.routePath),
-                    child: Text(context.copy.addExamAction),
+                    child: Text(_addExamAction(context)),
                   ),
                 )
               else
@@ -176,8 +176,7 @@ class ExamsScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: AppSpacing.sm),
                                     StatusPill(
-                                      label:
-                                          context.copy.examCountdown(countdown),
+                                      label: _examCountdown(context, countdown),
                                       color: priorityColor(exam.priority),
                                     ),
                                   ],
@@ -194,8 +193,7 @@ class ExamsScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     StatusPill(
-                                      label:
-                                          context.copy.examCountdown(countdown),
+                                      label: _examCountdown(context, countdown),
                                       color: priorityColor(exam.priority),
                                     ),
                                   ],
@@ -317,33 +315,22 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      existing == null
-                          ? context.copy.addExamTitle
-                          : context.copy.editExamTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  if (existing != null)
-                    IconButton(
-                      onPressed: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .deleteExam(existing.id);
-                        if (!mounted) return;
-                        context.pop();
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                ],
+              PageHeader(
+                title: existing == null
+                    ? _addExamAction(context)
+                    : _editExamTitle(context),
+                trailing: existing == null
+                    ? null
+                    : IconButton(
+                        onPressed: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .deleteExam(existing.id);
+                          if (!mounted) return;
+                          context.pop();
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -553,9 +540,9 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
 
 String _examTypeLabel(BuildContext context, ExamType type) {
   return switch (type) {
-    ExamType.exam => context.copy.examTypeExam,
-    ExamType.assignment => context.copy.examTypeAssignment,
-    ExamType.quiz => context.copy.examTypeQuiz,
+    ExamType.exam => _examTypeExam(context),
+    ExamType.assignment => _examTypeAssignment(context),
+    ExamType.quiz => _examTypeQuiz(context),
   };
 }
 
@@ -565,5 +552,101 @@ String _priorityLabel(BuildContext context, TaskPriority priority) {
     TaskPriority.medium => context.l10n.priorityMedium,
     TaskPriority.high => context.l10n.priorityHigh,
     TaskPriority.urgent => context.l10n.priorityUrgent,
+  };
+}
+
+String _addExamAction(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sinav ekle',
+    'ar' => 'إضافة اختبار',
+    _ => 'Add exam',
+  };
+}
+
+String _editExamTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sinavi duzenle',
+    'ar' => 'تعديل الاختبار',
+    _ => 'Edit exam',
+  };
+}
+
+String _examsTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sinavlar',
+    'ar' => 'الاختبارات',
+    _ => 'Exams',
+  };
+}
+
+String _examsSubtitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Onemli tarihlerini ve yaklasan sinavlarini tek ekranda gor.',
+    'ar' => 'راجع اختباراتك القادمة ومواعيدك المهمة من شاشة واحدة.',
+    _ => 'See upcoming exams and important dates in one place.',
+  };
+}
+
+String _examsQuickCardTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Yaklasan sinavlar',
+    'ar' => 'الاختبارات القادمة',
+    _ => 'Upcoming exams',
+  };
+}
+
+String _examsQuickCardSubtitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Bir sonraki onemli tarihi yaklasmadan once kontrol et.',
+    'ar' => 'راجع الموعد المهم القادم قبل أن يقترب كثيرًا.',
+    _ => 'Review the next important date before it gets too close.',
+  };
+}
+
+String _emptyExamsTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Yaklasan sinav yok',
+    'ar' => 'لا توجد اختبارات قادمة',
+    _ => 'No upcoming exams',
+  };
+}
+
+String _emptyExamsDescription(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Bir sonraki onemli tarihi gorunur tutmak icin sinav ekle.',
+    'ar' => 'أضف اختبارًا لإبقاء الموعد القادم واضحًا أمامك.',
+    _ => 'Add an exam to keep the next important date visible.',
+  };
+}
+
+String _examCountdown(BuildContext context, int days) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$days gun kaldi',
+    'ar' => 'متبقي $days يوم',
+    _ => '$days days left',
+  };
+}
+
+String _examTypeExam(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sinav',
+    'ar' => 'اختبار',
+    _ => 'Exam',
+  };
+}
+
+String _examTypeAssignment(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Odev',
+    'ar' => 'واجب',
+    _ => 'Assignment',
+  };
+}
+
+String _examTypeQuiz(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Kisa sinav',
+    'ar' => 'اختبار قصير',
+    _ => 'Quiz',
   };
 }

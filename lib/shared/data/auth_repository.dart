@@ -179,7 +179,7 @@ class LocalAuthRepository implements AuthRepository {
     }
 
     final result = await signUp(
-      fullName: 'StudyFlow Student',
+      fullName: 'Student',
       email: AppConstants.demoEmail,
       password: AppConstants.demoPassword,
     );
@@ -278,11 +278,11 @@ class LocalAuthRepository implements AuthRepository {
     final now = DateTime.now();
     return AppUserModel(
       id: _demoUserId,
-      fullName: 'StudyFlow Student',
+      fullName: 'Student',
       email: AppConstants.demoEmail,
       avatarUrl: null,
-      username: 'studyflow_student',
-      bio: 'Designing calm, high-focus study weeks with clean routines.',
+      username: 'student',
+      bio: 'Building a calm study routine with clear daily priorities.',
       university: 'Istanbul Technical University',
       department: 'Human-Computer Interaction',
       preferredLanguage:

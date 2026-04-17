@@ -50,7 +50,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final query = _searchController.text.trim().toLowerCase();
@@ -75,19 +76,22 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   return b.priority.index.compareTo(a.priority.index);
                 case _TaskSort.course:
                   final courseA =
-                      studyData.courseById(a.courseId)?.title.toLowerCase() ?? '';
+                      studyData.courseById(a.courseId)?.title.toLowerCase() ??
+                          '';
                   final courseB =
-                      studyData.courseById(b.courseId)?.title.toLowerCase() ?? '';
+                      studyData.courseById(b.courseId)?.title.toLowerCase() ??
+                          '';
                   return courseA.compareTo(courseB);
               }
             });
 
           return ListView(
             children: [
-              SectionHeader(
+              PageHeader(
+                leading: const AppLogo(size: 44, radius: 18),
                 title: context.l10n.tasksTitle,
                 subtitle: context.l10n.tasksSubtitle,
-                action: PopupMenuButton<_TaskSort>(
+                trailing: PopupMenuButton<_TaskSort>(
                   initialValue: _sort,
                   onSelected: (value) => setState(() => _sort = value),
                   itemBuilder: (context) => [
@@ -120,7 +124,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   FilterChip(
                     label: Text(context.l10n.filterAll),
                     selected: _filter == _TaskFilter.all,
-                    onSelected: (_) => setState(() => _filter = _TaskFilter.all),
+                    onSelected: (_) =>
+                        setState(() => _filter = _TaskFilter.all),
                   ),
                   FilterChip(
                     label: Text(context.l10n.filterPending),
@@ -183,7 +188,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                 Checkbox(
                                   value: task.status == TaskStatus.completed,
                                   onChanged: (_) => ref
-                                      .read(studyDataControllerProvider.notifier)
+                                      .read(
+                                          studyDataControllerProvider.notifier)
                                       .toggleTaskStatus(task),
                                 ),
                               ],
@@ -217,7 +223,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                                       task.dueDateTime!,
                                       locale,
                                     ),
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                               ],
                             ),
@@ -255,7 +262,8 @@ class TaskDetailScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final task = studyData.taskById(taskId);
@@ -270,33 +278,22 @@ class TaskDetailScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
+              PageHeader(
+                title: context.l10n.taskDetailTitle,
+                trailing: IconButton(
+                  onPressed: () => context.push(
+                    '${TaskEditorScreen.routePath}?taskId=${task.id}',
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.taskDetailTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => context.push(
-                      '${TaskEditorScreen.routePath}?taskId=${task.id}',
-                    ),
-                    icon: const Icon(Icons.edit_outlined),
-                  ),
-                ],
+                  icon: const Icon(Icons.edit_outlined),
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(task.title, style: Theme.of(context).textTheme.headlineMedium),
+                    Text(task.title,
+                        style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: AppSpacing.md),
                     Text(task.description),
                     const SizedBox(height: AppSpacing.lg),
@@ -311,7 +308,8 @@ class TaskDetailScreen extends ConsumerWidget {
                     if (task.dueDateTime != null)
                       DetailRow(
                         label: context.l10n.dueDateLabel,
-                        value: DateTimeUtils.friendlyDate(task.dueDateTime!, locale),
+                        value: DateTimeUtils.friendlyDate(
+                            task.dueDateTime!, locale),
                       ),
                     DetailRow(
                       label: context.l10n.estimatedMinutesLabel,
@@ -419,12 +417,12 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
-          final existing = widget.taskId == null
-              ? null
-              : studyData.taskById(widget.taskId!);
+          final existing =
+              widget.taskId == null ? null : studyData.taskById(widget.taskId!);
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           final selectedCourseId = studyData.courses.any(
             (course) => course.id == _courseId,
@@ -447,7 +445,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                   ? null
                   : TimeOfDay.fromDateTime(existing.dueDateTime!);
               for (final subtask in existing.subtasks) {
-                _subtaskControllers.add(TextEditingController(text: subtask.title));
+                _subtaskControllers
+                    .add(TextEditingController(text: subtask.title));
               }
             } else if (_subtaskControllers.isEmpty) {
               _subtaskControllers.add(TextEditingController());
@@ -456,22 +455,10 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      existing == null
-                          ? context.l10n.addTaskTitle
-                          : context.l10n.editTaskTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
+              PageHeader(
+                title: existing == null
+                    ? context.l10n.addTaskTitle
+                    : context.l10n.editTaskTitle,
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -499,8 +486,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
                         initialValue: selectedCourseId,
-                        decoration:
-                            InputDecoration(labelText: context.l10n.courseLabel),
+                        decoration: InputDecoration(
+                            labelText: context.l10n.courseLabel),
                         items: [
                           DropdownMenuItem<String?>(
                             value: null,
@@ -540,8 +527,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskStatus>(
                               initialValue: _status,
-                              decoration:
-                                  InputDecoration(labelText: context.l10n.statusLabel),
+                              decoration: InputDecoration(
+                                  labelText: context.l10n.statusLabel),
                               items: TaskStatus.values
                                   .map(
                                     (value) => DropdownMenuItem(
@@ -621,8 +608,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                   context: context,
                                   firstDate: DateTime.now()
                                       .subtract(const Duration(days: 365)),
-                                  lastDate:
-                                      DateTime.now().add(const Duration(days: 730)),
+                                  lastDate: DateTime.now()
+                                      .add(const Duration(days: 730)),
                                   initialDate: _dueDate ?? DateTime.now(),
                                 );
                                 if (picked != null) {
@@ -718,35 +705,39 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ..._subtaskControllers.asMap().entries.map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: entry.value,
-                                  decoration: InputDecoration(
-                                    labelText: context.l10n.subtaskLabel(
-                                      entry.key + 1,
+                            (entry) => Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: AppSpacing.sm),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: entry.value,
+                                      decoration: InputDecoration(
+                                        labelText: context.l10n.subtaskLabel(
+                                          entry.key + 1,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  IconButton(
+                                    onPressed: _subtaskControllers.length == 1
+                                        ? null
+                                        : () {
+                                            setState(() {
+                                              _subtaskControllers[entry.key]
+                                                  .dispose();
+                                              _subtaskControllers
+                                                  .removeAt(entry.key);
+                                            });
+                                          },
+                                    icon: const Icon(
+                                        Icons.remove_circle_outline_rounded),
+                                  ),
+                                ],
                               ),
-                              IconButton(
-                                onPressed: _subtaskControllers.length == 1
-                                    ? null
-                                    : () {
-                                        setState(() {
-                                          _subtaskControllers[entry.key].dispose();
-                                          _subtaskControllers.removeAt(entry.key);
-                                        });
-                                      },
-                                icon: const Icon(Icons.remove_circle_outline_rounded),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
                       Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: TextButton.icon(
@@ -791,11 +782,13 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             dueDateTime: dueDateTime,
                             priority: _priority,
                             status: _status,
-                            estimatedMinutes:
-                                int.tryParse(_estimatedMinutesController.text) ?? 0,
+                            estimatedMinutes: int.tryParse(
+                                    _estimatedMinutesController.text) ??
+                                0,
                             isArchived: existing?.isArchived ?? false,
                             subtasks: _subtaskControllers
-                                .where((controller) => controller.text.trim().isNotEmpty)
+                                .where((controller) =>
+                                    controller.text.trim().isNotEmpty)
                                 .map(
                                   (controller) => SubtaskModel(
                                     id: const Uuid().v4(),

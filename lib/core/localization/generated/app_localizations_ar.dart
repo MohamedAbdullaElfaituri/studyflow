@@ -12,7 +12,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appName => 'StudyFlow';
 
   @override
-  String get splashSubtitle => 'تخطيط دراسي مميز لحياة جامعية أكثر تركيزًا.';
+  String get splashSubtitle => 'تخطيط دراسي بسيط لتقدم يومي واضح.';
 
   @override
   String get genericNavigationError => 'حدثت مشكلة أثناء فتح هذه الشاشة.';
@@ -639,7 +639,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get profileFallbackName => 'طالب StudyFlow';
+  String get profileFallbackName => 'طالب';
 
   @override
   String get editProfileAction => 'تعديل الملف الشخصي';
@@ -697,7 +697,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dailyReminderLabel => 'تذكير يومي';
 
   @override
-  String get notificationPreviewTitle => 'تذكير StudyFlow';
+  String get notificationPreviewTitle => 'تذكير دراسي';
 
   @override
   String get notificationPreviewBody =>

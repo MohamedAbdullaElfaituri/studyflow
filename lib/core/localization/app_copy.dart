@@ -43,9 +43,9 @@ class AppCopy {
       );
 
   String get chooseLanguageTitle => _pick(
-        en: 'Choose your app language',
-        tr: 'Uygulama dilini seç',
-        ar: 'اختر لغة التطبيق',
+        en: 'Choose language',
+        tr: 'Dil sec',
+        ar: 'اختر اللغة',
       );
 
   String get chooseLanguageSubtitle => _pick(

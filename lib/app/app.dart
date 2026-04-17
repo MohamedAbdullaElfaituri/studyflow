@@ -19,9 +19,13 @@ class StudyFlowApp extends ConsumerWidget {
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const _StudyFlowScrollBehavior(),
       theme: AppTheme.light(locale, accessibilityMode: accessibilityMode),
       darkTheme: AppTheme.dark(locale, accessibilityMode: accessibilityMode),
       themeMode: themeMode,
+      themeAnimationDuration:
+          accessibilityMode ? Duration.zero : const Duration(milliseconds: 180),
+      themeAnimationCurve: Curves.easeOutCubic,
       locale: locale,
       supportedLocales: AppConstants.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -38,18 +42,27 @@ class StudyFlowApp extends ConsumerWidget {
                 ? const TextScaler.linear(1.05)
                 : mediaQuery.textScaler,
           ),
-          child: TweenAnimationBuilder<double>(
-            key: ValueKey(locale?.languageCode ?? 'system'),
-            duration: const Duration(milliseconds: 160),
-            tween: Tween(begin: 0.0, end: 1.0),
-            curve: Curves.easeOut,
-            child: appChild,
-            builder: (context, value, child) {
-              return Opacity(opacity: value, child: child);
-            },
-          ),
+          child: appChild,
         );
       },
     );
+  }
+}
+
+class _StudyFlowScrollBehavior extends MaterialScrollBehavior {
+  const _StudyFlowScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
   }
 }

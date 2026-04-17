@@ -54,167 +54,176 @@ class HomeScreen extends ConsumerWidget {
             0,
           );
 
-          return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(studyDataControllerProvider.notifier).refresh(),
-            child: ListView(
-              children: [
-                Row(
+          return ListView(
+            children: [
+              PageHeader(
+                leading: const AppLogo(size: 44, radius: 18),
+                title: context.l10n.welcomeBack(firstName),
+                subtitle: DateTimeUtils.friendlyDate(DateTime.now(), locale),
+                trailing: IconButton.filledTonal(
+                  onPressed: () => context.push(SearchScreen.routePath),
+                  icon: const Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              GradientBanner(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const AppLogo(size: 44),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
+                    if (isCompact)
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            context.l10n.welcomeBack(
-                              firstName,
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            style: Theme.of(context).textTheme.headlineMedium,
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSpacing.sm),
+                              child: Image.asset(
+                                'assets/branding/app_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.xs),
+                          const SizedBox(height: AppSpacing.md),
                           Text(
-                            DateTimeUtils.friendlyDate(DateTime.now(), locale),
-                            style:
-                                Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                            _overviewTitle(context),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: Colors.white),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            context.l10n.dashboardHeroSubtitle(
+                              DateTimeUtils.friendlyDate(
+                                  DateTime.now(), locale),
+                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.82),
+                                ),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _overviewTitle(context),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(color: Colors.white),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  context.l10n.dashboardHeroSubtitle(
+                                    DateTimeUtils.friendlyDate(
+                                      DateTime.now(),
+                                      locale,
                                     ),
+                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.82),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSpacing.sm),
+                              child: Image.asset(
+                                'assets/branding/app_logo.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
                         ],
                       ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Wrap(
+                      spacing: AppSpacing.md,
+                      runSpacing: AppSpacing.md,
+                      children: [
+                        _HeroPill(
+                          label: context.copy.levelLabel,
+                          value: '${studyData.level}',
+                        ),
+                        _HeroPill(
+                          label: context.copy.xpLabel,
+                          value: '${studyData.totalXp}',
+                        ),
+                        _HeroPill(
+                          label: context.l10n.streakLabel,
+                          value: '${studyData.streakCount}',
+                        ),
+                      ],
                     ),
-                    IconButton.filledTonal(
-                      onPressed: () => context.push(SearchScreen.routePath),
-                      icon: const Icon(Icons.search_rounded),
+                    const SizedBox(height: AppSpacing.lg),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: LinearProgressIndicator(
+                        value: studyData.levelProgress,
+                        minHeight: 10,
+                        color: Colors.white,
+                        backgroundColor: Colors.white.withValues(alpha: 0.16),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                GradientBanner(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isCompact)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: const AppLogo(
-                                size: 72,
-                                framed: false,
-                                elevation: false,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              context.copy.premiumDashboardTitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              context.copy.premiumDashboardSubtitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.82),
-                                  ),
-                            ),
-                          ],
-                        )
-                      else
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    context.copy.premiumDashboardTitle,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(color: Colors.white),
-                                  ),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  Text(
-                                    context.copy.premiumDashboardSubtitle,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.82),
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: const AppLogo(
-                                size: 72,
-                                framed: false,
-                                elevation: false,
-                              ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Wrap(
-                        spacing: AppSpacing.md,
-                        runSpacing: AppSpacing.md,
-                        children: [
-                          _HeroPill(
-                            label: context.copy.levelLabel,
-                            value: '${studyData.level}',
-                          ),
-                          _HeroPill(
-                            label: context.copy.xpLabel,
-                            value: '${studyData.totalXp}',
-                          ),
-                          _HeroPill(
-                            label: context.l10n.streakLabel,
-                            value: '${studyData.streakCount}',
-                          ),
-                        ],
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              if (isCompact)
+                Column(
+                  children: [
+                    HeroMetricCard(
+                      title: context.l10n.dailyStudyMinutesLabel,
+                      value: '${studyData.dailyStudyMinutes}',
+                      subtitle: context.l10n.goalProgressValue(
+                        studyData.dailyStudyMinutes,
+                        studyData.goals.dailyTargetMinutes,
                       ),
-                      const SizedBox(height: AppSpacing.lg),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(99),
-                        child: LinearProgressIndicator(
-                          value: studyData.levelProgress,
-                          minHeight: 10,
-                          color: Colors.white,
-                          backgroundColor: Colors.white.withValues(alpha: 0.16),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                if (isCompact)
-                  Column(
-                    children: [
-                      HeroMetricCard(
+                      icon: Icons.timer_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    HeroMetricCard(
+                      title: context.l10n.completedTasksLabel,
+                      value: '${(completionRate * 100).round()}%',
+                      subtitle:
+                          '${studyData.completedTasks.length}/${studyData.tasks.length} ${context.l10n.tasksTitle.toLowerCase()}',
+                      icon: Icons.task_alt_rounded,
+                      accent: const Color(0xFF2BAE9A),
+                    ),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: HeroMetricCard(
                         title: context.l10n.dailyStudyMinutesLabel,
                         value: '${studyData.dailyStudyMinutes}',
                         subtitle: context.l10n.goalProgressValue(
@@ -223,8 +232,10 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         icon: Icons.timer_rounded,
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      HeroMetricCard(
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: HeroMetricCard(
                         title: context.l10n.completedTasksLabel,
                         value: '${(completionRate * 100).round()}%',
                         subtitle:
@@ -232,50 +243,49 @@ class HomeScreen extends ConsumerWidget {
                         icon: Icons.task_alt_rounded,
                         accent: const Color(0xFF2BAE9A),
                       ),
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: HeroMetricCard(
-                          title: context.l10n.dailyStudyMinutesLabel,
-                          value: '${studyData.dailyStudyMinutes}',
-                          subtitle: context.l10n.goalProgressValue(
-                            studyData.dailyStudyMinutes,
-                            studyData.goals.dailyTargetMinutes,
-                          ),
-                          icon: Icons.timer_rounded,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: HeroMetricCard(
-                          title: context.l10n.completedTasksLabel,
-                          value: '${(completionRate * 100).round()}%',
-                          subtitle:
-                              '${studyData.completedTasks.length}/${studyData.tasks.length} ${context.l10n.tasksTitle.toLowerCase()}',
-                          icon: Icons.task_alt_rounded,
-                          accent: const Color(0xFF2BAE9A),
-                        ),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.l10n.quickActionsTitle,
-                  subtitle: context.l10n.quickActionsSubtitle,
-                  action: TextButton(
-                    onPressed: () => _showQuickAddSheet(context),
-                    child: Text(context.l10n.addTaskAction),
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (isCompact)
-                  Column(
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.quickActionsTitle,
+                subtitle: context.l10n.quickActionsSubtitle,
+                action: TextButton(
+                  onPressed: () => _showQuickAddSheet(context),
+                  child: Text(context.l10n.addTaskAction),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (isCompact)
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 156,
+                      child: QuickActionTile(
+                        icon: Icons.checklist_rtl_rounded,
+                        title: context.l10n.tasksTitle,
+                        subtitle: context.l10n.quickTaskSubtitle,
+                        onTap: () => context.push(TaskEditorScreen.routePath),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SizedBox(
+                      height: 156,
+                      child: QuickActionTile(
+                        icon: Icons.event_note_rounded,
+                        title: _examsTitle(context),
+                        subtitle: _upcomingExamsTitle(context),
+                        onTap: () => context.push(ExamsScreen.routePath),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                SizedBox(
+                  height: 180,
+                  child: Row(
                     children: [
-                      SizedBox(
-                        height: 156,
+                      Expanded(
                         child: QuickActionTile(
                           icon: Icons.checklist_rtl_rounded,
                           title: context.l10n.tasksTitle,
@@ -283,60 +293,58 @@ class HomeScreen extends ConsumerWidget {
                           onTap: () => context.push(TaskEditorScreen.routePath),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      SizedBox(
-                        height: 156,
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
                         child: QuickActionTile(
                           icon: Icons.event_note_rounded,
-                          title: context.copy.examsTitle,
-                          subtitle: context.copy.examsQuickCardTitle,
+                          title: _examsTitle(context),
+                          subtitle: _upcomingExamsTitle(context),
                           onTap: () => context.push(ExamsScreen.routePath),
                         ),
                       ),
                     ],
-                  )
-                else
-                  SizedBox(
-                    height: 180,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: QuickActionTile(
-                            icon: Icons.checklist_rtl_rounded,
-                            title: context.l10n.tasksTitle,
-                            subtitle: context.l10n.quickTaskSubtitle,
-                            onTap: () =>
-                                context.push(TaskEditorScreen.routePath),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: QuickActionTile(
-                            icon: Icons.event_note_rounded,
-                            title: context.copy.examsTitle,
-                            subtitle: context.copy.examsQuickCardTitle,
-                            onTap: () => context.push(ExamsScreen.routePath),
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                const SizedBox(height: AppSpacing.md),
-                if (isCompact)
-                  Column(
+                ),
+              const SizedBox(height: AppSpacing.md),
+              if (isCompact)
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 156,
+                      child: QuickActionTile(
+                        icon: Icons.repeat_rounded,
+                        title: _habitsTitle(context),
+                        subtitle: _dailyRoutinesTitle(context),
+                        onTap: () => context.push(HabitsScreen.routePath),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SizedBox(
+                      height: 156,
+                      child: QuickActionTile(
+                        icon: Icons.analytics_rounded,
+                        title: context.l10n.analyticsTitle,
+                        subtitle: context.l10n.quickAnalyticsSubtitle,
+                        onTap: () => context.push(AnalyticsScreen.routePath),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                SizedBox(
+                  height: 180,
+                  child: Row(
                     children: [
-                      SizedBox(
-                        height: 156,
+                      Expanded(
                         child: QuickActionTile(
                           icon: Icons.repeat_rounded,
-                          title: context.copy.habitsTitle,
-                          subtitle: context.copy.habitsQuickCardTitle,
+                          title: _habitsTitle(context),
+                          subtitle: _dailyRoutinesTitle(context),
                           onTap: () => context.push(HabitsScreen.routePath),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      SizedBox(
-                        height: 156,
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
                         child: QuickActionTile(
                           icon: Icons.analytics_rounded,
                           title: context.l10n.analyticsTitle,
@@ -345,343 +353,429 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ],
-                  )
-                else
-                  SizedBox(
-                    height: 180,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: QuickActionTile(
-                            icon: Icons.repeat_rounded,
-                            title: context.copy.habitsTitle,
-                            subtitle: context.copy.habitsQuickCardTitle,
-                            onTap: () => context.push(HabitsScreen.routePath),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: QuickActionTile(
-                            icon: Icons.analytics_rounded,
-                            title: context.l10n.analyticsTitle,
-                            subtitle: context.l10n.quickAnalyticsSubtitle,
-                            onTap: () =>
-                                context.push(AnalyticsScreen.routePath),
-                          ),
-                        ),
-                      ],
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.goalProgressTitle,
+                subtitle: context.l10n.goalProgressSubtitle,
+                action: TextButton(
+                  onPressed: () => context.push(GoalsScreen.routePath),
+                  child: Text(context.l10n.viewAllAction),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _GoalProgressRow(
+                      label: context.l10n.dailyGoalLabel,
+                      value: studyData.dailyStudyMinutes,
+                      target: studyData.goals.dailyTargetMinutes,
                     ),
-                  ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.copy.plannerPulseTitle,
-                  subtitle: context.copy.plannerPulseSubtitle,
-                  action: TextButton(
-                    onPressed: () => context.push(GoalsScreen.routePath),
-                    child: Text(context.l10n.viewAllAction),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SectionCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _GoalProgressRow(
-                        label: context.l10n.dailyGoalLabel,
-                        value: studyData.dailyStudyMinutes,
-                        target: studyData.goals.dailyTargetMinutes,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      _GoalProgressRow(
-                        label: context.l10n.weeklyGoalLabel,
-                        value: studyData.weeklyStudyMinutes,
-                        target: studyData.goals.weeklyTargetMinutes,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      _GoalProgressRow(
-                        label: context.l10n.monthlyGoalLabel,
-                        value: studyData.monthlyStudyMinutes,
-                        target: studyData.goals.monthlyTargetMinutes,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      StatusPill(
-                        label: context.copy.weeklyChallengeDescription(
-                            focusDelta == 0
-                                ? studyData.goals.weeklyTargetMinutes
-                                : focusDelta),
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.copy.examsQuickCardTitle,
-                  subtitle: context.copy.examsSubtitle,
-                  action: TextButton(
-                    onPressed: () => context.push(ExamsScreen.routePath),
-                    child: Text(context.l10n.viewAllAction),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                if (studyData.criticalExams.isEmpty)
-                  EmptyState(
-                    title: context.copy.emptyExamsTitle,
-                    description: context.copy.emptyExamsDescription,
-                    icon: Icons.event_available_rounded,
-                  )
-                else
-                  ...studyData.criticalExams.map(
-                    (exam) => Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: SectionCard(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: priorityColor(exam.priority)
-                                  .withValues(alpha: 0.16),
-                              child: Icon(
-                                Icons.event_note_rounded,
-                                color: priorityColor(exam.priority),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    exam.title,
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                  const SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    DateTimeUtils.friendlyDate(
-                                        exam.dateTime, locale),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                  ),
-                                  if (isCompact) ...[
-                                    const SizedBox(height: AppSpacing.sm),
-                                    StatusPill(
-                                      label: context.copy.examCountdown(
-                                        exam.dateTime
-                                            .difference(DateTime.now())
-                                            .inDays,
-                                      ),
-                                      color: priorityColor(exam.priority),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            if (!isCompact)
-                              StatusPill(
-                                label: context.copy.examCountdown(
-                                  exam.dateTime
-                                      .difference(DateTime.now())
-                                      .inDays,
-                                ),
-                                color: priorityColor(exam.priority),
-                              ),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: AppSpacing.md),
+                    _GoalProgressRow(
+                      label: context.l10n.weeklyGoalLabel,
+                      value: studyData.weeklyStudyMinutes,
+                      target: studyData.goals.weeklyTargetMinutes,
                     ),
-                  ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.copy.habitsQuickCardTitle,
-                  subtitle: context.copy.habitsSubtitle,
-                  action: TextButton(
-                    onPressed: () => context.push(HabitsScreen.routePath),
-                    child: Text(context.l10n.viewAllAction),
-                  ),
+                    const SizedBox(height: AppSpacing.md),
+                    _GoalProgressRow(
+                      label: context.l10n.monthlyGoalLabel,
+                      value: studyData.monthlyStudyMinutes,
+                      target: studyData.goals.monthlyTargetMinutes,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    StatusPill(
+                      label: _weeklyFocusHint(
+                        context,
+                        focusDelta == 0
+                            ? studyData.goals.weeklyTargetMinutes
+                            : focusDelta,
+                      ),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (studyData.activeHabits.isEmpty)
-                  EmptyState(
-                    title: context.copy.emptyHabitsTitle,
-                    description: context.copy.emptyHabitsDescription,
-                    icon: Icons.repeat_rounded,
-                  )
-                else
-                  ...studyData.activeHabits.take(3).map(
-                        (habit) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: SectionCard(
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: _upcomingExamsTitle(context),
+                subtitle: _examsSubtitle(context),
+                action: TextButton(
+                  onPressed: () => context.push(ExamsScreen.routePath),
+                  child: Text(context.l10n.viewAllAction),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (studyData.criticalExams.isEmpty)
+                EmptyState(
+                  title: _emptyExamsTitle(context),
+                  description: _emptyExamsDescription(context),
+                  icon: Icons.event_available_rounded,
+                )
+              else
+                ...studyData.criticalExams.map(
+                  (exam) => Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: SectionCard(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: priorityColor(exam.priority)
+                                .withValues(alpha: 0.16),
+                            child: Icon(
+                              Icons.event_note_rounded,
+                              color: priorityColor(exam.priority),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (isCompact)
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
+                                Text(
+                                  exam.title,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(
+                                  DateTimeUtils.friendlyDate(
+                                      exam.dateTime, locale),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                                if (isCompact) ...[
+                                  const SizedBox(height: AppSpacing.sm),
+                                  StatusPill(
+                                    label: _examCountdown(
+                                      context,
+                                      exam.dateTime
+                                          .difference(DateTime.now())
+                                          .inDays,
+                                    ),
+                                    color: priorityColor(exam.priority),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (!isCompact)
+                            StatusPill(
+                              label: _examCountdown(
+                                context,
+                                exam.dateTime.difference(DateTime.now()).inDays,
+                              ),
+                              color: priorityColor(exam.priority),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: _dailyRoutinesTitle(context),
+                subtitle: _habitsSubtitle(context),
+                action: TextButton(
+                  onPressed: () => context.push(HabitsScreen.routePath),
+                  child: Text(context.l10n.viewAllAction),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (studyData.activeHabits.isEmpty)
+                EmptyState(
+                  title: _emptyHabitsTitle(context),
+                  description: _emptyHabitsDescription(context),
+                  icon: Icons.repeat_rounded,
+                )
+              else
+                ...studyData.activeHabits.take(3).map(
+                      (habit) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: SectionCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (isCompact)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      habit.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    FilledButton.tonal(
+                                      onPressed: habit.isCompleted
+                                          ? null
+                                          : () => ref
+                                              .read(
+                                                studyDataControllerProvider
+                                                    .notifier,
+                                              )
+                                              .completeHabit(habit),
+                                      child: Text(context.l10n.finishAction),
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
                                         habit.title,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium,
                                       ),
-                                      const SizedBox(height: AppSpacing.sm),
-                                      FilledButton.tonal(
-                                        onPressed: habit.isCompleted
-                                            ? null
-                                            : () => ref
-                                                .read(
-                                                  studyDataControllerProvider
-                                                      .notifier,
-                                                )
-                                                .completeHabit(habit),
-                                        child: Text(context.l10n.finishAction),
-                                      ),
-                                    ],
-                                  )
-                                else
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          habit.title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                      ),
-                                      FilledButton.tonal(
-                                        onPressed: habit.isCompleted
-                                            ? null
-                                            : () => ref
-                                                .read(
-                                                  studyDataControllerProvider
-                                                      .notifier,
-                                                )
-                                                .completeHabit(habit),
-                                        child: Text(context.l10n.finishAction),
-                                      ),
-                                    ],
-                                  ),
-                                const SizedBox(height: AppSpacing.sm),
-                                LinearProgressIndicator(
-                                  value:
-                                      (habit.completedCount / habit.goalCount)
-                                          .clamp(0.0, 1.0)
-                                          .toDouble(),
-                                  color: Color(habit.color),
+                                    ),
+                                    FilledButton.tonal(
+                                      onPressed: habit.isCompleted
+                                          ? null
+                                          : () => ref
+                                              .read(
+                                                studyDataControllerProvider
+                                                    .notifier,
+                                              )
+                                              .completeHabit(habit),
+                                      child: Text(context.l10n.finishAction),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  context.copy.habitProgress(
-                                    habit.completedCount,
-                                    habit.goalCount,
-                                  ),
+                              const SizedBox(height: AppSpacing.sm),
+                              LinearProgressIndicator(
+                                value: (habit.completedCount / habit.goalCount)
+                                    .clamp(0.0, 1.0)
+                                    .toDouble(),
+                                color: Color(habit.color),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                _habitProgress(
+                                  context,
+                                  habit.completedCount,
+                                  habit.goalCount,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.copy.motivationMomentTitle,
-                  subtitle: context.l10n.insightsSubtitle,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                SectionCard(
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.auto_awesome_rounded,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                    ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.insightsTitle,
+                subtitle: context.l10n.insightsSubtitle,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SectionCard(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      child: Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          motivation,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        motivation,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                SectionHeader(
-                  title: context.l10n.recentActivityTitle,
-                  subtitle: context.l10n.recentActivitySubtitle,
-                  action: TextButton(
-                    onPressed: () => context.push(NotesScreen.routePath),
-                    child: Text(context.l10n.notesTitle),
-                  ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              SectionHeader(
+                title: context.l10n.recentActivityTitle,
+                subtitle: context.l10n.recentActivitySubtitle,
+                action: TextButton(
+                  onPressed: () => context.push(NotesScreen.routePath),
+                  child: Text(context.l10n.notesTitle),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (studyData.sessions.isEmpty)
-                  EmptyState(
-                    title: context.l10n.emptyActivityTitle,
-                    description: context.l10n.emptyActivityDescription,
-                    icon: Icons.history_toggle_off_rounded,
-                  )
-                else
-                  ...studyData.sessions.take(4).map(
-                        (session) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: SectionCard(
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .secondaryContainer,
-                                  child: const Icon(Icons.timer_rounded),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        context.l10n.focusSessionSummary(
-                                          session.durationMinutes,
-                                        ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (studyData.sessions.isEmpty)
+                EmptyState(
+                  title: context.l10n.emptyActivityTitle,
+                  description: context.l10n.emptyActivityDescription,
+                  icon: Icons.history_toggle_off_rounded,
+                )
+              else
+                ...studyData.sessions.take(4).map(
+                      (session) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                        child: SectionCard(
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
+                                child: const Icon(Icons.timer_rounded),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.l10n.focusSessionSummary(
+                                        session.durationMinutes,
                                       ),
-                                      const SizedBox(height: AppSpacing.xs),
-                                      Text(
-                                        DateTimeUtils.friendlyDate(
-                                          session.startTime,
-                                          locale,
-                                        ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    const SizedBox(height: AppSpacing.xs),
+                                    Text(
+                                      DateTimeUtils.friendlyDate(
+                                        session.startTime,
+                                        locale,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-              ],
-            ),
+                    ),
+            ],
           );
         },
       ),
     );
+  }
+
+  String _overviewTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bugunun ozeti',
+      'ar' => 'ملخص اليوم',
+      _ => 'Today overview',
+    };
+  }
+
+  String _weeklyFocusHint(BuildContext context, int minutes) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bu hafta ritmi korumak icin $minutes dakika odak yeterli.',
+      'ar' => 'يكفي $minutes دقيقة تركيز هذا الأسبوع للحفاظ على الإيقاع.',
+      _ => '$minutes minutes of focused work will keep this week on track.',
+    };
+  }
+
+  String _examsTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Sinavlar',
+      'ar' => 'الاختبارات',
+      _ => 'Exams',
+    };
+  }
+
+  String _upcomingExamsTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Yaklasan sinavlar',
+      'ar' => 'الاختبارات القادمة',
+      _ => 'Upcoming exams',
+    };
+  }
+
+  String _examsSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Onemli tarihlerini ve yaklasan sinavlarini tek ekranda gor.',
+      'ar' => 'راجع اختباراتك القادمة ومواعيدك المهمة من شاشة واحدة.',
+      _ => 'See upcoming exams and important dates in one place.',
+    };
+  }
+
+  String _emptyExamsTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Yaklasan sinav yok',
+      'ar' => 'لا توجد اختبارات قادمة',
+      _ => 'No upcoming exams',
+    };
+  }
+
+  String _emptyExamsDescription(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bir sonraki onemli tarihi gorunur tutmak icin sinav ekle.',
+      'ar' => 'أضف اختبارًا لإبقاء الموعد القادم واضحًا أمامك.',
+      _ => 'Add an exam to keep the next important date visible.',
+    };
+  }
+
+  String _examCountdown(BuildContext context, int days) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => '$days gun kaldi',
+      'ar' => 'متبقي $days يوم',
+      _ => '$days days left',
+    };
+  }
+
+  String _habitsTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Aliskanliklar',
+      'ar' => 'العادات',
+      _ => 'Habits',
+    };
+  }
+
+  String _dailyRoutinesTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Gunluk rutinler',
+      'ar' => 'العادات اليومية',
+      _ => 'Daily routines',
+    };
+  }
+
+  String _habitsSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Gununu destekleyen basit rutinleri takip et.',
+      'ar' => 'تابع عادات بسيطة تدعم يومك الدراسي.',
+      _ => 'Track simple routines that support your day.',
+    };
+  }
+
+  String _emptyHabitsTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Henuz aliskanlik yok',
+      'ar' => 'لا توجد عادات بعد',
+      _ => 'No habits yet',
+    };
+  }
+
+  String _emptyHabitsDescription(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Gunluk ritmine destek olacak basit bir aliskanlik ekle.',
+      'ar' => 'أضف عادة بسيطة تدعم روتينك اليومي.',
+      _ => 'Add a simple habit to support your daily routine.',
+    };
+  }
+
+  String _habitProgress(BuildContext context, int value, int target) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => '$value / $target tamamlandi',
+      'ar' => '$value / $target مكتمل',
+      _ => '$value / $target complete',
+    };
   }
 
   String _motivationQuote(BuildContext context, StudyDataState data) {

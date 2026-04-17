@@ -57,7 +57,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
 
           return ListView(
             children: [
-              SectionHeader(
+              PageHeader(
+                leading: const AppLogo(size: 44, radius: 18),
                 title: context.l10n.focusTitle,
                 subtitle: context.l10n.focusSubtitle,
               ),

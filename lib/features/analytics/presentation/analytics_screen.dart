@@ -22,15 +22,16 @@ class AnalyticsScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final courseMinutes = <String, double>{};
           final locale = Localizations.localeOf(context).languageCode;
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           for (final session in studyData.sessions) {
-            final title =
-                studyData.courseById(session.courseId)?.title ?? context.l10n.miscLabel;
+            final title = studyData.courseById(session.courseId)?.title ??
+                context.l10n.miscLabel;
             courseMinutes.update(
               title,
               (value) => value + session.durationMinutes,
@@ -68,20 +69,9 @@ class AnalyticsScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: Navigator.of(context).pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.analyticsTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
+              PageHeader(
+                title: context.l10n.analyticsTitle,
+                subtitle: _analyticsSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (isCompact)
@@ -267,8 +257,11 @@ class AnalyticsScreen extends ConsumerWidget {
                           PieChartData(
                             sectionsSpace: 3,
                             centerSpaceRadius: 42,
-                            sections:
-                                courseMinutes.entries.toList().asMap().entries.map(
+                            sections: courseMinutes.entries
+                                .toList()
+                                .asMap()
+                                .entries
+                                .map(
                               (entry) {
                                 final colors = [
                                   Theme.of(context).colorScheme.primary,
@@ -312,5 +305,13 @@ class AnalyticsScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  String _analyticsSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Haftalik odak, gorevler ve aliskanliklarin ozetini gor.',
+      'ar' => 'راجع ملخص التركيز الأسبوعي والمهام والعادات.',
+      _ => 'Review your weekly focus, tasks, and habit summary.',
+    };
   }
 }

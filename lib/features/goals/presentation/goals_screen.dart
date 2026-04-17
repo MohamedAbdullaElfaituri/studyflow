@@ -25,20 +25,9 @@ class GoalsScreen extends ConsumerWidget {
         ),
         data: (studyData) => ListView(
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: Navigator.of(context).pop,
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    context.l10n.goalsTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ],
+            PageHeader(
+              title: context.l10n.goalsTitle,
+              subtitle: _goalsSubtitle(context),
             ),
             const SizedBox(height: AppSpacing.lg),
             _GoalsEditor(
@@ -113,6 +102,14 @@ class GoalsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _goalsSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Gunluk, haftalik ve aylik hedeflerini sade sekilde ayarla.',
+      'ar' => 'اضبط أهدافك اليومية والأسبوعية والشهرية بشكل واضح.',
+      _ => 'Set your daily, weekly, and monthly targets clearly.',
+    };
   }
 }
 

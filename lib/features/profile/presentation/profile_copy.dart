@@ -26,9 +26,9 @@ class ProfileCopy {
   }
 
   String get fallbackUserName => _pick(
-        en: 'StudyFlow User',
-        tr: 'StudyFlow Kullanıcısı',
-        ar: 'مستخدم StudyFlow',
+        en: 'Student',
+        tr: 'Ogrenci',
+        ar: 'طالب',
       );
   String get focusPlanner => _pick(
         en: 'Focus-driven planner',
@@ -51,9 +51,9 @@ class ProfileCopy {
         ar: 'تعديل',
       );
   String get defaultBio => _pick(
-        en: 'Designing calm study weeks with focused sessions, visible progress, and low cognitive load.',
-        tr: 'Odak seansları, görünür ilerleme ve düşük bilişsel yük ile sakin çalışma haftaları kuruyorum.',
-        ar: 'أبني أسابيع دراسة هادئة بجلسات تركيز وتقدم واضح وحمل معرفي منخفض.',
+        en: 'Keeping study days calm, clear, and easy to manage.',
+        tr: 'Calisma gunlerini sakin, net ve kolay yonetilebilir tutuyorum.',
+        ar: 'أحافظ على أيام الدراسة هادئة وواضحة وسهلة الإدارة.',
       );
   String get weeklyFocus => _pick(
         en: 'Weekly focus',

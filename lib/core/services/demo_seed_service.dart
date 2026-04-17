@@ -228,7 +228,8 @@ class DemoSeedService {
         userId: userId,
         courseId: _courseIdAt(courses, 2),
         title: 'Sprint planning quiz',
-        description: 'Review agile ceremonies, story points, and estimation trade-offs.',
+        description:
+            'Review agile ceremonies, story points, and estimation trade-offs.',
         dateTime: now.add(const Duration(days: 6, hours: 2)),
         type: ExamType.quiz,
         priority: TaskPriority.medium,
@@ -246,7 +247,8 @@ class DemoSeedService {
         id: _uuid.v4(),
         userId: userId,
         title: 'Morning planning',
-        description: 'Review the day and lock the first focus block before 09:00.',
+        description:
+            'Review the day and lock the first focus block before 09:00.',
         color: 0xFF1F6FEB,
         frequency: HabitFrequency.daily,
         goalCount: 1,
@@ -260,7 +262,8 @@ class DemoSeedService {
         id: _uuid.v4(),
         userId: userId,
         title: 'Pomodoro pair',
-        description: 'Complete at least two focused sessions on active study days.',
+        description:
+            'Complete at least two focused sessions on active study days.',
         color: 0xFF24A19C,
         frequency: HabitFrequency.daily,
         goalCount: 2,
@@ -274,7 +277,8 @@ class DemoSeedService {
         id: _uuid.v4(),
         userId: userId,
         title: 'Weekly review',
-        description: 'Summarize wins, blockers, and next week priorities every Sunday.',
+        description:
+            'Summarize wins, blockers, and next week priorities every Sunday.',
         color: 0xFFF4A261,
         frequency: HabitFrequency.weekly,
         goalCount: 1,

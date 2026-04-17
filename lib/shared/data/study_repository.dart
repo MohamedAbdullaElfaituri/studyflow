@@ -41,9 +41,10 @@ class LocalStudyRepository implements StudyRepository {
   @override
   Future<void> ensureSeeded(AppUserModel user) async {
     final seededCourses = DemoSeedService.coursesFor(user.id);
-    final existingCourses = _storage.containsKey(AppConstants.coursesKey(user.id))
-        ? await getCourses(user.id)
-        : <CourseModel>[];
+    final existingCourses =
+        _storage.containsKey(AppConstants.coursesKey(user.id))
+            ? await getCourses(user.id)
+            : <CourseModel>[];
     final courses = existingCourses.isEmpty ? seededCourses : existingCourses;
 
     final seededTasks = DemoSeedService.tasksFor(user.id, courses);
@@ -121,7 +122,8 @@ class LocalStudyRepository implements StudyRepository {
 
   @override
   Future<List<CourseModel>> getCourses(String userId) async {
-    return _readCollection(AppConstants.coursesKey(userId), CourseModel.fromJson);
+    return _readCollection(
+        AppConstants.coursesKey(userId), CourseModel.fromJson);
   }
 
   @override
@@ -136,8 +138,9 @@ class LocalStudyRepository implements StudyRepository {
 
   @override
   Future<void> deleteCourse(String userId, String courseId) async {
-    final courses =
-        (await getCourses(userId)).where((item) => item.id != courseId).toList();
+    final courses = (await getCourses(userId))
+        .where((item) => item.id != courseId)
+        .toList();
     final tasks = (await getTasks(userId))
         .map(
           (task) => task.courseId == courseId
@@ -206,7 +209,8 @@ class LocalStudyRepository implements StudyRepository {
   @override
   Future<void> saveTask(TaskModel task) async {
     final tasks = await getTasks(task.userId);
-    final updated = _upsert(tasks, task.withLinkedSubtasks(), (item) => item.id);
+    final updated =
+        _upsert(tasks, task.withLinkedSubtasks(), (item) => item.id);
     await _writeCollection(
       AppConstants.tasksKey(task.userId),
       updated.map((item) => item.toJson()).toList(),
@@ -338,8 +342,8 @@ class LocalStudyRepository implements StudyRepository {
 
   @override
   Future<GoalSettingsModel> getGoals(String userId) async {
-    final items =
-        _readCollection(AppConstants.goalsKey(userId), GoalSettingsModel.fromJson);
+    final items = _readCollection(
+        AppConstants.goalsKey(userId), GoalSettingsModel.fromJson);
     if (items.isNotEmpty) {
       return items.first;
     }

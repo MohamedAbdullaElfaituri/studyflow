@@ -42,7 +42,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final query = _searchController.text.trim().toLowerCase();
@@ -60,20 +61,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.notesTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
+              PageHeader(
+                title: context.l10n.notesTitle,
+                subtitle: context.l10n.emptyNotesDescription,
               ),
               const SizedBox(height: AppSpacing.md),
               SearchTextField(
@@ -127,7 +117,8 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                             if (note.courseId != null) ...[
                               const SizedBox(height: AppSpacing.sm),
                               Text(
-                                studyData.courseById(note.courseId)?.title ?? '',
+                                studyData.courseById(note.courseId)?.title ??
+                                    '',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -190,7 +181,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final existing =
@@ -213,33 +205,22 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      existing == null
-                          ? context.l10n.addNoteTitle
-                          : context.l10n.editNoteTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  if (existing != null)
-                    IconButton(
-                      onPressed: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .deleteNote(existing.id);
-                        if (!mounted) return;
-                        context.pop();
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                ],
+              PageHeader(
+                title: existing == null
+                    ? context.l10n.addNoteTitle
+                    : context.l10n.editNoteTitle,
+                trailing: existing == null
+                    ? null
+                    : IconButton(
+                        onPressed: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .deleteNote(existing.id);
+                          if (!mounted) return;
+                          context.pop();
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -258,8 +239,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
                         initialValue: selectedCourseId,
-                        decoration:
-                            InputDecoration(labelText: context.l10n.courseLabel),
+                        decoration: InputDecoration(
+                            labelText: context.l10n.courseLabel),
                         items: [
                           DropdownMenuItem<String?>(
                             value: null,

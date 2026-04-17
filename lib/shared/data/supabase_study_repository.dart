@@ -28,7 +28,8 @@ class SupabaseStudyRepository implements StudyRepository {
         .order('created_at');
 
     return (data as List<dynamic>)
-        .map((item) => CourseModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map((item) =>
+            CourseModel.fromJson(Map<String, dynamic>.from(item as Map)))
         .toList();
   }
 
@@ -39,7 +40,11 @@ class SupabaseStudyRepository implements StudyRepository {
 
   @override
   Future<void> deleteCourse(String userId, String courseId) async {
-    await _client.from('courses').delete().eq('id', courseId).eq('user_id', userId);
+    await _client
+        .from('courses')
+        .delete()
+        .eq('id', courseId)
+        .eq('user_id', userId);
   }
 
   @override
@@ -100,7 +105,8 @@ class SupabaseStudyRepository implements StudyRepository {
         .order('created_at');
 
     return (data as List<dynamic>)
-        .map((item) => NoteModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map((item) =>
+            NoteModel.fromJson(Map<String, dynamic>.from(item as Map)))
         .toList();
   }
 
@@ -123,7 +129,8 @@ class SupabaseStudyRepository implements StudyRepository {
         .order('date_time');
 
     return (data as List<dynamic>)
-        .map((item) => ExamModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map((item) =>
+            ExamModel.fromJson(Map<String, dynamic>.from(item as Map)))
         .toList();
   }
 
@@ -146,7 +153,8 @@ class SupabaseStudyRepository implements StudyRepository {
         .order('created_at');
 
     return (data as List<dynamic>)
-        .map((item) => HabitModel.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map((item) =>
+            HabitModel.fromJson(Map<String, dynamic>.from(item as Map)))
         .toList();
   }
 
@@ -157,7 +165,11 @@ class SupabaseStudyRepository implements StudyRepository {
 
   @override
   Future<void> deleteHabit(String userId, String habitId) async {
-    await _client.from('habits').delete().eq('id', habitId).eq('user_id', userId);
+    await _client
+        .from('habits')
+        .delete()
+        .eq('id', habitId)
+        .eq('user_id', userId);
   }
 
   @override
@@ -170,8 +182,8 @@ class SupabaseStudyRepository implements StudyRepository {
 
     return (data as List<dynamic>)
         .map(
-          (item) =>
-              StudySessionModel.fromJson(Map<String, dynamic>.from(item as Map)),
+          (item) => StudySessionModel.fromJson(
+              Map<String, dynamic>.from(item as Map)),
         )
         .toList();
   }
@@ -183,8 +195,11 @@ class SupabaseStudyRepository implements StudyRepository {
 
   @override
   Future<GoalSettingsModel> getGoals(String userId) async {
-    final data =
-        await _client.from('goals').select().eq('user_id', userId).maybeSingle();
+    final data = await _client
+        .from('goals')
+        .select()
+        .eq('user_id', userId)
+        .maybeSingle();
 
     if (data == null) {
       final created = GoalSettingsModel(
@@ -227,8 +242,7 @@ class SupabaseStudyRepository implements StudyRepository {
       final created = UserSettingsModel(
         id: _uuid.v4(),
         userId: userId,
-        languageCode:
-            profileData?['preferred_language'] as String? ?? 'en',
+        languageCode: profileData?['preferred_language'] as String? ?? 'en',
         themeMode: profileData?['theme_mode'] as String? ?? 'system',
         notificationsEnabled: true,
         accessibilityMode: false,
@@ -295,17 +309,17 @@ class SupabaseStudyRepository implements StudyRepository {
 
     final now = DateTime.now();
     await _client.from('goals').upsert(
-      GoalSettingsModel(
-        id: _uuid.v4(),
-        userId: userId,
-        dailyTargetMinutes: 120,
-        weeklyTargetMinutes: 600,
-        monthlyTargetMinutes: 2400,
-        createdAt: now,
-        updatedAt: now,
-      ).toJson(),
-      onConflict: 'user_id',
-    );
+          GoalSettingsModel(
+            id: _uuid.v4(),
+            userId: userId,
+            dailyTargetMinutes: 120,
+            weeklyTargetMinutes: 600,
+            monthlyTargetMinutes: 2400,
+            createdAt: now,
+            updatedAt: now,
+          ).toJson(),
+          onConflict: 'user_id',
+        );
   }
 
   Future<void> _ensureUserSettings(AppUserModel user) async {
@@ -323,9 +337,8 @@ class SupabaseStudyRepository implements StudyRepository {
       themeMode: user.themeMode,
       notificationsEnabled: data?['notifications_enabled'] as bool? ?? true,
       accessibilityMode: data?['accessibility_mode'] as bool? ?? false,
-      createdAt: data == null
-          ? now
-          : DateTime.parse(data['created_at'] as String),
+      createdAt:
+          data == null ? now : DateTime.parse(data['created_at'] as String),
       updatedAt: now,
     );
 
@@ -353,16 +366,16 @@ class SupabaseStudyRepository implements StudyRepository {
 
     final now = DateTime.now();
     await _client.from('reminder_preferences').upsert(
-      ReminderPreferencesModel(
-        id: _uuid.v4(),
-        userId: userId,
-        tasksEnabled: true,
-        studyEnabled: true,
-        dailyEnabled: false,
-        createdAt: now,
-        updatedAt: now,
-      ).toJson(),
-      onConflict: 'user_id',
-    );
+          ReminderPreferencesModel(
+            id: _uuid.v4(),
+            userId: userId,
+            tasksEnabled: true,
+            studyEnabled: true,
+            dailyEnabled: false,
+            createdAt: now,
+            updatedAt: now,
+          ).toJson(),
+          onConflict: 'user_id',
+        );
   }
 }

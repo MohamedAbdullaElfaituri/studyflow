@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   "appName": "StudyFlow",
-  "splashSubtitle": "Premium study planning for focused university life.",
+  "splashSubtitle": "Simple study planning for everyday progress.",
   "genericNavigationError": "Something went wrong while opening this screen.",
   "genericErrorMessage": "Something went wrong. Please try again.",
   "errorStateTitle": "We hit a small issue",
@@ -296,7 +296,7 @@
       }
     }
   },
-  "profileFallbackName": "StudyFlow Student",
+  "profileFallbackName": "Student",
   "editProfileAction": "Edit profile",
   "profileOverviewTitle": "Profile overview",
   "profileOverviewSubtitle": "A snapshot of your current study identity and momentum.",
@@ -315,7 +315,7 @@
   "taskRemindersLabel": "Task reminders",
   "studyRemindersLabel": "Study reminders",
   "dailyReminderLabel": "Daily reminder",
-  "notificationPreviewTitle": "StudyFlow reminder",
+  "notificationPreviewTitle": "Study reminder",
   "notificationPreviewBody": "A short focused session can move today forward.",
   "previewNotificationAction": "Preview notification",
   "accessibilityPlaceholderTitle": "Accessibility support",

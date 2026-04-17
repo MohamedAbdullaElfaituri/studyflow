@@ -36,7 +36,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final query = _controller.text.trim().toLowerCase();
@@ -67,45 +68,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.copy.searchTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                context.copy.searchSubtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+              PageHeader(
+                title: _searchTitle(context),
+                subtitle: _searchSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
               SearchTextField(
                 controller: _controller,
-                hintText: context.copy.searchHint,
+                hintText: _searchHint(context),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (query.isEmpty)
                 EmptyState(
                   title: context.copy.emptySearchTitle,
-                  description: context.copy.emptySearchDescription,
+                  description: _searchEmptyDescription(context),
                   icon: Icons.travel_explore_rounded,
                 )
               else if (!hasResults)
                 EmptyState(
                   title: context.copy.emptySearchTitle,
-                  description: context.copy.emptySearchDescription,
+                  description: _searchEmptyDescription(context),
                   icon: Icons.search_off_rounded,
                 )
               else ...[
@@ -195,6 +178,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         },
       ),
     );
+  }
+
+  String _searchTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Arama',
+      'ar' => 'البحث',
+      _ => 'Search',
+    };
+  }
+
+  String _searchSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Dersleri, gorevleri, notlari ve sinavlari tek yerden ara.',
+      'ar' => 'ابحث في المواد والمهام والملاحظات والاختبارات من مكان واحد.',
+      _ => 'Search courses, tasks, notes, and exams from one place.',
+    };
+  }
+
+  String _searchHint(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Calisma iceriginde ara',
+      'ar' => 'ابحث في محتوى الدراسة',
+      _ => 'Search your study content',
+    };
+  }
+
+  String _searchEmptyDescription(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Yazdikca sonuclar burada gorunecek.',
+      'ar' => 'ستظهر النتائج هنا أثناء الكتابة.',
+      _ => 'Results will appear here as you type.',
+    };
   }
 }
 

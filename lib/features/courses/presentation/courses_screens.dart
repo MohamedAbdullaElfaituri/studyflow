@@ -29,24 +29,14 @@ class CoursesScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 4),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) => ListView(
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: context.pop,
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    context.l10n.coursesTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ],
+            PageHeader(
+              title: context.l10n.coursesTitle,
+              subtitle: context.l10n.emptyCoursesDescription,
             ),
             const SizedBox(height: AppSpacing.md),
             if (studyData.courses.isEmpty)
@@ -77,7 +67,8 @@ class CoursesScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   course.title,
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
@@ -135,7 +126,8 @@ class CourseDetailScreen extends ConsumerWidget {
         loading: () => const LoadingColumn(itemCount: 3),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final course = studyData.courseById(courseId);
@@ -152,26 +144,14 @@ class CourseDetailScreen extends ConsumerWidget {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
+              PageHeader(
+                title: context.l10n.courseDetailTitle,
+                trailing: IconButton(
+                  onPressed: () => context.push(
+                    '${CourseEditorScreen.routePath}?courseId=${course.id}',
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      context.l10n.courseDetailTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => context.push(
-                      '${CourseEditorScreen.routePath}?courseId=${course.id}',
-                    ),
-                    icon: const Icon(Icons.edit_outlined),
-                  ),
-                ],
+                  icon: const Icon(Icons.edit_outlined),
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -336,7 +316,8 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
         loading: () => const LoadingColumn(itemCount: 2),
         error: (error, _) => ErrorStateCard(
           message: context.resolveError(error),
-          onRetry: () => ref.read(studyDataControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(studyDataControllerProvider.notifier).refresh(),
         ),
         data: (studyData) {
           final existing = widget.courseId == null
@@ -355,22 +336,10 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      existing == null
-                          ? context.l10n.addCourseTitle
-                          : context.l10n.editCourseTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
+              PageHeader(
+                title: existing == null
+                    ? context.l10n.addCourseTitle
+                    : context.l10n.editCourseTitle,
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -416,7 +385,8 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
                         children: _colorOptions
                             .map(
                               (color) => GestureDetector(
-                                onTap: () => setState(() => _selectedColor = color),
+                                onTap: () =>
+                                    setState(() => _selectedColor = color),
                                 child: Container(
                                   width: 40,
                                   height: 40,
@@ -425,7 +395,9 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: _selectedColor == color
-                                          ? Theme.of(context).colorScheme.onSurface
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
                                           : Colors.transparent,
                                       width: 2,
                                     ),
@@ -451,9 +423,10 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
                             userId: user.id,
                             title: _titleController.text.trim(),
                             description: _descriptionController.text.trim(),
-                            instructorName: _instructorController.text.trim().isEmpty
-                                ? null
-                                : _instructorController.text.trim(),
+                            instructorName:
+                                _instructorController.text.trim().isEmpty
+                                    ? null
+                                    : _instructorController.text.trim(),
                             color: _selectedColor,
                             createdAt: existing?.createdAt ?? now,
                             updatedAt: now,

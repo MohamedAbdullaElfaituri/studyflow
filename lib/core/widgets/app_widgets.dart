@@ -73,6 +73,62 @@ class AppPage extends StatelessWidget {
   }
 }
 
+class PageHeader extends StatelessWidget {
+  const PageHeader({
+    required this.title,
+    super.key,
+    this.subtitle,
+    this.trailing,
+    this.leading,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget? leading;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        leading ??
+            IconButton.filledTonal(
+              onPressed: () => Navigator.of(context).maybePop(),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  subtitle!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (trailing != null) ...[
+          const SizedBox(width: AppSpacing.sm),
+          trailing!,
+        ],
+      ],
+    );
+  }
+}
+
 enum _MainNavTab {
   home,
   tasks,
@@ -230,66 +286,55 @@ class _StudyFlowBottomBar extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 380;
+        final compact = constraints.maxWidth < 390;
         final useShortLabel = constraints.maxWidth < 430;
-        final horizontalPadding = compact ? AppSpacing.xs : AppSpacing.sm;
-        final verticalPadding = compact ? AppSpacing.xs : AppSpacing.sm;
 
         return ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(30),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    scheme.surface.withValues(alpha: 0.92),
-                    scheme.surfaceContainerHigh.withValues(alpha: 0.88),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(32),
+                color: scheme.surface.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(30),
                 border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.34),
+                  color: scheme.outlineVariant.withValues(alpha: 0.28),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 32,
-                    offset: const Offset(0, 18),
-                  ),
-                  BoxShadow(
-                    color: scheme.primary.withValues(alpha: 0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 22,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: verticalPadding,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: compact ? 76 : 82,
                 ),
-                child: Row(
-                  textDirection: TextDirection.ltr,
-                  children: List.generate(items.length, (index) {
-                    final item = items[index];
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compact ? 2 : 4,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? AppSpacing.xs : AppSpacing.sm,
+                    vertical: compact ? AppSpacing.xs : AppSpacing.sm,
+                  ),
+                  child: Row(
+                    textDirection: TextDirection.ltr,
+                    children: List.generate(items.length, (index) {
+                      final item = items[index];
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: _StudyFlowBottomBarItem(
+                            data: item,
+                            selected: index == currentIndex,
+                            useShortLabel: useShortLabel,
+                            compact: compact,
+                            onTap: () => onSelected(index),
+                          ),
                         ),
-                        child: _StudyFlowBottomBarItem(
-                          data: item,
-                          selected: index == currentIndex,
-                          useShortLabel: useShortLabel,
-                          compact: compact,
-                          onTap: () => onSelected(index),
-                        ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
@@ -320,7 +365,7 @@ class _StudyFlowBottomBarItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final label = useShortLabel ? data.shortLabel : data.label;
     final iconSize = compact ? 18.0 : 20.0;
-    final bubbleSize = compact ? 38.0 : 42.0;
+    final bubbleSize = compact ? 36.0 : 40.0;
     final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
           fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
           color: selected ? data.accent : scheme.onSurfaceVariant,
@@ -337,94 +382,54 @@ class _StudyFlowBottomBarItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           onTap: onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 260),
+            duration: const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
             padding: EdgeInsets.symmetric(
               horizontal: compact ? 4 : 6,
-              vertical: compact ? 8 : 10,
+              vertical: compact ? 6 : 8,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: selected
-                  ? LinearGradient(
-                      colors: [
-                        data.accent.withValues(alpha: 0.24),
-                        data.accent.withValues(alpha: 0.08),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    )
-                  : null,
+              color: selected ? data.accent.withValues(alpha: 0.10) : null,
               border: Border.all(
                 color: selected
-                    ? data.accent.withValues(alpha: 0.3)
+                    ? data.accent.withValues(alpha: 0.24)
                     : Colors.transparent,
               ),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: data.accent.withValues(alpha: 0.18),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ]
-                  : const [],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 260),
+                  duration: const Duration(milliseconds: 180),
                   curve: Curves.easeOutCubic,
                   width: bubbleSize,
                   height: bubbleSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: selected
-                        ? LinearGradient(
-                            colors: [
-                              data.accent,
-                              data.accent.withValues(alpha: 0.72),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
                     color: selected
-                        ? null
-                        : scheme.surface.withValues(alpha: 0.42),
+                        ? data.accent.withValues(alpha: 0.16)
+                        : scheme.surface.withValues(alpha: 0.52),
                     border: Border.all(
                       color: selected
-                          ? data.accent.withValues(alpha: 0.18)
-                          : scheme.outlineVariant.withValues(alpha: 0.26),
+                          ? data.accent.withValues(alpha: 0.24)
+                          : scheme.outlineVariant.withValues(alpha: 0.22),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: (selected ? data.accent : scheme.shadow)
-                            .withValues(alpha: selected ? 0.24 : 0.08),
-                        blurRadius: selected ? 18 : 10,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
                   ),
                   child: Icon(
                     selected ? data.selectedIcon : data.icon,
                     size: iconSize,
-                    color:
-                        selected ? scheme.onPrimary : scheme.onSurfaceVariant,
+                    color: selected ? data.accent : scheme.onSurfaceVariant,
                   ),
                 ),
                 SizedBox(height: compact ? 5 : 6),
                 SizedBox(
-                  height: compact ? 14 : 16,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
+                  height: compact ? 16 : 18,
+                  child: Center(
                     child: Text(
                       label,
-                      key: ValueKey<String>(label),
                       maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: labelStyle,
                     ),
@@ -453,35 +458,22 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.surface.withValues(alpha: 0.98),
-            Theme.of(context).colorScheme.surface.withValues(alpha: 0.88),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(
           color: Theme.of(context)
               .colorScheme
               .outlineVariant
-              .withValues(alpha: 0.38),
+              .withValues(alpha: 0.28),
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
               alpha:
-                  Theme.of(context).brightness == Brightness.dark ? 0.22 : 0.07,
+                  Theme.of(context).brightness == Brightness.dark ? 0.16 : 0.05,
             ),
-            blurRadius: 32,
-            offset: const Offset(0, 18),
-          ),
-          BoxShadow(
-            color:
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-            blurRadius: 22,
-            offset: const Offset(0, 6),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -570,25 +562,28 @@ class GradientBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
         gradient: LinearGradient(
           colors: colors ??
               [
-                Theme.of(context).colorScheme.primary,
-                Theme.of(context).colorScheme.secondary,
-                Theme.of(context).colorScheme.tertiary,
+                scheme.primary,
+                Color.alphaBlend(
+                  scheme.secondary.withValues(alpha: 0.28),
+                  scheme.primaryContainer,
+                ),
               ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
-            blurRadius: 30,
-            offset: const Offset(0, 16),
+            color: scheme.primary.withValues(alpha: 0.18),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -817,18 +812,21 @@ class LoadingColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        itemCount,
-        (index) => Padding(
-          padding: EdgeInsets.only(
-              bottom: index == itemCount - 1 ? 0 : AppSpacing.md),
-          child: const SectionCard(
-            child: SizedBox(height: 120),
-          ),
+    return SingleChildScrollView(
+  child: Column(
+    children: List.generate(
+      itemCount,
+      (index) => Padding(
+        padding: EdgeInsets.only(
+          bottom: index == itemCount - 1 ? 0 : AppSpacing.md,
+        ),
+        child: const SectionCard(
+          child: SizedBox(height: 120),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 
@@ -935,6 +933,8 @@ class StatusPill extends StatelessWidget {
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color),
       ),
     );
@@ -958,6 +958,7 @@ class SearchTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: const Icon(Icons.search_rounded),
@@ -1019,10 +1020,10 @@ class QuickActionTile extends StatelessWidget {
         onTap: onTap,
         child: Ink(
           decoration: BoxDecoration(
-            color: scheme.surface,
+            color: scheme.surface.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: 0.6),
+              color: scheme.outlineVariant.withValues(alpha: 0.34),
             ),
           ),
           child: Padding(
@@ -1097,11 +1098,11 @@ class _RevealOnBuildState extends State<RevealOnBuild> {
     }
 
     return AnimatedSlide(
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 240),
       curve: Curves.easeOutCubic,
       offset: _visible ? Offset.zero : widget.offset,
       child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
         opacity: _visible ? 1 : 0,
         child: widget.child,
@@ -1330,56 +1331,59 @@ class _AppBackdrop extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isDark
-                    ? const [
-                        Color(0xFF08111F),
-                        Color(0xFF0E1727),
-                        Color(0xFF162236),
-                      ]
-                    : const [
-                        Color(0xFFF8FAFE),
-                        Color(0xFFF1F5FB),
-                        Color(0xFFEAF1FA),
-                      ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+    return ClipRect(
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? const [
+                          Color(0xFF0B1322),
+                          Color(0xFF10192B),
+                          Color(0xFF141F32),
+                        ]
+                      : const [
+                          Color(0xFFF7F9FC),
+                          Color(0xFFF2F5FA),
+                          Color(0xFFECEFF5),
+                        ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
               ),
             ),
           ),
-        ),
-        PositionedDirectional(
-          top: -56,
-          start: -32,
-          child: _AmbientOrb(
-            color: (isDark ? AppColors.secondary : AppColors.seed)
-                .withValues(alpha: 0.16),
-            size: 180,
+          PositionedDirectional(
+            top: -56,
+            start: -32,
+            child: _AmbientOrb(
+              color: (isDark ? AppColors.secondary : AppColors.seed)
+                  .withValues(alpha: 0.10),
+              size: 172,
+            ),
           ),
-        ),
-        PositionedDirectional(
-          top: 140,
-          end: -48,
-          child: _AmbientOrb(
-            color: AppColors.tertiary.withValues(alpha: isDark ? 0.1 : 0.12),
-            size: 180,
+          PositionedDirectional(
+            top: 140,
+            end: -48,
+            child: _AmbientOrb(
+              color: AppColors.tertiary.withValues(alpha: isDark ? 0.06 : 0.08),
+              size: 176,
+            ),
           ),
-        ),
-        PositionedDirectional(
-          bottom: 80,
-          start: 18,
-          child: _AmbientOrb(
-            color: AppColors.success.withValues(alpha: isDark ? 0.08 : 0.1),
-            size: 128,
+          PositionedDirectional(
+            bottom: 80,
+            start: 18,
+            child: _AmbientOrb(
+              color: AppColors.success.withValues(alpha: isDark ? 0.05 : 0.07),
+              size: 120,
+            ),
           ),
-        ),
-        child,
-      ],
+          child,
+        ],
+      ),
     );
   }
 }

@@ -33,6 +33,7 @@ class AppRouter {
 
   static final Set<String> _publicPaths = {
     SplashScreen.routePath,
+    AuthLoadingScreen.routePath,
     OnboardingScreen.routePath,
     LoginScreen.routePath,
     SignupScreen.routePath,
@@ -46,19 +47,28 @@ class AppRouter {
       refreshListenable: refreshListenable,
       redirect: (context, state) {
         final authAsync = ref.read(authControllerProvider);
+        final authNavigationPending = ref.read(authNavigationProvider);
         final location = state.matchedLocation;
 
         if (authAsync.isLoading && !authAsync.hasValue) {
-          return location == SplashScreen.routePath
+          return location == SplashScreen.routePath ||
+                  location == AuthLoadingScreen.routePath
               ? null
               : SplashScreen.routePath;
         }
 
         final authState = authAsync.valueOrNull;
         if (authState == null) {
-          return location == SplashScreen.routePath
+          return location == SplashScreen.routePath ||
+                  location == AuthLoadingScreen.routePath
               ? null
               : SplashScreen.routePath;
+        }
+
+        if (authNavigationPending && !authState.isAuthenticated) {
+          return location == AuthLoadingScreen.routePath
+              ? null
+              : AuthLoadingScreen.routePath;
         }
 
         if (authState.requiresPasswordReset) {
@@ -69,6 +79,7 @@ class AppRouter {
 
         if (authState.isAuthenticated) {
           if (location == SplashScreen.routePath ||
+              location == AuthLoadingScreen.routePath ||
               location == OnboardingScreen.routePath ||
               _authPaths.contains(location)) {
             return HomeScreen.routePath;
@@ -83,6 +94,9 @@ class AppRouter {
         }
 
         if (!authState.isAuthenticated) {
+          if (location == AuthLoadingScreen.routePath) {
+            return LoginScreen.routePath;
+          }
           if (_publicPaths.contains(location)) {
             return location == SplashScreen.routePath
                 ? LoginScreen.routePath
@@ -99,6 +113,13 @@ class AppRouter {
           pageBuilder: (context, state) => _fadePage(
             state,
             const SplashScreen(),
+          ),
+        ),
+        GoRoute(
+          path: AuthLoadingScreen.routePath,
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            const AuthLoadingScreen(),
           ),
         ),
         GoRoute(

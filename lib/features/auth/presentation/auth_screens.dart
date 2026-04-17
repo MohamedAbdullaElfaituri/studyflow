@@ -41,14 +41,19 @@ String _alreadyHaveAccountPrompt(BuildContext context) {
   };
 }
 
-String _browserHandoffMessage(BuildContext context) {
+String _authLoadingTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' =>
-      'Google girisi tarayicida acildi. Islemi tamamlayinca uygulamaya geri doneceksin.',
-    'ar' =>
-      'تم فتح تسجيل الدخول عبر Google في المتصفح. ستعود إلى التطبيق بعد إكماله.',
-    _ =>
-      'Google sign-in opened in your browser. You will return to the app when it finishes.',
+    'tr' => 'Hesabin hazirlaniyor',
+    'ar' => 'جار تجهيز حسابك',
+    _ => 'Preparing your account',
+  };
+}
+
+String _authLoadingSubtitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Lutfen bekle, seni dogrudan ana ekrana goturuyoruz.',
+    'ar' => 'يرجى الانتظار، سيتم نقلك مباشرة إلى الصفحة الرئيسية.',
+    _ => 'Please wait while we take you straight to the home screen.',
   };
 }
 
@@ -105,26 +110,65 @@ class SplashScreen extends StatelessWidget {
     return AppPage(
       padding: EdgeInsets.zero,
       child: Center(
-        child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0.92, end: 1),
-          duration: const Duration(milliseconds: 450),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            return Transform.scale(
-              scale: value,
-              child: Opacity(
-                opacity: value.clamp(0, 1),
-                child: child,
+        child: Semantics(
+          label: 'StudyFlow',
+          child: Image.asset(
+            'assets/branding/app_logo.png',
+            width: 104,
+            height: 104,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AuthLoadingScreen extends StatelessWidget {
+  const AuthLoadingScreen({super.key});
+
+  static const routePath = '/auth-loading';
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPage(
+      padding: EdgeInsets.zero,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 280),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/branding/app_logo.png',
+                width: 88,
+                height: 88,
+                fit: BoxFit.contain,
               ),
-            );
-          },
-          child: Semantics(
-            label: 'StudyFlow',
-            child: const AppLogo(
-              size: 94,
-              framed: false,
-              elevation: false,
-            ),
+              const SizedBox(height: AppSpacing.xl),
+              SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                _authLoadingTitle(context),
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                _authLoadingSubtitle(context),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
@@ -187,10 +231,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isGoogleSubmitting = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      if (!mounted) {
-        return;
-      }
-      context.showSuccessNotification(_browserHandoffMessage(context));
     } catch (error) {
       if (!mounted) {
         return;
@@ -364,7 +404,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         context.showSuccessNotification(
           _signupConfirmationMessage(context, result.email),
         );
-        context.go(LoginScreen.routePath);
       }
     } catch (error) {
       if (!mounted) {
@@ -383,10 +422,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isGoogleSubmitting = true);
     try {
       await ref.read(authControllerProvider.notifier).signInWithGoogle();
-      if (!mounted) {
-        return;
-      }
-      context.showSuccessNotification(_browserHandoffMessage(context));
     } catch (error) {
       if (!mounted) {
         return;

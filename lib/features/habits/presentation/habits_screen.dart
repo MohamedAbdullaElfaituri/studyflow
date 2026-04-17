@@ -37,18 +37,18 @@ class HabitsScreen extends ConsumerWidget {
           final isCompact = MediaQuery.sizeOf(context).width < 390;
           return ListView(
             children: [
-              SectionHeader(
-                title: context.copy.habitsTitle,
-                subtitle: context.copy.habitsSubtitle,
+              PageHeader(
+                title: _habitsTitle(context),
+                subtitle: _habitsSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (isCompact)
                 Column(
                   children: [
                     HeroMetricCard(
-                      title: context.copy.levelLabel,
+                      title: _completedHabitsLabel(context),
                       value: '${studyData.completedHabits.length}',
-                      subtitle: context.copy.habitsQuickCardTitle,
+                      subtitle: _habitsQuickCardTitle(context),
                       icon: Icons.workspace_premium_rounded,
                       accent: const Color(0xFF2BAE9A),
                     ),
@@ -57,7 +57,7 @@ class HabitsScreen extends ConsumerWidget {
                       title: context.l10n.streakLabel,
                       value:
                           '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
-                      subtitle: context.copy.motivationMomentTitle,
+                      subtitle: _focusNoteTitle(context),
                       icon: Icons.local_fire_department_rounded,
                       accent: const Color(0xFFF4A261),
                     ),
@@ -68,9 +68,9 @@ class HabitsScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: HeroMetricCard(
-                        title: context.copy.levelLabel,
+                        title: _completedHabitsLabel(context),
                         value: '${studyData.completedHabits.length}',
-                        subtitle: context.copy.habitsQuickCardTitle,
+                        subtitle: _habitsQuickCardTitle(context),
                         icon: Icons.workspace_premium_rounded,
                         accent: const Color(0xFF2BAE9A),
                       ),
@@ -81,7 +81,7 @@ class HabitsScreen extends ConsumerWidget {
                         title: context.l10n.streakLabel,
                         value:
                             '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
-                        subtitle: context.copy.motivationMomentTitle,
+                        subtitle: _focusNoteTitle(context),
                         icon: Icons.local_fire_department_rounded,
                         accent: const Color(0xFFF4A261),
                       ),
@@ -91,12 +91,12 @@ class HabitsScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
               if (habits.isEmpty)
                 EmptyState(
-                  title: context.copy.emptyHabitsTitle,
-                  description: context.copy.emptyHabitsDescription,
+                  title: _emptyHabitsTitle(context),
+                  description: _emptyHabitsDescription(context),
                   icon: Icons.repeat_rounded,
                   action: FilledButton.tonal(
                     onPressed: () => context.push(HabitEditorScreen.routePath),
-                    child: Text(context.copy.addHabitAction),
+                    child: Text(_addHabitAction(context)),
                   ),
                 )
               else
@@ -239,23 +239,26 @@ class HabitsScreen extends ConsumerWidget {
                                 runSpacing: AppSpacing.sm,
                                 children: [
                                   StatusPill(
-                                    label: context.copy.habitProgress(
+                                    label: _habitProgress(
+                                      context,
                                       habit.completedCount,
                                       habit.goalCount,
                                     ),
                                     color: Color(habit.color),
                                   ),
                                   StatusPill(
-                                    label: context.copy
-                                        .habitStreak(habit.streakCount),
+                                    label: _habitStreak(
+                                      context,
+                                      habit.streakCount,
+                                    ),
                                     color:
                                         Theme.of(context).colorScheme.tertiary,
                                   ),
                                   StatusPill(
                                     label:
                                         habit.frequency == HabitFrequency.daily
-                                            ? context.copy.habitDaily
-                                            : context.copy.habitWeekly,
+                                            ? _habitDaily(context)
+                                            : _habitWeekly(context),
                                     color:
                                         Theme.of(context).colorScheme.secondary,
                                   ),
@@ -345,33 +348,22 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
 
           return ListView(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      existing == null
-                          ? context.copy.addHabitTitle
-                          : context.copy.editHabitTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  if (existing != null)
-                    IconButton(
-                      onPressed: () async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .deleteHabit(existing.id);
-                        if (!mounted) return;
-                        context.pop();
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                ],
+              PageHeader(
+                title: existing == null
+                    ? _addHabitAction(context)
+                    : _editHabitTitle(context),
+                trailing: existing == null
+                    ? null
+                    : IconButton(
+                        onPressed: () async {
+                          await ref
+                              .read(studyDataControllerProvider.notifier)
+                              .deleteHabit(existing.id);
+                          if (!mounted) return;
+                          context.pop();
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
               ),
               const SizedBox(height: AppSpacing.lg),
               SectionCard(
@@ -403,7 +395,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             DropdownButtonFormField<HabitFrequency>(
                               initialValue: _frequency,
                               decoration: InputDecoration(
-                                labelText: context.copy.habitFrequencyLabel,
+                                labelText: _habitFrequencyLabel(context),
                               ),
                               items: HabitFrequency.values
                                   .map(
@@ -411,8 +403,8 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                                       value: value,
                                       child: Text(
                                         value == HabitFrequency.daily
-                                            ? context.copy.habitDaily
-                                            : context.copy.habitWeekly,
+                                            ? _habitDaily(context)
+                                            : _habitWeekly(context),
                                       ),
                                     ),
                                   )
@@ -424,7 +416,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             DropdownButtonFormField<int>(
                               initialValue: _goalCount,
                               decoration: InputDecoration(
-                                labelText: context.copy.habitGoalLabel,
+                                labelText: _habitGoalLabel(context),
                               ),
                               items: List.generate(
                                 5,
@@ -445,7 +437,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                               child: DropdownButtonFormField<HabitFrequency>(
                                 initialValue: _frequency,
                                 decoration: InputDecoration(
-                                  labelText: context.copy.habitFrequencyLabel,
+                                  labelText: _habitFrequencyLabel(context),
                                 ),
                                 items: HabitFrequency.values
                                     .map(
@@ -454,8 +446,8 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                                         value: value,
                                         child: Text(
                                           value == HabitFrequency.daily
-                                              ? context.copy.habitDaily
-                                              : context.copy.habitWeekly,
+                                              ? _habitDaily(context)
+                                              : _habitWeekly(context),
                                         ),
                                       ),
                                     )
@@ -469,7 +461,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                               child: DropdownButtonFormField<int>(
                                 initialValue: _goalCount,
                                 decoration: InputDecoration(
-                                  labelText: context.copy.habitGoalLabel,
+                                  labelText: _habitGoalLabel(context),
                                 ),
                                 items: List.generate(
                                   5,
@@ -551,7 +543,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                           if (!mounted) return;
                           context.pop();
                         },
-                        child: Text(context.copy.saveHabitAction),
+                        child: Text(_saveHabitAction(context)),
                       ),
                     ],
                   ),
@@ -563,4 +555,132 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
       ),
     );
   }
+}
+
+String _addHabitAction(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Aliskanlik ekle',
+    'ar' => 'إضافة عادة',
+    _ => 'Add habit',
+  };
+}
+
+String _editHabitTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Aliskanligi duzenle',
+    'ar' => 'تعديل العادة',
+    _ => 'Edit habit',
+  };
+}
+
+String _saveHabitAction(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Aliskanligi kaydet',
+    'ar' => 'حفظ العادة',
+    _ => 'Save habit',
+  };
+}
+
+String _habitsTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Aliskanliklar',
+    'ar' => 'العادات',
+    _ => 'Habits',
+  };
+}
+
+String _habitsSubtitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gununu destekleyen basit rutinleri takip et.',
+    'ar' => 'تابع عادات بسيطة تدعم يومك الدراسي.',
+    _ => 'Track simple routines that support your day.',
+  };
+}
+
+String _habitsQuickCardTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gunluk rutinler',
+    'ar' => 'العادات اليومية',
+    _ => 'Daily routines',
+  };
+}
+
+String _completedHabitsLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Tamamlananlar',
+    'ar' => 'المكتمل',
+    _ => 'Completed',
+  };
+}
+
+String _focusNoteTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Odak notu',
+    'ar' => 'ملاحظة تركيز',
+    _ => 'Focus note',
+  };
+}
+
+String _emptyHabitsTitle(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Henuz aliskanlik yok',
+    'ar' => 'لا توجد عادات بعد',
+    _ => 'No habits yet',
+  };
+}
+
+String _emptyHabitsDescription(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gunluk ritmine destek olacak basit bir aliskanlik ekle.',
+    'ar' => 'أضف عادة بسيطة تدعم روتينك اليومي.',
+    _ => 'Add a simple habit to support your daily routine.',
+  };
+}
+
+String _habitFrequencyLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Siklik',
+    'ar' => 'التكرار',
+    _ => 'Frequency',
+  };
+}
+
+String _habitGoalLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gunluk hedef',
+    'ar' => 'الهدف اليومي',
+    _ => 'Daily goal',
+  };
+}
+
+String _habitDaily(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gunluk',
+    'ar' => 'يومي',
+    _ => 'Daily',
+  };
+}
+
+String _habitWeekly(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Haftalik',
+    'ar' => 'أسبوعي',
+    _ => 'Weekly',
+  };
+}
+
+String _habitProgress(BuildContext context, int value, int target) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$value / $target tamamlandi',
+    'ar' => '$value / $target مكتمل',
+    _ => '$value / $target complete',
+  };
+}
+
+String _habitStreak(BuildContext context, int streak) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$streak gun seri',
+    'ar' => 'سلسلة $streak يوم',
+    _ => '$streak day streak',
+  };
 }

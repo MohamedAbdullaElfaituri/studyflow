@@ -1,7 +1,7 @@
 {
   "@@locale": "tr",
   "appName": "StudyFlow",
-  "splashSubtitle": "Odaklı üniversite yaşamı için premium çalışma planlaması.",
+  "splashSubtitle": "Gunluk ilerleme icin sade calisma planlamasi.",
   "genericNavigationError": "Bu ekran açılırken bir sorun oluştu.",
   "genericErrorMessage": "Bir sorun oluştu. Lütfen tekrar deneyin.",
   "errorStateTitle": "Küçük bir sorun oluştu",
@@ -296,7 +296,7 @@
       }
     }
   },
-  "profileFallbackName": "StudyFlow Öğrencisi",
+  "profileFallbackName": "Ogrenci",
   "editProfileAction": "Profili düzenle",
   "profileOverviewTitle": "Profil özeti",
   "profileOverviewSubtitle": "Mevcut çalışma kimliğinin ve ivmenin kısa görünümü.",
@@ -315,7 +315,7 @@
   "taskRemindersLabel": "Görev hatırlatmaları",
   "studyRemindersLabel": "Çalışma hatırlatmaları",
   "dailyReminderLabel": "Günlük hatırlatma",
-  "notificationPreviewTitle": "StudyFlow hatırlatması",
+  "notificationPreviewTitle": "Calisma hatirlatmasi",
   "notificationPreviewBody": "Kısa bir odak oturumu bugünü ileri taşıyabilir.",
   "previewNotificationAction": "Bildirimi önizle",
   "accessibilityPlaceholderTitle": "Erişilebilirlik desteği",

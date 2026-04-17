@@ -303,7 +303,8 @@ class TaskModel {
     return TaskModel(
       id: id,
       userId: userId,
-      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
+      courseId:
+          identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       description: description ?? this.description,
       dueDateTime: identical(dueDateTime, _unset)
@@ -321,7 +322,8 @@ class TaskModel {
 
   TaskModel withLinkedSubtasks() {
     return copyWith(
-      subtasks: subtasks.map((subtask) => subtask.copyWith(taskId: id)).toList(),
+      subtasks:
+          subtasks.map((subtask) => subtask.copyWith(taskId: id)).toList(),
     );
   }
 
@@ -364,7 +366,8 @@ class TaskModel {
       estimatedMinutes: (json['estimated_minutes'] as num?)?.toInt() ?? 0,
       isArchived: json['is_archived'] as bool? ?? false,
       subtasks: ((json['subtasks'] as List?) ?? const [])
-          .map((item) => SubtaskModel.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map((item) =>
+              SubtaskModel.fromJson(Map<String, dynamic>.from(item as Map)))
           .toList(),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -403,7 +406,8 @@ class NoteModel {
     return NoteModel(
       id: id,
       userId: userId,
-      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
+      courseId:
+          identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       content: content ?? this.content,
       isPinned: isPinned ?? this.isPinned,
@@ -524,7 +528,8 @@ class ExamModel {
     return ExamModel(
       id: id,
       userId: userId,
-      courseId: identical(courseId, _unset) ? this.courseId : courseId as String?,
+      courseId:
+          identical(courseId, _unset) ? this.courseId : courseId as String?,
       title: title ?? this.title,
       description: description ?? this.description,
       dateTime: dateTime ?? this.dateTime,
@@ -724,7 +729,8 @@ class GoalSettingsModel {
     return GoalSettingsModel(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      dailyTargetMinutes: (json['daily_target_minutes'] as num?)?.toInt() ?? 120,
+      dailyTargetMinutes:
+          (json['daily_target_minutes'] as num?)?.toInt() ?? 120,
       weeklyTargetMinutes:
           (json['weekly_target_minutes'] as num?)?.toInt() ?? 600,
       monthlyTargetMinutes:
@@ -891,7 +897,5 @@ List<Map<String, dynamic>> decodeCollection(String? raw) {
   }
 
   final decoded = jsonDecode(raw) as List<dynamic>;
-  return decoded
-      .map((item) => Map<String, dynamic>.from(item as Map))
-      .toList();
+  return decoded.map((item) => Map<String, dynamic>.from(item as Map)).toList();
 }
