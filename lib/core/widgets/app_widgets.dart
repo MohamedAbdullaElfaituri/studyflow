@@ -91,40 +91,66 @@ class PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Row(
+    final titleBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        leading ??
-            IconButton.filledTonal(
-              onPressed: () => Navigator.of(context).maybePop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subtitle!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ],
-          ),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
-        if (trailing != null) ...[
-          const SizedBox(width: AppSpacing.sm),
-          trailing!,
+        if (subtitle != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            subtitle!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stackTrailing = trailing != null && constraints.maxWidth < 430;
+
+        final headerRow = Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            leading ??
+                IconButton.filledTonal(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: titleBlock),
+            if (!stackTrailing && trailing != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              trailing!,
+            ],
+          ],
+        );
+
+        if (!stackTrailing) {
+          return headerRow;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            headerRow,
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: trailing!,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -550,6 +576,143 @@ class HeroMetricCard extends StatelessWidget {
   }
 }
 
+class DashboardStatCard extends StatelessWidget {
+  const DashboardStatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    super.key,
+    this.caption,
+    this.accent,
+    this.onTap,
+    this.minHeight = 150,
+  });
+
+  final String label;
+  final String value;
+  final String? caption;
+  final IconData icon;
+  final Color? accent;
+  final VoidCallback? onTap;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final color = accent ?? scheme.primary;
+
+    Widget child = SectionCard(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: color.withValues(alpha: 0.14),
+                  child: Icon(icon, color: color),
+                ),
+                const Spacer(),
+                if (onTap != null)
+                  Icon(
+                    Icons.arrow_outward_rounded,
+                    size: 18,
+                    color: color.withValues(alpha: 0.82),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (caption != null) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                caption!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    if (onTap != null) {
+      child = InkWell(
+        borderRadius: BorderRadius.circular(26),
+        onTap: onTap,
+        child: child,
+      );
+    }
+
+    return child;
+  }
+}
+
+class AdaptiveCardGrid extends StatelessWidget {
+  const AdaptiveCardGrid({
+    required this.children,
+    super.key,
+    this.minItemWidth = 240,
+    this.maxColumns = 2,
+    this.spacing = AppSpacing.md,
+  });
+
+  final List<Widget> children;
+  final double minItemWidth;
+  final int maxColumns;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final rawColumns =
+            ((availableWidth + spacing) / (minItemWidth + spacing)).floor();
+        final columns = math.max(1, math.min(maxColumns, rawColumns));
+        final itemWidth =
+            (availableWidth - (spacing * (columns - 1))) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final child in children)
+              SizedBox(
+                width: itemWidth,
+                child: child,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class GradientBanner extends StatelessWidget {
   const GradientBanner({
     required this.child,
@@ -611,12 +774,17 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
+        final compact = constraints.maxWidth < 480;
         if (compact && action != null) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
               if (subtitle != null) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
@@ -624,6 +792,8 @@ class SectionHeader extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
               const SizedBox(height: AppSpacing.sm),
@@ -639,7 +809,12 @@ class SectionHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(
@@ -648,6 +823,8 @@ class SectionHeader extends StatelessWidget {
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
@@ -813,20 +990,20 @@ class LoadingColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-  child: Column(
-    children: List.generate(
-      itemCount,
-      (index) => Padding(
-        padding: EdgeInsets.only(
-          bottom: index == itemCount - 1 ? 0 : AppSpacing.md,
-        ),
-        child: const SectionCard(
-          child: SizedBox(height: 120),
+      child: Column(
+        children: List.generate(
+          itemCount,
+          (index) => Padding(
+            padding: EdgeInsets.only(
+              bottom: index == itemCount - 1 ? 0 : AppSpacing.md,
+            ),
+            child: const SectionCard(
+              child: SizedBox(height: 120),
+            ),
+          ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 
@@ -1028,30 +1205,34 @@ class QuickActionTile extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  child: Icon(icon, color: scheme.primary),
-                ),
-                const Spacer(),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 148),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: scheme.primaryContainer,
+                    child: Icon(icon, color: scheme.primary),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1200,6 +1381,8 @@ class ProgressRing extends StatelessWidget {
                       color: scheme.onSurfaceVariant,
                     ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

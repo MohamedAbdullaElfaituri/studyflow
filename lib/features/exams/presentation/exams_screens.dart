@@ -38,7 +38,15 @@ class ExamsScreen extends ConsumerWidget {
         ),
         data: (studyData) {
           final exams = studyData.upcomingExams;
-          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final isCompact = MediaQuery.sizeOf(context).width < 520;
+          final linkedCourseCount = exams
+              .where((exam) => exam.courseId != null)
+              .map((exam) => exam.courseId)
+              .toSet()
+              .length;
+          final nextExamDays = exams.isEmpty
+              ? null
+              : exams.first.dateTime.difference(DateTime.now()).inDays;
           return ListView(
             children: [
               PageHeader(
@@ -46,97 +54,41 @@ class ExamsScreen extends ConsumerWidget {
                 subtitle: _examsSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
-              GradientBanner(
-                colors: const [
-                  Color(0xFF18456B),
-                  Color(0xFF1F6FEB),
-                  Color(0xFF24A19C)
+              AdaptiveCardGrid(
+                minItemWidth: 170,
+                children: [
+                  DashboardStatCard(
+                    label: _examsQuickCardTitle(context),
+                    value: '${exams.length}',
+                    caption: _examsQuickCardSubtitle(context),
+                    icon: Icons.event_available_rounded,
+                    accent: Theme.of(context).colorScheme.primary,
+                  ),
+                  DashboardStatCard(
+                    label: _criticalLabel(context),
+                    value: '${studyData.criticalExams.length}',
+                    caption: _criticalCaption(
+                        context, studyData.criticalExams.length),
+                    icon: Icons.priority_high_rounded,
+                    accent: const Color(0xFFF4A261),
+                  ),
+                  DashboardStatCard(
+                    label: _nextExamLabel(context),
+                    value: nextExamDays == null ? '-' : '$nextExamDays',
+                    caption: nextExamDays == null
+                        ? _emptyExamsDescription(context)
+                        : _examCountdown(context, nextExamDays),
+                    icon: Icons.schedule_rounded,
+                    accent: Theme.of(context).colorScheme.secondary,
+                  ),
+                  DashboardStatCard(
+                    label: _linkedCoursesLabel(context),
+                    value: '$linkedCourseCount',
+                    caption: _calendarHint(context),
+                    icon: Icons.view_agenda_rounded,
+                    accent: const Color(0xFF2BAE9A),
+                  ),
                 ],
-                child: isCompact
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.event_available_rounded,
-                            size: 54,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            _examsQuickCardTitle(context),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.88),
-                                ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            '${studyData.criticalExams.length}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .displaySmall
-                                ?.copyWith(color: Colors.white),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            _examsQuickCardSubtitle(context),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.82),
-                                ),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _examsQuickCardTitle(context),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.88),
-                                      ),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  '${studyData.criticalExams.length}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall
-                                      ?.copyWith(color: Colors.white),
-                                ),
-                                const SizedBox(height: AppSpacing.xs),
-                                Text(
-                                  _examsQuickCardSubtitle(context),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.82),
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          const Icon(
-                            Icons.event_available_rounded,
-                            size: 54,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
               ),
               const SizedBox(height: AppSpacing.xl),
               if (exams.isEmpty)
@@ -203,6 +155,8 @@ class ExamsScreen extends ConsumerWidget {
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 exam.description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
@@ -298,7 +252,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
         data: (studyData) {
           final existing =
               widget.examId == null ? null : studyData.examById(widget.examId!);
-          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final isCompact = MediaQuery.sizeOf(context).width < 560;
           final selectedCourseId = studyData.courses.any(
             (course) => course.id == _courseId,
           )
@@ -362,6 +316,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
                         initialValue: selectedCourseId,
+                        isExpanded: true,
                         decoration: InputDecoration(
                             labelText: context.l10n.courseLabel),
                         items: [
@@ -384,6 +339,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                           children: [
                             DropdownButtonFormField<ExamType>(
                               initialValue: _type,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.copy.examTypeLabel,
                               ),
@@ -402,6 +358,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskPriority>(
                               initialValue: _priority,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
                               ),
@@ -425,6 +382,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<ExamType>(
                                 initialValue: _type,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.copy.examTypeLabel,
                                 ),
@@ -445,6 +403,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<TaskPriority>(
                                 initialValue: _priority,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.priorityLabel,
                                 ),
@@ -464,38 +423,44 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                           ],
                         ),
                       const SizedBox(height: AppSpacing.md),
-                      OutlinedButton.icon(
-                        onPressed: () async {
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            firstDate: DateTime.now()
-                                .subtract(const Duration(days: 30)),
-                            lastDate:
-                                DateTime.now().add(const Duration(days: 730)),
-                            initialDate: _dateTime,
-                          );
-                          if (pickedDate == null || !mounted) return;
-                          final pickedTime = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(_dateTime),
-                          );
-                          if (pickedTime == null) return;
-                          setState(() {
-                            _dateTime = DateTime(
-                              pickedDate.year,
-                              pickedDate.month,
-                              pickedDate.day,
-                              pickedTime.hour,
-                              pickedTime.minute,
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 30)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 730)),
+                              initialDate: _dateTime,
                             );
-                          });
-                        },
-                        icon: const Icon(Icons.event_outlined),
-                        label: Text(
-                          '${DateTimeUtils.friendlyDate(
-                            _dateTime,
-                            Localizations.localeOf(context).languageCode,
-                          )} / ${TimeOfDay.fromDateTime(_dateTime).format(context)}',
+                            if (pickedDate == null || !mounted) return;
+                            final pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.fromDateTime(_dateTime),
+                            );
+                            if (pickedTime == null) return;
+                            setState(() {
+                              _dateTime = DateTime(
+                                pickedDate.year,
+                                pickedDate.month,
+                                pickedDate.day,
+                                pickedTime.hour,
+                                pickedTime.minute,
+                              );
+                            });
+                          },
+                          icon: const Icon(Icons.event_outlined),
+                          label: Text(
+                            '${DateTimeUtils.friendlyDate(
+                              _dateTime,
+                              Localizations.localeOf(context).languageCode,
+                            )} / ${TimeOfDay.fromDateTime(_dateTime).format(context)}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.lg),
@@ -596,6 +561,52 @@ String _examsQuickCardTitle(BuildContext context) {
     'tr' => 'Yaklasan sinavlar',
     'ar' => 'الاختبارات القادمة',
     _ => 'Upcoming exams',
+  };
+}
+
+String _criticalLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Kritik tarihler',
+    'ar' => 'المواعيد الحرجة',
+    _ => 'Critical dates',
+  };
+}
+
+String _criticalCaption(BuildContext context, int count) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => count == 0
+        ? 'Yakin baski gorunmuyor.'
+        : 'Onceligi yuksek tarihler one cikiyor.',
+    'ar' => count == 0
+        ? 'لا توجد ضغوط قريبة الآن.'
+        : 'المواعيد ذات الأولوية تظهر أولًا.',
+    _ => count == 0
+        ? 'No urgent pressure right now.'
+        : 'Higher priority dates are surfaced first.',
+  };
+}
+
+String _nextExamLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sonraki tarih',
+    'ar' => 'الموعد التالي',
+    _ => 'Next date',
+  };
+}
+
+String _calendarHint(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Sinavlari derslerle birlikte takip et.',
+    'ar' => 'تابع الاختبارات مع المواد في نفس المسار.',
+    _ => 'Keep exams tied to courses for clearer planning.',
+  };
+}
+
+String _linkedCoursesLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Bagli dersler',
+    'ar' => 'المواد المرتبطة',
+    _ => 'Linked courses',
   };
 }
 

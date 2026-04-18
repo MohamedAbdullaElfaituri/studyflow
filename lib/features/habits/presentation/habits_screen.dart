@@ -36,7 +36,10 @@ class HabitsScreen extends ConsumerWidget {
         ),
         data: (studyData) {
           final habits = studyData.activeHabits;
-          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final isCompact = MediaQuery.sizeOf(context).width < 520;
+          final totalStreak =
+              habits.fold<int>(0, (sum, item) => sum + item.streakCount);
+
           return ListView(
             children: [
               PageHeader(
@@ -44,52 +47,43 @@ class HabitsScreen extends ConsumerWidget {
                 subtitle: _habitsSubtitle(context),
               ),
               const SizedBox(height: AppSpacing.lg),
-              if (isCompact)
-                Column(
-                  children: [
-                    HeroMetricCard(
-                      title: _completedHabitsLabel(context),
-                      value: '${studyData.completedHabits.length}',
-                      subtitle: _habitsQuickCardTitle(context),
-                      icon: Icons.workspace_premium_rounded,
-                      accent: const Color(0xFF2BAE9A),
+              AdaptiveCardGrid(
+                minItemWidth: 170,
+                children: [
+                  DashboardStatCard(
+                    label: _completedHabitsLabel(context),
+                    value: '${studyData.completedHabits.length}',
+                    caption: _habitsQuickCardTitle(context),
+                    icon: Icons.workspace_premium_rounded,
+                    accent: const Color(0xFF2BAE9A),
+                  ),
+                  DashboardStatCard(
+                    label: context.l10n.streakLabel,
+                    value: '$totalStreak',
+                    caption: _focusNoteTitle(context),
+                    icon: Icons.local_fire_department_rounded,
+                    accent: const Color(0xFFF4A261),
+                  ),
+                  DashboardStatCard(
+                    label: _habitsTitle(context),
+                    value: '${habits.length}',
+                    caption: _activeHabitsCaption(context, habits.length),
+                    icon: Icons.repeat_rounded,
+                    accent: Theme.of(context).colorScheme.primary,
+                  ),
+                  DashboardStatCard(
+                    label: _consistencyLabel(context),
+                    value: '${(studyData.habitConsistency * 100).round()}%',
+                    caption: _habitCompletionCaption(
+                      context,
+                      studyData.completedHabits.length,
+                      studyData.habits.length,
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    HeroMetricCard(
-                      title: context.l10n.streakLabel,
-                      value:
-                          '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
-                      subtitle: _focusNoteTitle(context),
-                      icon: Icons.local_fire_department_rounded,
-                      accent: const Color(0xFFF4A261),
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: HeroMetricCard(
-                        title: _completedHabitsLabel(context),
-                        value: '${studyData.completedHabits.length}',
-                        subtitle: _habitsQuickCardTitle(context),
-                        icon: Icons.workspace_premium_rounded,
-                        accent: const Color(0xFF2BAE9A),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: HeroMetricCard(
-                        title: context.l10n.streakLabel,
-                        value:
-                            '${habits.fold<int>(0, (sum, item) => sum + item.streakCount)}',
-                        subtitle: _focusNoteTitle(context),
-                        icon: Icons.local_fire_department_rounded,
-                        accent: const Color(0xFFF4A261),
-                      ),
-                    ),
-                  ],
-                ),
+                    icon: Icons.insights_rounded,
+                    accent: Theme.of(context).colorScheme.secondary,
+                  ),
+                ],
+              ),
               const SizedBox(height: AppSpacing.xl),
               if (habits.isEmpty)
                 EmptyState(
@@ -106,6 +100,7 @@ class HabitsScreen extends ConsumerWidget {
                   (habit) {
                     final progress = (habit.completedCount / habit.goalCount)
                         .clamp(0.0, 1.0);
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: InkWell(
@@ -122,6 +117,8 @@ class HabitsScreen extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         CircleAvatar(
                                           backgroundColor:
@@ -144,11 +141,16 @@ class HabitsScreen extends ConsumerWidget {
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(
-                                                  height: AppSpacing.xs),
+                                                height: AppSpacing.xs,
+                                              ),
                                               Text(
                                                 habit.description,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .bodyMedium
@@ -179,6 +181,7 @@ class HabitsScreen extends ConsumerWidget {
                                 )
                               else
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     CircleAvatar(
                                       backgroundColor:
@@ -201,10 +204,14 @@ class HabitsScreen extends ConsumerWidget {
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleMedium,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: AppSpacing.xs),
                                           Text(
                                             habit.description,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
@@ -337,7 +344,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
           final existing = widget.habitId == null
               ? null
               : studyData.habitById(widget.habitId!);
-          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final isCompact = MediaQuery.sizeOf(context).width < 560;
 
           if (!_initialized) {
             _initialized = true;
@@ -398,6 +405,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                           children: [
                             DropdownButtonFormField<HabitFrequency>(
                               initialValue: _frequency,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: _habitFrequencyLabel(context),
                               ),
@@ -419,6 +427,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<int>(
                               initialValue: _goalCount,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: _habitGoalLabel(context),
                               ),
@@ -440,6 +449,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<HabitFrequency>(
                                 initialValue: _frequency,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: _habitFrequencyLabel(context),
                                 ),
@@ -464,6 +474,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<int>(
                                 initialValue: _goalCount,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: _habitGoalLabel(context),
                                 ),
@@ -686,5 +697,29 @@ String _habitStreak(BuildContext context, int streak) {
     'tr' => '$streak gun seri',
     'ar' => 'سلسلة $streak يوم',
     _ => '$streak day streak',
+  };
+}
+
+String _activeHabitsCaption(BuildContext context, int count) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$count aktif rutin',
+    'ar' => '$count روتين نشط',
+    _ => '$count active routines',
+  };
+}
+
+String _consistencyLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Tutarlilik',
+    'ar' => 'الاتساق',
+    _ => 'Consistency',
+  };
+}
+
+String _habitCompletionCaption(BuildContext context, int completed, int total) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$completed / $total tamamlandi',
+    'ar' => '$completed / $total مكتمل',
+    _ => '$completed / $total complete',
   };
 }

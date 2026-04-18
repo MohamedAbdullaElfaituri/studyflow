@@ -57,6 +57,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         ),
         data: (studyData) {
           final query = _searchController.text.trim().toLowerCase();
+          final dueToday = studyData.todayTasks
+              .where((task) => task.status != TaskStatus.completed)
+              .length;
+          final overdue = studyData.activeTasks
+              .where(
+                (task) =>
+                    task.status != TaskStatus.completed &&
+                    task.dueDateTime != null &&
+                    task.dueDateTime!.isBefore(DateTime.now()),
+              )
+              .length;
           final filtered = studyData.activeTasks.where((task) {
             final matchesSearch = query.isEmpty ||
                 task.title.toLowerCase().contains(query) ||
@@ -113,48 +124,92 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              SearchTextField(
-                controller: _searchController,
-                hintText: context.l10n.searchTasksHint,
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
+              AdaptiveCardGrid(
+                minItemWidth: 170,
                 children: [
-                  FilterChip(
-                    label: Text(context.l10n.filterAll),
-                    selected: _filter == _TaskFilter.all,
-                    onSelected: (_) =>
-                        setState(() => _filter = _TaskFilter.all),
+                  DashboardStatCard(
+                    label: _openTasksLabel(context),
+                    value: '${studyData.activeTasks.length}',
+                    caption: context.l10n.tasksSubtitle,
+                    icon: Icons.task_alt_rounded,
+                    accent: Theme.of(context).colorScheme.primary,
                   ),
-                  FilterChip(
-                    label: Text(context.l10n.filterPending),
-                    selected: _filter == _TaskFilter.pending,
-                    onSelected: (_) =>
-                        setState(() => _filter = _TaskFilter.pending),
+                  DashboardStatCard(
+                    label: _dueTodayLabel(context),
+                    value: '$dueToday',
+                    caption: DateTimeUtils.friendlyDate(DateTime.now(), locale),
+                    icon: Icons.calendar_today_rounded,
+                    accent: Theme.of(context).colorScheme.secondary,
                   ),
-                  FilterChip(
-                    label: Text(context.l10n.filterInProgress),
-                    selected: _filter == _TaskFilter.inProgress,
-                    onSelected: (_) =>
-                        setState(() => _filter = _TaskFilter.inProgress),
+                  DashboardStatCard(
+                    label: context.l10n.completedTasksLabel,
+                    value: '${studyData.completedTasks.length}',
+                    caption: _taskSummaryCaption(
+                      context,
+                      studyData.completedTasks.length,
+                      studyData.tasks.length,
+                    ),
+                    icon: Icons.check_circle_rounded,
+                    accent: const Color(0xFF2BAE9A),
                   ),
-                  FilterChip(
-                    label: Text(context.l10n.filterCompleted),
-                    selected: _filter == _TaskFilter.completed,
-                    onSelected: (_) =>
-                        setState(() => _filter = _TaskFilter.completed),
+                  DashboardStatCard(
+                    label: _overdueLabel(context),
+                    value: '$overdue',
+                    caption: _overdueCaption(context, overdue),
+                    icon: Icons.warning_amber_rounded,
+                    accent: const Color(0xFFD95D39),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton.tonal(
-                onPressed: () => ref
-                    .read(studyDataControllerProvider.notifier)
-                    .archiveCompletedTasks(),
-                child: Text(context.l10n.archiveCompletedAction),
+              const SizedBox(height: AppSpacing.lg),
+              SectionCard(
+                child: Column(
+                  children: [
+                    SearchTextField(
+                      controller: _searchController,
+                      hintText: context.l10n.searchTasksHint,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: [
+                        FilterChip(
+                          label: Text(context.l10n.filterAll),
+                          selected: _filter == _TaskFilter.all,
+                          onSelected: (_) =>
+                              setState(() => _filter = _TaskFilter.all),
+                        ),
+                        FilterChip(
+                          label: Text(context.l10n.filterPending),
+                          selected: _filter == _TaskFilter.pending,
+                          onSelected: (_) =>
+                              setState(() => _filter = _TaskFilter.pending),
+                        ),
+                        FilterChip(
+                          label: Text(context.l10n.filterInProgress),
+                          selected: _filter == _TaskFilter.inProgress,
+                          onSelected: (_) =>
+                              setState(() => _filter = _TaskFilter.inProgress),
+                        ),
+                        FilterChip(
+                          label: Text(context.l10n.filterCompleted),
+                          selected: _filter == _TaskFilter.completed,
+                          onSelected: (_) =>
+                              setState(() => _filter = _TaskFilter.completed),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    FilledButton.tonal(
+                      onPressed: () => ref
+                          .read(studyDataControllerProvider.notifier)
+                          .archiveCompletedTasks(),
+                      child: Text(context.l10n.archiveCompletedAction),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.xl),
               if (filtered.isEmpty)
@@ -179,29 +234,61 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    task.title,
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
+                                CircleAvatar(
+                                  backgroundColor: priorityColor(task.priority)
+                                      .withValues(alpha: 0.14),
+                                  child: Icon(
+                                    Icons.checklist_rtl_rounded,
+                                    color: priorityColor(task.priority),
                                   ),
                                 ),
-                                Checkbox(
-                                  value: task.status == TaskStatus.completed,
-                                  onChanged: (_) => ref
-                                      .read(
-                                          studyDataControllerProvider.notifier)
-                                      .toggleTaskStatus(task),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        task.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: AppSpacing.xs),
+                                      Text(
+                                        task.description,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: AppSpacing.xs),
+                                  child: Checkbox(
+                                    value: task.status == TaskStatus.completed,
+                                    onChanged: (_) => ref
+                                        .read(
+                                          studyDataControllerProvider.notifier,
+                                        )
+                                        .toggleTaskStatus(task),
+                                  ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              task.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             const SizedBox(height: AppSpacing.md),
                             Wrap(
@@ -429,7 +516,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
         data: (studyData) {
           final existing =
               widget.taskId == null ? null : studyData.taskById(widget.taskId!);
-          final isCompact = MediaQuery.sizeOf(context).width < 390;
+          final isCompact = MediaQuery.sizeOf(context).width < 560;
           final selectedCourseId = studyData.courses.any(
             (course) => course.id == _courseId,
           )
@@ -492,6 +579,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
                         initialValue: selectedCourseId,
+                        isExpanded: true,
                         decoration: InputDecoration(
                             labelText: context.l10n.courseLabel),
                         items: [
@@ -514,6 +602,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                           children: [
                             DropdownButtonFormField<TaskPriority>(
                               initialValue: _priority,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
                               ),
@@ -533,6 +622,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskStatus>(
                               initialValue: _status,
+                              isExpanded: true,
                               decoration: InputDecoration(
                                   labelText: context.l10n.statusLabel),
                               items: TaskStatus.values
@@ -556,6 +646,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<TaskPriority>(
                                 initialValue: _priority,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.priorityLabel,
                                 ),
@@ -577,6 +668,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             Expanded(
                               child: DropdownButtonFormField<TaskStatus>(
                                 initialValue: _status,
+                                isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.statusLabel,
                                 ),
@@ -608,53 +700,8 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       if (isCompact)
                         Column(
                           children: [
-                            OutlinedButton(
-                              onPressed: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  firstDate: DateTime.now()
-                                      .subtract(const Duration(days: 365)),
-                                  lastDate: DateTime.now()
-                                      .add(const Duration(days: 730)),
-                                  initialDate: _dueDate ?? DateTime.now(),
-                                );
-                                if (picked != null) {
-                                  setState(() => _dueDate = picked);
-                                }
-                              },
-                              child: Text(
-                                _dueDate == null
-                                    ? context.l10n.pickDateAction
-                                    : DateTimeUtils.friendlyDate(
-                                        _dueDate!,
-                                        Localizations.localeOf(context)
-                                            .languageCode,
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            OutlinedButton(
-                              onPressed: () async {
-                                final picked = await showTimePicker(
-                                  context: context,
-                                  initialTime: _dueTime ?? TimeOfDay.now(),
-                                );
-                                if (picked != null) {
-                                  setState(() => _dueTime = picked);
-                                }
-                              },
-                              child: Text(
-                                _dueTime == null
-                                    ? context.l10n.pickTimeAction
-                                    : _dueTime!.format(context),
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Row(
-                          children: [
-                            Expanded(
+                            SizedBox(
+                              width: double.infinity,
                               child: OutlinedButton(
                                 onPressed: () async {
                                   final picked = await showDatePicker(
@@ -677,11 +724,15 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                           Localizations.localeOf(context)
                                               .languageCode,
                                         ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
+                            const SizedBox(height: AppSpacing.md),
+                            SizedBox(
+                              width: double.infinity,
                               child: OutlinedButton(
                                 onPressed: () async {
                                   final picked = await showTimePicker(
@@ -696,6 +747,71 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                   _dueTime == null
                                       ? context.l10n.pickTimeAction
                                       : _dueTime!.format(context),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime.now()
+                                          .subtract(const Duration(days: 365)),
+                                      lastDate: DateTime.now()
+                                          .add(const Duration(days: 730)),
+                                      initialDate: _dueDate ?? DateTime.now(),
+                                    );
+                                    if (picked != null) {
+                                      setState(() => _dueDate = picked);
+                                    }
+                                  },
+                                  child: Text(
+                                    _dueDate == null
+                                        ? context.l10n.pickDateAction
+                                        : DateTimeUtils.friendlyDate(
+                                            _dueDate!,
+                                            Localizations.localeOf(context)
+                                                .languageCode,
+                                          ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    final picked = await showTimePicker(
+                                      context: context,
+                                      initialTime: _dueTime ?? TimeOfDay.now(),
+                                    );
+                                    if (picked != null) {
+                                      setState(() => _dueTime = picked);
+                                    }
+                                  },
+                                  child: Text(
+                                    _dueTime == null
+                                        ? context.l10n.pickTimeAction
+                                        : _dueTime!.format(context),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
                             ),
@@ -834,6 +950,49 @@ String _taskStatusLabel(BuildContext context, TaskStatus status) {
     TaskStatus.pending => context.l10n.filterPending,
     TaskStatus.inProgress => context.l10n.filterInProgress,
     TaskStatus.completed => context.l10n.filterCompleted,
+  };
+}
+
+String _openTasksLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Acik gorevler',
+    'ar' => 'المهام المفتوحة',
+    _ => 'Open tasks',
+  };
+}
+
+String _dueTodayLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Bugun',
+    'ar' => 'اليوم',
+    _ => 'Due today',
+  };
+}
+
+String _overdueLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Gecikenler',
+    'ar' => 'المتأخرة',
+    _ => 'Overdue',
+  };
+}
+
+String _taskSummaryCaption(BuildContext context, int completed, int total) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => '$completed / $total tamamlandi',
+    'ar' => '$completed / $total مكتمل',
+    _ => '$completed / $total complete',
+  };
+}
+
+String _overdueCaption(BuildContext context, int count) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' =>
+      count == 0 ? 'Takvim temiz gorunuyor.' : 'Oncelik sirasina gore duzenle.',
+    'ar' => count == 0 ? 'الجدول يبدو مرتبًا.' : 'رتبها حسب الأولوية أولًا.',
+    _ => count == 0
+        ? 'Your schedule looks clear.'
+        : 'Sort these by priority first.',
   };
 }
 
