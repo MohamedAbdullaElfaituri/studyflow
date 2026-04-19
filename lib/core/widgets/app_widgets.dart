@@ -181,14 +181,15 @@ class _MainNavItemData {
   final Color accent;
 }
 
-String _shortNavLabel(BuildContext context, _MainNavTab tab) {
+// ignore: unused_element
+String _legacyShortNavLabel(BuildContext context, _MainNavTab tab) {
   final code = Localizations.localeOf(context).languageCode;
 
   if (code == 'tr') {
     return switch (tab) {
       _MainNavTab.home => 'Ana',
-      _MainNavTab.tasks => 'Gorev',
-      _MainNavTab.calendar => 'Takvim',
+      _MainNavTab.tasks => 'Görev',
+      _MainNavTab.calendar => 'Plan',
       _MainNavTab.focus => 'Odak',
       _MainNavTab.profile => 'Profil',
     };
@@ -199,6 +200,38 @@ String _shortNavLabel(BuildContext context, _MainNavTab tab) {
       _MainNavTab.home => 'الرئيسية',
       _MainNavTab.tasks => 'المهام',
       _MainNavTab.calendar => 'التقويم',
+      _MainNavTab.focus => 'التركيز',
+      _MainNavTab.profile => 'الملف',
+    };
+  }
+
+  return switch (tab) {
+    _MainNavTab.home => 'Home',
+    _MainNavTab.tasks => 'Tasks',
+    _MainNavTab.calendar => 'Plan',
+    _MainNavTab.focus => 'Focus',
+    _MainNavTab.profile => 'Profile',
+  };
+}
+
+String _shortNavLabel(BuildContext context, _MainNavTab tab) {
+  final code = Localizations.localeOf(context).languageCode;
+
+  if (code == 'tr') {
+    return switch (tab) {
+      _MainNavTab.home => 'Ana',
+      _MainNavTab.tasks => 'Görev',
+      _MainNavTab.calendar => 'Plan',
+      _MainNavTab.focus => 'Odak',
+      _MainNavTab.profile => 'Profil',
+    };
+  }
+
+  if (code == 'ar') {
+    return switch (tab) {
+      _MainNavTab.home => 'الرئيسية',
+      _MainNavTab.tasks => 'المهام',
+      _MainNavTab.calendar => 'الخطة',
       _MainNavTab.focus => 'التركيز',
       _MainNavTab.profile => 'الملف',
     };

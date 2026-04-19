@@ -17,6 +17,8 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(studyDataControllerProvider);
     final explicitLanguagePreference = ref.watch(appLocalePreferenceProvider);
+    final notificationPermission = ref.watch(notificationPermissionProvider);
+    final reminderService = ref.watch(reminderServiceProvider);
 
     return AppPage(
       child: data.when(
@@ -31,6 +33,7 @@ class SettingsScreen extends ConsumerWidget {
         data: (studyData) {
           const supportedLanguages = {'en', 'tr', 'ar'};
           const supportedThemes = {'system', 'light', 'dark'};
+
           final selectedLanguage = supportedLanguages.contains(
             explicitLanguagePreference,
           )
@@ -43,6 +46,14 @@ class SettingsScreen extends ConsumerWidget {
           )
               ? studyData.settings.themeMode
               : 'system';
+          final systemNotificationsEnabled =
+              notificationPermission.valueOrNull ??
+                  studyData.settings.notificationsEnabled;
+          final appNotificationsEnabled =
+              studyData.settings.notificationsEnabled;
+          final effectiveNotificationsEnabled = reminderService.isSupported &&
+              appNotificationsEnabled &&
+              systemNotificationsEnabled;
 
           return ListView(
             children: [
@@ -50,65 +61,10 @@ class SettingsScreen extends ConsumerWidget {
                 title: context.l10n.settingsTitle,
                 subtitle: _settingsSubtitle(context),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: 0.72),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Image.asset(
-                            'assets/branding/app_logo.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.l10n.appName,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                _appSummary(context),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: AppSpacing.xl),
-              SectionHeader(
+              _SettingsPanel(
                 title: context.l10n.languageSectionTitle,
-                subtitle: context.copy.chooseLanguageSubtitle,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SectionCard(
+                subtitle: _languageSubtitle(context),
                 child: Wrap(
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
@@ -143,13 +99,10 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              SectionHeader(
+              const SizedBox(height: AppSpacing.lg),
+              _SettingsPanel(
                 title: context.l10n.themeSectionTitle,
                 subtitle: _themeSubtitle(context),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SectionCard(
                 child: Wrap(
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
@@ -187,122 +140,87 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              SectionHeader(
-                title: context.copy.notificationPermissionsAction,
-                subtitle: context.copy.notificationPermissionsHint,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SectionCard(
+              const SizedBox(height: AppSpacing.lg),
+              _SettingsPanel(
+                title: _notificationsSectionTitle(context),
+                subtitle: _notificationsSectionSubtitle(
+                  context,
+                  isSupported: reminderService.isSupported,
+                  appEnabled: appNotificationsEnabled,
+                  systemEnabled: systemNotificationsEnabled,
+                  isLoading: notificationPermission.isLoading,
+                ),
                 child: Column(
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.notifications_active_outlined),
-                      title: Text(context.copy.notificationPermissionsAction),
-                      subtitle: Text(context.copy.notificationPermissionsHint),
-                      onTap: () async {
-                        await ref
-                            .read(reminderServiceProvider)
-                            .requestPermissions();
-                      },
+                    _SettingsToggleTile(
+                      icon: Icons.notifications_active_outlined,
+                      title: _allowNotificationsLabel(context),
+                      subtitle: _notificationsTileSubtitle(
+                        context,
+                        isSupported: reminderService.isSupported,
+                        appEnabled: appNotificationsEnabled,
+                        systemEnabled: systemNotificationsEnabled,
+                      ),
+                      value: effectiveNotificationsEnabled,
+                      onChanged: (value) => _toggleNotifications(
+                        context,
+                        ref,
+                        studyData,
+                        enabled: value,
+                        systemEnabled: systemNotificationsEnabled,
+                      ),
                     ),
-                    const Divider(),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: studyData.reminders.tasksEnabled,
-                      title: Text(context.l10n.taskRemindersLabel),
-                      onChanged: (value) async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateReminders(
-                              studyData.reminders.copyWith(
-                                tasksEnabled: value,
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: studyData.reminders.studyEnabled,
-                      title: Text(context.l10n.studyRemindersLabel),
-                      onChanged: (value) async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateReminders(
-                              studyData.reminders.copyWith(
-                                studyEnabled: value,
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: studyData.reminders.dailyEnabled,
-                      title: Text(context.l10n.dailyReminderLabel),
-                      onChanged: (value) async {
-                        await ref
-                            .read(studyDataControllerProvider.notifier)
-                            .updateReminders(
-                              studyData.reminders.copyWith(
-                                dailyEnabled: value,
-                                updatedAt: DateTime.now(),
-                              ),
-                            );
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        await ref.read(reminderServiceProvider).showPreview(
-                              id: 7,
-                              title: context.l10n.notificationPreviewTitle,
-                              body: context.l10n.notificationPreviewBody,
-                            );
-                      },
-                      child: Text(context.l10n.previewNotificationAction),
-                    ),
+                    if (effectiveNotificationsEnabled) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                        child: Divider(height: 1),
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FilledButton.tonalIcon(
+                          onPressed: () async {
+                            await ref.read(reminderServiceProvider).showPreview(
+                                  id: 7,
+                                  title: context.l10n.notificationPreviewTitle,
+                                  body: context.l10n.notificationPreviewBody,
+                                );
+                          },
+                          icon: const Icon(Icons.visibility_outlined),
+                          label: Text(context.l10n.previewNotificationAction),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              SectionHeader(
-                title: context.copy.accessibilityModeTitle,
-                subtitle: context.copy.accessibilityModeDescription,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              SectionCard(
-                child: SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  secondary: const Icon(Icons.accessibility_new_rounded),
+              const SizedBox(height: AppSpacing.lg),
+              _SettingsPanel(
+                title: _accessibilitySectionTitle(context),
+                subtitle: _accessibilitySectionSubtitle(context),
+                child: _SettingsToggleTile(
+                  icon: Icons.accessibility_new_rounded,
+                  title: _accessibilityModeTitle(context),
+                  subtitle: _accessibilityModeSubtitle(context),
                   value: studyData.settings.accessibilityMode,
-                  title: Text(context.copy.accessibilityModeTitle),
-                  subtitle: Text(context.copy.accessibilityModeDescription),
-                  onChanged: (value) async {
-                    await ref
-                        .read(studyDataControllerProvider.notifier)
-                        .updateSettings(
-                          studyData.settings.copyWith(
-                            languageCode: selectedLanguage,
-                            accessibilityMode: value,
-                            updatedAt: DateTime.now(),
-                          ),
-                        );
-                  },
+                  onChanged: (value) => _toggleAccessibility(
+                    ref,
+                    studyData,
+                    selectedLanguage,
+                    value,
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
               SectionCard(
-                child: OutlinedButton(
+                child: OutlinedButton.icon(
                   onPressed: () async {
                     await ref.read(authControllerProvider.notifier).signOut();
                     if (context.mounted) {
                       context.go(LoginScreen.routePath);
                     }
                   },
-                  child: Text(context.l10n.logoutAction),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: Text(context.l10n.logoutAction),
                 ),
               ),
             ],
@@ -340,29 +258,352 @@ class SettingsScreen extends ConsumerWidget {
         );
   }
 
+  Future<void> _toggleNotifications(
+    BuildContext context,
+    WidgetRef ref,
+    StudyDataState studyData, {
+    required bool enabled,
+    required bool systemEnabled,
+  }) async {
+    final reminderService = ref.read(reminderServiceProvider);
+    final notifier = ref.read(studyDataControllerProvider.notifier);
+
+    if (!enabled) {
+      await reminderService.cancelAll();
+      await notifier.updateSettings(
+        studyData.settings.copyWith(
+          notificationsEnabled: false,
+          updatedAt: DateTime.now(),
+        ),
+      );
+      ref.invalidate(notificationPermissionProvider);
+      if (context.mounted) {
+        context.showAppSnackBar(_notificationsPausedMessage(context));
+      }
+      return;
+    }
+
+    final granted =
+        systemEnabled ? true : await reminderService.requestPermissions();
+    await notifier.updateSettings(
+      studyData.settings.copyWith(
+        notificationsEnabled: granted,
+        updatedAt: DateTime.now(),
+      ),
+    );
+    ref.invalidate(notificationPermissionProvider);
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (granted) {
+      context.showSuccessNotification(_notificationsEnabledMessage(context));
+      return;
+    }
+
+    context.showErrorNotification(
+      reminderService.isSupported
+          ? _notificationsDeniedMessage(context)
+          : _notificationsUnsupportedMessage(context),
+    );
+  }
+
+  Future<void> _toggleAccessibility(
+    WidgetRef ref,
+    StudyDataState studyData,
+    String languageCode,
+    bool value,
+  ) async {
+    await ref.read(studyDataControllerProvider.notifier).updateSettings(
+          studyData.settings.copyWith(
+            languageCode: languageCode,
+            accessibilityMode: value,
+            updatedAt: DateTime.now(),
+          ),
+        );
+  }
+
   String _settingsSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' =>
-        'Dil, gorunum, bildirimler ve erisilebilirlik ayarlarini duzenle.',
-      'ar' => 'عدّل اللغة والمظهر والإشعارات وإعدادات سهولة الوصول.',
-      _ => 'Adjust language, appearance, notifications, and accessibility.',
+      'tr' => 'Sadece gerekli ayarlari tut, dili ve gorunumu rahatca degistir.',
+      'ar' => 'احتفظ بالإعدادات الأساسية فقط، وبدّل اللغة والمظهر بسهولة.',
+      _ =>
+        'Keep only the essentials here and adjust language and appearance quickly.',
+    };
+  }
+
+  String _languageSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Uygulama duzenini bozmadan dili aninda degistir.',
+      'ar' => 'بدّل لغة التطبيق مباشرة من دون التأثير على ترتيب الواجهة.',
+      _ => 'Switch the app language instantly without affecting the layout.',
     };
   }
 
   String _themeSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' => 'Acik, koyu veya sistem gorunumunu sec.',
-      'ar' => 'اختر المظهر الفاتح أو الداكن أو مظهر النظام.',
-      _ => 'Choose light, dark, or system appearance.',
+      'ar' => 'اختر المظهر الفاتح أو الداكن أو اجعل التطبيق يتبع النظام.',
+      _ => 'Choose light, dark, or follow the system appearance.',
     };
   }
 
-  String _appSummary(BuildContext context) {
+  String _notificationsSectionTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sade bir calisma duzeni icin temel ayarlari burada tut.',
-      'ar' => 'احتفظ هنا بالإعدادات الأساسية لتجربة دراسة بسيطة ومريحة.',
-      _ => 'Keep the essentials here for a calm and simple study experience.',
+      'tr' => 'Bildirimler',
+      'ar' => 'الإشعارات',
+      _ => 'Notifications',
     };
+  }
+
+  String _allowNotificationsLabel(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bildirimlere izin ver',
+      'ar' => 'السماح بالإشعارات',
+      _ => 'Allow notifications',
+    };
+  }
+
+  String _notificationsSectionSubtitle(
+    BuildContext context, {
+    required bool isSupported,
+    required bool appEnabled,
+    required bool systemEnabled,
+    required bool isLoading,
+  }) {
+    if (isLoading) {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'tr' => 'Bildirim durumu kontrol ediliyor.',
+        'ar' => 'جارٍ التحقق من حالة الإشعارات.',
+        _ => 'Checking notification availability.',
+      };
+    }
+
+    if (!isSupported) {
+      return _notificationsUnsupportedMessage(context);
+    }
+
+    if (appEnabled && systemEnabled) {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'tr' => 'Odak, gorev ve calisma hatirlatmalari hazir.',
+        'ar' => 'تم تفعيل تذكيرات التركيز والمهام والدراسة.',
+        _ => 'Focus, task, and study reminders are ready to reach you.',
+      };
+    }
+
+    if (appEnabled && !systemEnabled) {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'tr' => 'Uygulama acik, ancak sistem izni hala kapali.',
+        'ar' => 'الإعداد داخل التطبيق مفعّل، لكن إذن النظام ما زال مغلقاً.',
+        _ => 'The app setting is on, but system permission is still blocked.',
+      };
+    }
+
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Sadece ihtiyac duydugunda ac ve dikkat dagitmadan kullan.',
+      'ar' => 'فعّلها فقط عندما تحتاج التذكيرات، وأبقِ التجربة هادئة.',
+      _ => 'Turn this on only when you want reminders without extra clutter.',
+    };
+  }
+
+  String _notificationsTileSubtitle(
+    BuildContext context, {
+    required bool isSupported,
+    required bool appEnabled,
+    required bool systemEnabled,
+  }) {
+    if (!isSupported) {
+      return _notificationsUnsupportedMessage(context);
+    }
+
+    if (appEnabled && systemEnabled) {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'tr' => 'Hatirlatmalar etkin.',
+        'ar' => 'التذكيرات مفعّلة.',
+        _ => 'Reminders are enabled.',
+      };
+    }
+
+    if (appEnabled && !systemEnabled) {
+      return switch (Localizations.localeOf(context).languageCode) {
+        'tr' => 'Izni tamamlamak icin sistemi onayla.',
+        'ar' => 'أكمل إذن النظام ليعمل هذا الخيار.',
+        _ => 'Approve the system permission to finish enabling this.',
+      };
+    }
+
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Hatirlatmalar kapali.',
+      'ar' => 'التذكيرات متوقفة.',
+      _ => 'Reminders are off.',
+    };
+  }
+
+  String _accessibilitySectionTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Erisilebilirlik',
+      'ar' => 'إمكانية الوصول',
+      _ => 'Accessibility',
+    };
+  }
+
+  String _accessibilitySectionSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Okumayi kolaylastir ve gereksiz hareketi azalt.',
+      'ar' => 'اجعل القراءة أوضح وقلّل الحركة غير الضرورية في الواجهة.',
+      _ => 'Make reading easier and reduce unnecessary motion across the app.',
+    };
+  }
+
+  String _accessibilityModeTitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Erisilebilirlik modu',
+      'ar' => 'وضع إمكانية الوصول',
+      _ => 'Accessibility mode',
+    };
+  }
+
+  String _accessibilityModeSubtitle(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Animasyonlari azaltir ve metni biraz daha rahat hale getirir.',
+      'ar' => 'يقلّل الحركة ويجعل النص أكثر راحة للقراءة قليلاً.',
+      _ => 'Reduces motion and slightly improves reading comfort.',
+    };
+  }
+
+  String _notificationsEnabledMessage(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bildirimler acildi.',
+      'ar' => 'تم تفعيل الإشعارات.',
+      _ => 'Notifications were enabled.',
+    };
+  }
+
+  String _notificationsDeniedMessage(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bildirim izni verilmedi.',
+      'ar' => 'لم يتم منح إذن الإشعارات.',
+      _ => 'Notification permission was not granted.',
+    };
+  }
+
+  String _notificationsPausedMessage(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bildirimler uygulama icinde duraklatildi.',
+      'ar' => 'تم إيقاف الإشعارات من داخل التطبيق.',
+      _ => 'Notifications were paused inside the app.',
+    };
+  }
+
+  String _notificationsUnsupportedMessage(BuildContext context) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => 'Bildirimler bu platformda kullanilamiyor.',
+      'ar' => 'الإشعارات غير متاحة على هذه المنصة.',
+      _ => 'Notifications are not available on this platform.',
+    };
+  }
+}
+
+class _SettingsPanel extends StatelessWidget {
+  const _SettingsPanel({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsToggleTile extends StatelessWidget {
+  const _SettingsToggleTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: scheme.primary),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
   }
 }
 

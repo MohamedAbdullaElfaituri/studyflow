@@ -31,24 +31,75 @@ class ReminderService {
     return ReminderService(notifications);
   }
 
-  Future<void> requestPermissions() async {
+  Future<bool> areNotificationsAllowed() async {
+    if (!isSupported) {
+      return false;
+    }
+
+    final android = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      return await android.areNotificationsEnabled() ?? false;
+    }
+
+    final ios = _notifications.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+    if (ios != null) {
+      return (await ios.checkPermissions())?.isEnabled ?? false;
+    }
+
+    final macos = _notifications.resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>();
+    if (macos != null) {
+      return (await macos.checkPermissions())?.isEnabled ?? false;
+    }
+
+    return true;
+  }
+
+  Future<bool> requestPermissions() async {
+    if (!isSupported) {
+      return false;
+    }
+
+    final android = _notifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (android != null) {
+      final granted = await android.requestNotificationsPermission();
+      return granted ?? await areNotificationsAllowed();
+    }
+
+    final ios = _notifications.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+    if (ios != null) {
+      final granted = await ios.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return granted ?? await areNotificationsAllowed();
+    }
+
+    final macos = _notifications.resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>();
+    if (macos != null) {
+      final granted = await macos.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return granted ?? await areNotificationsAllowed();
+    }
+
+    return true;
+  }
+
+  Future<void> cancelAll() async {
     if (!isSupported) {
       return;
     }
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+    await _notifications.cancelAll();
   }
 
   NotificationDetails _details({
@@ -95,7 +146,7 @@ class ReminderService {
     required String title,
     required String body,
   }) async {
-    if (!isSupported) {
+    if (!isSupported || !await areNotificationsAllowed()) {
       return;
     }
 

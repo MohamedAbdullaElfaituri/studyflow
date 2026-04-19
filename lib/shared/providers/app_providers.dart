@@ -27,6 +27,10 @@ final reminderServiceProvider = Provider<ReminderService>(
   (ref) => throw UnimplementedError(),
 );
 
+final notificationPermissionProvider = FutureProvider<bool>((ref) async {
+  return ref.watch(reminderServiceProvider).areNotificationsAllowed();
+});
+
 final backendModeProvider =
     Provider<BackendMode>((ref) => SupabaseService.backendMode);
 
