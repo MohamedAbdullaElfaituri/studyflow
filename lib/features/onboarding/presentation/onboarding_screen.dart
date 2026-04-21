@@ -97,41 +97,47 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              _LanguageChip(
-                label: context.l10n.englishLabel,
-                selected: selectedLanguage == 'en',
-                onSelected: () async {
-                  HapticFeedback.selectionClick();
-                  await ref
-                      .read(appLocalePreferenceProvider.notifier)
-                      .setLocale('en');
-                },
-              ),
-              _LanguageChip(
-                label: context.l10n.turkishLabel,
-                selected: selectedLanguage == 'tr',
-                onSelected: () async {
-                  HapticFeedback.selectionClick();
-                  await ref
-                      .read(appLocalePreferenceProvider.notifier)
-                      .setLocale('tr');
-                },
-              ),
-              _LanguageChip(
-                label: context.l10n.arabicLabel,
-                selected: selectedLanguage == 'ar',
-                onSelected: () async {
-                  HapticFeedback.selectionClick();
-                  await ref
-                      .read(appLocalePreferenceProvider.notifier)
-                      .setLocale('ar');
-                },
-              ),
-            ],
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                _LanguageChip(
+                  label: 'EN',
+                  semanticLabel: context.l10n.englishLabel,
+                  selected: selectedLanguage == 'en',
+                  onSelected: () async {
+                    HapticFeedback.selectionClick();
+                    await ref
+                        .read(appLocalePreferenceProvider.notifier)
+                        .setLocale('en');
+                  },
+                ),
+                _LanguageChip(
+                  label: 'TR',
+                  semanticLabel: context.l10n.turkishLabel,
+                  selected: selectedLanguage == 'tr',
+                  onSelected: () async {
+                    HapticFeedback.selectionClick();
+                    await ref
+                        .read(appLocalePreferenceProvider.notifier)
+                        .setLocale('tr');
+                  },
+                ),
+                _LanguageChip(
+                  label: 'AR',
+                  semanticLabel: context.l10n.arabicLabel,
+                  selected: selectedLanguage == 'ar',
+                  onSelected: () async {
+                    HapticFeedback.selectionClick();
+                    await ref
+                        .read(appLocalePreferenceProvider.notifier)
+                        .setLocale('ar');
+                  },
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Expanded(
@@ -229,18 +235,25 @@ class _LanguageChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onSelected,
+    this.semanticLabel,
   });
 
   final String label;
   final bool selected;
   final Future<void> Function() onSelected;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
+    return Semantics(
+      button: true,
       selected: selected,
-      onSelected: (_) => onSelected(),
+      label: semanticLabel ?? label,
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onSelected(),
+      ),
     );
   }
 }

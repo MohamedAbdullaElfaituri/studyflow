@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_widgets.dart';
+import '../../../core/widgets/avatar_image_provider.dart';
 import '../../../shared/extensions/build_context_x.dart';
 import '../../../shared/models/app_models.dart';
 import '../../../shared/providers/app_providers.dart';
@@ -271,9 +272,21 @@ class _ProfileAvatar extends StatelessWidget {
       ),
       child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
           ? ClipOval(
-              child: Image.network(
-                user.avatarUrl!,
+              child: Image(
+                image: avatarImageProvider(user.avatarUrl!),
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                  radius: radius,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  child: Text(
+                    initials,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
               ),
             )
           : CircleAvatar(

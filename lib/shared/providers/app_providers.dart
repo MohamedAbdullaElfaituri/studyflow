@@ -79,6 +79,22 @@ final appLocalePreferenceProvider =
   AppLocalePreferenceController.new,
 );
 
+class LaunchSplashController extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void complete() {
+    if (!state) {
+      state = true;
+    }
+  }
+}
+
+final launchSplashCompletedProvider =
+    NotifierProvider<LaunchSplashController, bool>(
+  LaunchSplashController.new,
+);
+
 class AuthNavigationController extends Notifier<bool> {
   Timer? _timeout;
 
@@ -404,6 +420,9 @@ final goRouterRefreshNotifierProvider =
     notifier.refresh();
   });
   ref.listen<bool>(authNavigationProvider, (_, __) {
+    notifier.refresh();
+  });
+  ref.listen<bool>(launchSplashCompletedProvider, (_, __) {
     notifier.refresh();
   });
   ref.listen<AsyncValue<StudyDataState>>(studyDataControllerProvider, (_, __) {

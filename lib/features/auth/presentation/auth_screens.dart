@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_widgets.dart';
@@ -100,23 +101,163 @@ String _resetPasswordSuccess(BuildContext context) {
   };
 }
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   static const routePath = '/splash';
 
   @override
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends ConsumerState<SplashScreen> {
+  static const _animationDuration = Duration(milliseconds: 1200);
+  static const _reducedMotionDuration = Duration(milliseconds: 650);
+
+  @override
+  void initState() {
+    super.initState();
+    final accessibilityMode = ref.read(accessibilityModeProvider);
+    final delay =
+        accessibilityMode ? _reducedMotionDuration : _animationDuration;
+    Future<void>.delayed(delay, () {
+      if (!mounted) {
+        return;
+      }
+      ref.read(launchSplashCompletedProvider.notifier).complete();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final progressDuration =
+        disableAnimations ? _reducedMotionDuration : _animationDuration;
+
     return AppPage(
       padding: EdgeInsets.zero,
       child: Center(
-        child: Semantics(
-          label: 'StudyFlow',
-          child: Image.asset(
-            'assets/branding/app_logo.png',
-            width: 104,
-            height: 104,
-            fit: BoxFit.contain,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.xxl,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 340),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.84, end: 1),
+                  duration: progressDuration,
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: disableAnimations ? 1 : value,
+                      child: Transform.scale(
+                        scale: disableAnimations ? 1 : value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 152,
+                    height: 152,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(44),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          scheme.surface.withValues(alpha: 0.96),
+                          scheme.surfaceContainerHighest.withValues(
+                            alpha: 0.88,
+                          ),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: scheme.outlineVariant.withValues(alpha: 0.34),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.seed.withValues(alpha: 0.10),
+                          blurRadius: 30,
+                          offset: const Offset(0, 18),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(44),
+                              gradient: RadialGradient(
+                                colors: [
+                                  AppColors.secondary.withValues(alpha: 0.14),
+                                  Colors.transparent,
+                                ],
+                                radius: 0.88,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const AppLogo(
+                          size: 88,
+                          radius: 28,
+                          backgroundColor: Colors.white,
+                          borderColor: Colors.transparent,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  context.l10n.appName,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  context.l10n.splashSubtitle,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        height: 1.45,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: SizedBox(
+                    width: 156,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: 1),
+                      duration: progressDuration,
+                      curve: Curves.easeOutCubic,
+                      builder: (context, value, _) {
+                        return LinearProgressIndicator(
+                          value: disableAnimations ? 1 : value,
+                          minHeight: 5,
+                          backgroundColor:
+                              scheme.outlineVariant.withValues(alpha: 0.24),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.secondary,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

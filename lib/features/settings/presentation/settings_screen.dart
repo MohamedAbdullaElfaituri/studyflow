@@ -65,38 +65,44 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsPanel(
                 title: context.l10n.languageSectionTitle,
                 subtitle: _languageSubtitle(context),
-                child: Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    _SettingsChoiceChip(
-                      label: context.l10n.englishLabel,
-                      selected: selectedLanguage == 'en',
-                      onSelected: () => _updateLanguage(
-                        ref,
-                        studyData,
-                        'en',
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      _SettingsChoiceChip(
+                        label: 'EN',
+                        semanticLabel: context.l10n.englishLabel,
+                        selected: selectedLanguage == 'en',
+                        onSelected: () => _updateLanguage(
+                          ref,
+                          studyData,
+                          'en',
+                        ),
                       ),
-                    ),
-                    _SettingsChoiceChip(
-                      label: context.l10n.turkishLabel,
-                      selected: selectedLanguage == 'tr',
-                      onSelected: () => _updateLanguage(
-                        ref,
-                        studyData,
-                        'tr',
+                      _SettingsChoiceChip(
+                        label: 'TR',
+                        semanticLabel: context.l10n.turkishLabel,
+                        selected: selectedLanguage == 'tr',
+                        onSelected: () => _updateLanguage(
+                          ref,
+                          studyData,
+                          'tr',
+                        ),
                       ),
-                    ),
-                    _SettingsChoiceChip(
-                      label: context.l10n.arabicLabel,
-                      selected: selectedLanguage == 'ar',
-                      onSelected: () => _updateLanguage(
-                        ref,
-                        studyData,
-                        'ar',
+                      _SettingsChoiceChip(
+                        label: 'AR',
+                        semanticLabel: context.l10n.arabicLabel,
+                        selected: selectedLanguage == 'ar',
+                        onSelected: () => _updateLanguage(
+                          ref,
+                          studyData,
+                          'ar',
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -612,18 +618,25 @@ class _SettingsChoiceChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onSelected,
+    this.semanticLabel,
   });
 
   final String label;
   final bool selected;
   final Future<void> Function() onSelected;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
+    return Semantics(
+      button: true,
       selected: selected,
-      onSelected: (_) => onSelected(),
+      label: semanticLabel ?? label,
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onSelected(),
+      ),
     );
   }
 }

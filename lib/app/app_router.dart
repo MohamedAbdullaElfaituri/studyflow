@@ -48,7 +48,14 @@ class AppRouter {
       redirect: (context, state) {
         final authAsync = ref.read(authControllerProvider);
         final authNavigationPending = ref.read(authNavigationProvider);
+        final launchSplashCompleted = ref.read(launchSplashCompletedProvider);
         final location = state.matchedLocation;
+
+        if (!launchSplashCompleted) {
+          return location == SplashScreen.routePath
+              ? null
+              : SplashScreen.routePath;
+        }
 
         if (authAsync.isLoading && !authAsync.hasValue) {
           return location == SplashScreen.routePath ||
@@ -168,8 +175,10 @@ class AppRouter {
           ),
         ),
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) =>
-              MainNavigationShell(navigationShell: navigationShell),
+          builder: (context, state, navigationShell) => MainNavigationShell(
+            navigationShell: navigationShell,
+            currentUser: ref.read(currentUserProvider),
+          ),
           branches: [
             StatefulShellBranch(
               routes: [

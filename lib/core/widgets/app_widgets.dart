@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 
 export 'branding/app_logo.dart';
 
+import 'avatar_image_provider.dart';
 import '../../shared/extensions/build_context_x.dart';
 import '../../shared/models/app_models.dart';
 import '../theme/app_colors.dart';
@@ -171,6 +172,7 @@ class _MainNavItemData {
     required this.icon,
     required this.selectedIcon,
     required this.accent,
+    this.avatarUrl,
   });
 
   final _MainNavTab tab;
@@ -179,6 +181,7 @@ class _MainNavItemData {
   final IconData icon;
   final IconData selectedIcon;
   final Color accent;
+  final String? avatarUrl;
 }
 
 // ignore: unused_element
@@ -249,10 +252,12 @@ String _shortNavLabel(BuildContext context, _MainNavTab tab) {
 class MainNavigationShell extends StatelessWidget {
   const MainNavigationShell({
     required this.navigationShell,
+    required this.currentUser,
     super.key,
   });
 
   final StatefulNavigationShell navigationShell;
+  final AppUserModel? currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -298,6 +303,7 @@ class MainNavigationShell extends StatelessWidget {
         icon: Icons.account_circle_outlined,
         selectedIcon: Icons.account_circle_rounded,
         accent: AppColors.success,
+        avatarUrl: currentUser?.avatarUrl,
       ),
     ];
 
@@ -475,10 +481,10 @@ class _StudyFlowBottomBarItem extends StatelessWidget {
                           : scheme.outlineVariant.withValues(alpha: 0.22),
                     ),
                   ),
-                  child: Icon(
-                    selected ? data.selectedIcon : data.icon,
-                    size: iconSize,
-                    color: selected ? data.accent : scheme.onSurfaceVariant,
+                  child: _BottomBarIcon(
+                    data: data,
+                    selected: selected,
+                    iconSize: iconSize,
                   ),
                 ),
                 SizedBox(height: compact ? 5 : 6),
@@ -499,6 +505,44 @@ class _StudyFlowBottomBarItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BottomBarIcon extends StatelessWidget {
+  const _BottomBarIcon({
+    required this.data,
+    required this.selected,
+    required this.iconSize,
+  });
+
+  final _MainNavItemData data;
+  final bool selected;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final avatarUrl = data.avatarUrl;
+
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image(
+          image: avatarImageProvider(avatarUrl),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            selected ? data.selectedIcon : data.icon,
+            size: iconSize,
+            color: selected ? data.accent : scheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+
+    return Icon(
+      selected ? data.selectedIcon : data.icon,
+      size: iconSize,
+      color: selected ? data.accent : scheme.onSurfaceVariant,
     );
   }
 }
