@@ -29,6 +29,34 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   _TaskFilter _filter = _TaskFilter.all;
   _TaskSort _sort = _TaskSort.dueDate;
 
+  Future<void> _archiveCompletedTasks(StudyDataState studyData) async {
+    final archiveCount =
+        studyData.completedTasks.where((task) => !task.isArchived).length;
+
+    if (archiveCount == 0) {
+      context
+          .showInfoNotification(context.copy.noCompletedTasksToArchiveMessage);
+      return;
+    }
+
+    try {
+      await ref
+          .read(studyDataControllerProvider.notifier)
+          .archiveCompletedTasks();
+      if (!mounted) {
+        return;
+      }
+      context.showSuccessNotification(
+        context.copy.archivedTasksMessage(archiveCount),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      context.showErrorNotification(context.resolveError(error));
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -203,9 +231,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     FilledButton.tonal(
-                      onPressed: () => ref
-                          .read(studyDataControllerProvider.notifier)
-                          .archiveCompletedTasks(),
+                      onPressed: () => _archiveCompletedTasks(studyData),
                       child: Text(context.l10n.archiveCompletedAction),
                     ),
                   ],
@@ -443,11 +469,22 @@ class TaskDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(
                 onPressed: () async {
-                  await ref
-                      .read(studyDataControllerProvider.notifier)
-                      .deleteTask(task.id);
-                  if (context.mounted) {
-                    context.pop();
+                  try {
+                    await ref
+                        .read(studyDataControllerProvider.notifier)
+                        .deleteTask(task.id);
+                    if (context.mounted) {
+                      context.showSuccessNotification(
+                        context.copy.taskDeletedMessage,
+                      );
+                      context.pop();
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      context.showErrorNotification(
+                        context.resolveError(error),
+                      );
+                    }
                   }
                 },
                 child: Text(context.l10n.deleteTaskAction),
@@ -925,11 +962,23 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             updatedAt: now,
                           );
 
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .saveTask(task);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .saveTask(task);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.taskSavedMessage(
+                                isNew: existing == null,
+                              ),
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         child: Text(context.l10n.saveTaskAction),
                       ),

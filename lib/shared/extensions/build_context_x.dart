@@ -22,13 +22,7 @@ extension BuildContextX on BuildContext {
       message: message,
       title: title,
       tone: tone,
-      position: position ??
-          switch (tone) {
-            AppNotificationTone.error => AppNotificationPosition.top,
-            AppNotificationTone.warning => AppNotificationPosition.top,
-            AppNotificationTone.success => AppNotificationPosition.bottom,
-            AppNotificationTone.info => AppNotificationPosition.bottom,
-          },
+      position: position ?? AppNotificationPosition.top,
       duration: duration,
     );
   }
@@ -55,6 +49,19 @@ extension BuildContextX on BuildContext {
       message,
       title: title,
       tone: AppNotificationTone.error,
+      duration: duration,
+    );
+  }
+
+  void showInfoNotification(
+    String message, {
+    String? title,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    showAppSnackBar(
+      message,
+      title: title,
+      tone: AppNotificationTone.info,
       duration: duration,
     );
   }

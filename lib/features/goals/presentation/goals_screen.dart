@@ -140,19 +140,27 @@ class GoalsScreen extends ConsumerWidget {
                 weekly: studyData.goals.weeklyTargetMinutes.toDouble(),
                 monthly: studyData.goals.monthlyTargetMinutes.toDouble(),
                 onSave: (daily, weekly, monthly) async {
-                  await ref
-                      .read(studyDataControllerProvider.notifier)
-                      .saveGoals(
-                        studyData.goals.copyWith(
-                          dailyTargetMinutes: daily.round(),
-                          weeklyTargetMinutes: weekly.round(),
-                          monthlyTargetMinutes: monthly.round(),
-                          updatedAt: DateTime.now(),
-                        ),
+                  try {
+                    await ref
+                        .read(studyDataControllerProvider.notifier)
+                        .saveGoals(
+                          studyData.goals.copyWith(
+                            dailyTargetMinutes: daily.round(),
+                            weeklyTargetMinutes: weekly.round(),
+                            monthlyTargetMinutes: monthly.round(),
+                            updatedAt: DateTime.now(),
+                          ),
+                        );
+                    if (context.mounted) {
+                      context.showSuccessNotification(
+                        context.l10n.goalsSavedMessage,
                       );
-                  if (context.mounted) {
-                    context.showSuccessNotification(
-                        context.l10n.goalsSavedMessage);
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      context
+                          .showErrorNotification(context.resolveError(error));
+                    }
                   }
                 },
               ),
@@ -171,13 +179,21 @@ class GoalsScreen extends ConsumerWidget {
                     description: context.l10n.dailyCheckInDescription,
                     actionLabel: context.l10n.dailyCheckInAction,
                     onActionTap: () async {
-                      await ref
-                          .read(studyDataControllerProvider.notifier)
-                          .addStudySession(durationMinutes: 15);
-                      if (context.mounted) {
-                        context.showSuccessNotification(
-                          context.l10n.dailyCheckInSuccessMessage,
-                        );
+                      try {
+                        await ref
+                            .read(studyDataControllerProvider.notifier)
+                            .addStudySession(durationMinutes: 15);
+                        if (context.mounted) {
+                          context.showSuccessNotification(
+                            context.l10n.dailyCheckInSuccessMessage,
+                          );
+                        }
+                      } catch (error) {
+                        if (context.mounted) {
+                          context.showErrorNotification(
+                            context.resolveError(error),
+                          );
+                        }
                       }
                     },
                   ),

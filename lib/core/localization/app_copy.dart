@@ -474,6 +474,118 @@ class AppCopy {
         ar: 'يقلل الحركة ويحسن قابلية القراءة قليلًا في كامل التطبيق.',
       );
 
+  String courseSavedMessage({required bool isNew}) => _pick(
+        en: isNew
+            ? 'Course added successfully.'
+            : 'Course updated successfully.',
+        tr: isNew ? 'Ders basariyla eklendi.' : 'Ders basariyla guncellendi.',
+        ar: isNew ? 'تمت إضافة المادة بنجاح.' : 'تم تحديث المادة بنجاح.',
+      );
+
+  String get courseDeletedMessage => _pick(
+        en: 'Course deleted successfully.',
+        tr: 'Ders basariyla silindi.',
+        ar: 'تم حذف المادة بنجاح.',
+      );
+
+  String taskSavedMessage({required bool isNew}) => _pick(
+        en: isNew ? 'Task added successfully.' : 'Task updated successfully.',
+        tr: isNew ? 'Gorev basariyla eklendi.' : 'Gorev basariyla guncellendi.',
+        ar: isNew ? 'تمت إضافة المهمة بنجاح.' : 'تم تحديث المهمة بنجاح.',
+      );
+
+  String get taskDeletedMessage => _pick(
+        en: 'Task deleted successfully.',
+        tr: 'Gorev basariyla silindi.',
+        ar: 'تم حذف المهمة بنجاح.',
+      );
+
+  String archivedTasksMessage(int count) => _pick(
+        en: count == 1
+            ? '1 completed task was archived.'
+            : '$count completed tasks were archived.',
+        tr: count == 1
+            ? '1 tamamlanan gorev arsivlendi.'
+            : '$count tamamlanan gorev arsivlendi.',
+        ar: count == 1
+            ? 'تمت أرشفة مهمة مكتملة واحدة.'
+            : 'تمت أرشفة $count مهام مكتملة.',
+      );
+
+  String get noCompletedTasksToArchiveMessage => _pick(
+        en: 'There are no completed tasks to archive right now.',
+        tr: 'Su anda arsivlenecek tamamlanmis gorev yok.',
+        ar: 'لا توجد مهام مكتملة لأرشفتها الآن.',
+      );
+
+  String noteSavedMessage({required bool isNew}) => _pick(
+        en: isNew ? 'Note saved successfully.' : 'Note updated successfully.',
+        tr: isNew ? 'Not basariyla kaydedildi.' : 'Not basariyla guncellendi.',
+        ar: isNew ? 'تم حفظ الملاحظة بنجاح.' : 'تم تحديث الملاحظة بنجاح.',
+      );
+
+  String get noteDeletedMessage => _pick(
+        en: 'Note deleted successfully.',
+        tr: 'Not basariyla silindi.',
+        ar: 'تم حذف الملاحظة بنجاح.',
+      );
+
+  String examSavedMessage({required bool isNew}) => _pick(
+        en: isNew ? 'Exam added successfully.' : 'Exam updated successfully.',
+        tr: isNew ? 'Sinav basariyla eklendi.' : 'Sinav basariyla guncellendi.',
+        ar: isNew ? 'تمت إضافة الاختبار بنجاح.' : 'تم تحديث الاختبار بنجاح.',
+      );
+
+  String get examDeletedMessage => _pick(
+        en: 'Exam deleted successfully.',
+        tr: 'Sinav basariyla silindi.',
+        ar: 'تم حذف الاختبار بنجاح.',
+      );
+
+  String habitSavedMessage({required bool isNew}) => _pick(
+        en: isNew ? 'Habit saved successfully.' : 'Habit updated successfully.',
+        tr: isNew
+            ? 'Aliskanlik basariyla kaydedildi.'
+            : 'Aliskanlik basariyla guncellendi.',
+        ar: isNew ? 'تم حفظ العادة بنجاح.' : 'تم تحديث العادة بنجاح.',
+      );
+
+  String get habitDeletedMessage => _pick(
+        en: 'Habit deleted successfully.',
+        tr: 'Aliskanlik basariyla silindi.',
+        ar: 'تم حذف العادة بنجاح.',
+      );
+
+  String get habitGoalCompletedMessage => _pick(
+        en: 'Habit goal completed for today.',
+        tr: 'Bugunku aliskanlik hedefi tamamlandi.',
+        ar: 'اكتمل هدف العادة لليوم.',
+      );
+
+  String get languageUpdatedMessage => _pick(
+        en: 'App language updated.',
+        tr: 'Uygulama dili guncellendi.',
+        ar: 'تم تحديث لغة التطبيق.',
+      );
+
+  String get themeUpdatedMessage => _pick(
+        en: 'Appearance updated.',
+        tr: 'Gorunum guncellendi.',
+        ar: 'تم تحديث المظهر.',
+      );
+
+  String accessibilityUpdatedMessage({required bool enabled}) => _pick(
+        en: enabled
+            ? 'Accessibility mode enabled.'
+            : 'Accessibility mode disabled.',
+        tr: enabled
+            ? 'Erisilebilirlik modu acildi.'
+            : 'Erisilebilirlik modu kapatildi.',
+        ar: enabled
+            ? 'تم تفعيل وضع إمكانية الوصول.'
+            : 'تم إيقاف وضع إمكانية الوصول.',
+      );
+
   String motivationQuote(int seed) {
     final quotes = switch (languageCode) {
       'tr' => const [

@@ -217,11 +217,21 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     ? null
                     : IconButton(
                         onPressed: () async {
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .deleteNote(existing.id);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .deleteNote(existing.id);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.noteDeletedMessage,
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
                       ),
@@ -298,11 +308,23 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             updatedAt: now,
                           );
 
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .saveNote(note);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .saveNote(note);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.noteSavedMessage(
+                                isNew: existing == null,
+                              ),
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         child: Text(context.l10n.saveNoteAction),
                       ),

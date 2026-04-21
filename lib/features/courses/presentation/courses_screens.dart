@@ -256,11 +256,22 @@ class CourseDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton(
                 onPressed: () async {
-                  await ref
-                      .read(studyDataControllerProvider.notifier)
-                      .deleteCourse(course.id);
-                  if (context.mounted) {
-                    context.pop();
+                  try {
+                    await ref
+                        .read(studyDataControllerProvider.notifier)
+                        .deleteCourse(course.id);
+                    if (context.mounted) {
+                      context.showSuccessNotification(
+                        context.copy.courseDeletedMessage,
+                      );
+                      context.pop();
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      context.showErrorNotification(
+                        context.resolveError(error),
+                      );
+                    }
                   }
                 },
                 child: Text(context.l10n.deleteCourseAction),
@@ -438,11 +449,23 @@ class _CourseEditorScreenState extends ConsumerState<CourseEditorScreen> {
                             updatedAt: now,
                           );
 
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .saveCourse(course);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .saveCourse(course);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.courseSavedMessage(
+                                isNew: existing == null,
+                              ),
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         child: Text(context.l10n.saveCourseAction),
                       ),

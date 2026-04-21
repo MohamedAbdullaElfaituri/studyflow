@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -82,19 +83,13 @@ class _AppNotificationOverlay extends StatefulWidget {
 
 class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
   Timer? _timer;
-  var _visible = false;
+  var _visible = true;
   var _dismissed = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() => _visible = true);
-      _timer = Timer(widget.duration, _dismiss);
-    });
+    _timer = Timer(widget.duration, _dismiss);
   }
 
   @override
@@ -111,7 +106,7 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
     _timer?.cancel();
     setState(() => _visible = false);
     Timer(
-      const Duration(milliseconds: 240),
+      const Duration(milliseconds: 140),
       widget.onDismissed,
     );
   }
@@ -119,10 +114,9 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final theme = Theme.of(context);
     final isTop = widget.position == AppNotificationPosition.top;
     final verticalOffset = isTop
-        ? mediaQuery.padding.top + AppSpacing.md
+        ? mediaQuery.padding.top + AppSpacing.xs
         : mediaQuery.padding.bottom + mediaQuery.viewInsets.bottom + 88;
 
     return Stack(
@@ -140,14 +134,14 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
           child: Align(
             alignment: isTop ? Alignment.topCenter : Alignment.bottomCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
+              constraints: const BoxConstraints(maxWidth: 560),
               child: AnimatedSlide(
-                duration: const Duration(milliseconds: 260),
+                duration: const Duration(milliseconds: 140),
                 curve: Curves.easeOutCubic,
                 offset:
-                    _visible ? Offset.zero : Offset(0, isTop ? -0.18 : 0.18),
+                    _visible ? Offset.zero : Offset(0, isTop ? -0.16 : 0.16),
                 child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 220),
+                  duration: const Duration(milliseconds: 120),
                   curve: Curves.easeOut,
                   opacity: _visible ? 1 : 0,
                   child: Material(
@@ -159,8 +153,6 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
                       onClose: _dismiss,
                       closeLabel:
                           MaterialLocalizations.of(context).closeButtonTooltip,
-                      textTheme: theme.textTheme,
-                      colorScheme: theme.colorScheme,
                     ),
                   ),
                 ),
@@ -179,8 +171,6 @@ class _AppNotificationCard extends StatelessWidget {
     required this.tone,
     required this.onClose,
     required this.closeLabel,
-    required this.textTheme,
-    required this.colorScheme,
     this.title,
   });
 
@@ -189,11 +179,12 @@ class _AppNotificationCard extends StatelessWidget {
   final AppNotificationTone tone;
   final VoidCallback onClose;
   final String closeLabel;
-  final TextTheme textTheme;
-  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final accent = switch (tone) {
       AppNotificationTone.success => AppColors.success,
       AppNotificationTone.error => colorScheme.error,
@@ -206,91 +197,128 @@ class _AppNotificationCard extends StatelessWidget {
       AppNotificationTone.info => Icons.info_rounded,
       AppNotificationTone.warning => Icons.warning_amber_rounded,
     };
-    final cardColor = Color.alphaBlend(
-      accent.withValues(alpha: 0.10),
-      colorScheme.surface.withValues(alpha: 0.98),
+    final surfaceColor = colorScheme.surface.withValues(
+      alpha: theme.brightness == Brightness.dark ? 0.88 : 0.93,
     );
-    final iconBackground = accent.withValues(alpha: 0.14);
+    final cardColor = Color.alphaBlend(
+      accent.withValues(alpha: 0.08),
+      surfaceColor,
+    );
+    final highlightColor = Color.alphaBlend(
+      accent.withValues(alpha: 0.05),
+      cardColor,
+    );
+    final iconBackground = accent.withValues(alpha: 0.13);
 
     return Semantics(
       container: true,
       liveRegion: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: accent.withValues(alpha: 0.22),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 28,
-              offset: const Offset(0, 12),
-            ),
-            BoxShadow(
-              color: accent.withValues(alpha: 0.14),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.md,
-            AppSpacing.md,
-            AppSpacing.sm,
-            AppSpacing.md,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: iconBackground,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: accent, size: 24),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [cardColor, highlightColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title != null && title!.trim().isNotEmpty) ...[
-                      Text(
-                        title!,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onSurface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 26,
+                  offset: const Offset(0, 10),
+                ),
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.10),
+                  blurRadius: 18,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.84),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: iconBackground,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(icon, color: accent, size: 22),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (title != null && title!.trim().isNotEmpty) ...[
+                              Text(
+                                title!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                            ],
+                            Text(
+                              message,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                                height: 1.35,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                    ],
-                    Text(
-                      message,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        height: 1.35,
+                      const SizedBox(width: AppSpacing.xs),
+                      IconButton(
+                        onPressed: onClose,
+                        tooltip: closeLabel,
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 18,
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                          size: 20,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              IconButton(
-                onPressed: onClose,
-                tooltip: closeLabel,
-                visualDensity: VisualDensity.compact,
-                icon: Icon(
-                  Icons.close_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 20,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -15,6 +15,27 @@ class HabitsScreen extends ConsumerWidget {
 
   static const routePath = '/habits';
 
+  Future<void> _completeHabit(
+    BuildContext context,
+    WidgetRef ref,
+    HabitModel habit,
+  ) async {
+    final nextCompleted = habit.completedCount + 1 > habit.goalCount
+        ? habit.goalCount
+        : habit.completedCount + 1;
+
+    try {
+      await ref.read(studyDataControllerProvider.notifier).completeHabit(habit);
+      if (context.mounted && nextCompleted >= habit.goalCount) {
+        context.showSuccessNotification(context.copy.habitGoalCompletedMessage);
+      }
+    } catch (error) {
+      if (context.mounted) {
+        context.showErrorNotification(context.resolveError(error));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(studyDataControllerProvider);
@@ -169,12 +190,11 @@ class HabitsScreen extends ConsumerWidget {
                                     FilledButton.tonal(
                                       onPressed: habit.isCompleted
                                           ? null
-                                          : () => ref
-                                              .read(
-                                                studyDataControllerProvider
-                                                    .notifier,
-                                              )
-                                              .completeHabit(habit),
+                                          : () => _completeHabit(
+                                                context,
+                                                ref,
+                                                habit,
+                                              ),
                                       child: Text(context.l10n.finishAction),
                                     ),
                                   ],
@@ -227,12 +247,11 @@ class HabitsScreen extends ConsumerWidget {
                                     FilledButton.tonal(
                                       onPressed: habit.isCompleted
                                           ? null
-                                          : () => ref
-                                              .read(
-                                                studyDataControllerProvider
-                                                    .notifier,
-                                              )
-                                              .completeHabit(habit),
+                                          : () => _completeHabit(
+                                                context,
+                                                ref,
+                                                habit,
+                                              ),
                                       child: Text(context.l10n.finishAction),
                                     ),
                                   ],
@@ -367,11 +386,21 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                     ? null
                     : IconButton(
                         onPressed: () async {
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .deleteHabit(existing.id);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .deleteHabit(existing.id);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.habitDeletedMessage,
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
                       ),
@@ -552,11 +581,23 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             updatedAt: now,
                           );
 
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .saveHabit(habit);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .saveHabit(habit);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.habitSavedMessage(
+                                isNew: existing == null,
+                              ),
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         child: Text(_saveHabitAction(context)),
                       ),

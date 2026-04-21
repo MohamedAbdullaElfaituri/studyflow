@@ -259,15 +259,18 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                 courseId: selectedCourseId,
                 durationMinutes: _focusMinutes,
               );
-          await ref.read(reminderServiceProvider).showPreview(
-                id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-                title: context.l10n.notificationPreviewTitle,
-                body: context.l10n.focusSessionCompleteMessage,
-              );
-          if (mounted) {
+          final isForeground = WidgetsBinding.instance.lifecycleState ==
+              AppLifecycleState.resumed;
+          if (mounted && isForeground) {
             context.showSuccessNotification(
               context.l10n.focusSessionCompleteMessage,
             );
+          } else {
+            await ref.read(reminderServiceProvider).showPomodoroComplete(
+                  id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                  title: context.l10n.notificationPreviewTitle,
+                  body: context.l10n.focusSessionCompleteMessage,
+                );
           }
         }
 

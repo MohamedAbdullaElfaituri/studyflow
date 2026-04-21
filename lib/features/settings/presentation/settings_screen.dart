@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_copy.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_widgets.dart';
 import '../../../shared/extensions/build_context_x.dart';
@@ -76,6 +77,7 @@ class SettingsScreen extends ConsumerWidget {
                         semanticLabel: context.l10n.englishLabel,
                         selected: selectedLanguage == 'en',
                         onSelected: () => _updateLanguage(
+                          context,
                           ref,
                           studyData,
                           'en',
@@ -86,6 +88,7 @@ class SettingsScreen extends ConsumerWidget {
                         semanticLabel: context.l10n.turkishLabel,
                         selected: selectedLanguage == 'tr',
                         onSelected: () => _updateLanguage(
+                          context,
                           ref,
                           studyData,
                           'tr',
@@ -96,6 +99,7 @@ class SettingsScreen extends ConsumerWidget {
                         semanticLabel: context.l10n.arabicLabel,
                         selected: selectedLanguage == 'ar',
                         onSelected: () => _updateLanguage(
+                          context,
                           ref,
                           studyData,
                           'ar',
@@ -117,6 +121,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: context.l10n.themeSystem,
                       selected: selectedTheme == 'system',
                       onSelected: () => _updateTheme(
+                        context,
                         ref,
                         studyData,
                         selectedLanguage,
@@ -127,6 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: context.l10n.themeLight,
                       selected: selectedTheme == 'light',
                       onSelected: () => _updateTheme(
+                        context,
                         ref,
                         studyData,
                         selectedLanguage,
@@ -137,6 +143,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: context.l10n.themeDark,
                       selected: selectedTheme == 'dark',
                       onSelected: () => _updateTheme(
+                        context,
                         ref,
                         studyData,
                         selectedLanguage,
@@ -209,6 +216,7 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: _accessibilityModeSubtitle(context),
                   value: studyData.settings.accessibilityMode,
                   onChanged: (value) => _toggleAccessibility(
+                    context,
                     ref,
                     studyData,
                     selectedLanguage,
@@ -237,31 +245,53 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _updateLanguage(
+    BuildContext context,
     WidgetRef ref,
     StudyDataState studyData,
     String code,
   ) async {
-    await ref.read(studyDataControllerProvider.notifier).updateSettings(
-          studyData.settings.copyWith(
-            languageCode: code,
-            updatedAt: DateTime.now(),
-          ),
+    try {
+      await ref.read(studyDataControllerProvider.notifier).updateSettings(
+            studyData.settings.copyWith(
+              languageCode: code,
+              updatedAt: DateTime.now(),
+            ),
+          );
+      if (context.mounted) {
+        context.showSuccessNotification(
+          AppCopy.of(Locale(code)).languageUpdatedMessage,
         );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        context.showErrorNotification(context.resolveError(error));
+      }
+    }
   }
 
   Future<void> _updateTheme(
+    BuildContext context,
     WidgetRef ref,
     StudyDataState studyData,
     String languageCode,
     String themeMode,
   ) async {
-    await ref.read(studyDataControllerProvider.notifier).updateSettings(
-          studyData.settings.copyWith(
-            languageCode: languageCode,
-            themeMode: themeMode,
-            updatedAt: DateTime.now(),
-          ),
-        );
+    try {
+      await ref.read(studyDataControllerProvider.notifier).updateSettings(
+            studyData.settings.copyWith(
+              languageCode: languageCode,
+              themeMode: themeMode,
+              updatedAt: DateTime.now(),
+            ),
+          );
+      if (context.mounted) {
+        context.showSuccessNotification(context.copy.themeUpdatedMessage);
+      }
+    } catch (error) {
+      if (context.mounted) {
+        context.showErrorNotification(context.resolveError(error));
+      }
+    }
   }
 
   Future<void> _toggleNotifications(
@@ -274,60 +304,78 @@ class SettingsScreen extends ConsumerWidget {
     final reminderService = ref.read(reminderServiceProvider);
     final notifier = ref.read(studyDataControllerProvider.notifier);
 
-    if (!enabled) {
-      await reminderService.cancelAll();
+    try {
+      if (!enabled) {
+        await reminderService.cancelAll();
+        await notifier.updateSettings(
+          studyData.settings.copyWith(
+            notificationsEnabled: false,
+            updatedAt: DateTime.now(),
+          ),
+        );
+        ref.invalidate(notificationPermissionProvider);
+        if (context.mounted) {
+          context.showAppSnackBar(_notificationsPausedMessage(context));
+        }
+        return;
+      }
+
+      final granted =
+          systemEnabled ? true : await reminderService.requestPermissions();
       await notifier.updateSettings(
         studyData.settings.copyWith(
-          notificationsEnabled: false,
+          notificationsEnabled: granted,
           updatedAt: DateTime.now(),
         ),
       );
       ref.invalidate(notificationPermissionProvider);
-      if (context.mounted) {
-        context.showAppSnackBar(_notificationsPausedMessage(context));
+
+      if (!context.mounted) {
+        return;
       }
-      return;
+
+      if (granted) {
+        context.showSuccessNotification(_notificationsEnabledMessage(context));
+        return;
+      }
+
+      context.showErrorNotification(
+        reminderService.isSupported
+            ? _notificationsDeniedMessage(context)
+            : _notificationsUnsupportedMessage(context),
+      );
+    } catch (error) {
+      if (context.mounted) {
+        context.showErrorNotification(context.resolveError(error));
+      }
     }
-
-    final granted =
-        systemEnabled ? true : await reminderService.requestPermissions();
-    await notifier.updateSettings(
-      studyData.settings.copyWith(
-        notificationsEnabled: granted,
-        updatedAt: DateTime.now(),
-      ),
-    );
-    ref.invalidate(notificationPermissionProvider);
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (granted) {
-      context.showSuccessNotification(_notificationsEnabledMessage(context));
-      return;
-    }
-
-    context.showErrorNotification(
-      reminderService.isSupported
-          ? _notificationsDeniedMessage(context)
-          : _notificationsUnsupportedMessage(context),
-    );
   }
 
   Future<void> _toggleAccessibility(
+    BuildContext context,
     WidgetRef ref,
     StudyDataState studyData,
     String languageCode,
     bool value,
   ) async {
-    await ref.read(studyDataControllerProvider.notifier).updateSettings(
-          studyData.settings.copyWith(
-            languageCode: languageCode,
-            accessibilityMode: value,
-            updatedAt: DateTime.now(),
-          ),
+    try {
+      await ref.read(studyDataControllerProvider.notifier).updateSettings(
+            studyData.settings.copyWith(
+              languageCode: languageCode,
+              accessibilityMode: value,
+              updatedAt: DateTime.now(),
+            ),
+          );
+      if (context.mounted) {
+        context.showSuccessNotification(
+          context.copy.accessibilityUpdatedMessage(enabled: value),
         );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        context.showErrorNotification(context.resolveError(error));
+      }
+    }
   }
 
   String _settingsSubtitle(BuildContext context) {
@@ -635,7 +683,7 @@ class _SettingsChoiceChip extends StatelessWidget {
       child: ChoiceChip(
         label: Text(label),
         selected: selected,
-        onSelected: (_) => onSelected(),
+        onSelected: selected ? null : (_) => onSelected(),
       ),
     );
   }

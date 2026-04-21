@@ -281,11 +281,21 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                     ? null
                     : IconButton(
                         onPressed: () async {
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .deleteExam(existing.id);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .deleteExam(existing.id);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.examDeletedMessage,
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.delete_outline_rounded),
                       ),
@@ -487,11 +497,23 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             updatedAt: now,
                           );
 
-                          await ref
-                              .read(studyDataControllerProvider.notifier)
-                              .saveExam(exam);
-                          if (!mounted) return;
-                          context.pop();
+                          try {
+                            await ref
+                                .read(studyDataControllerProvider.notifier)
+                                .saveExam(exam);
+                            if (!mounted) return;
+                            context.showSuccessNotification(
+                              context.copy.examSavedMessage(
+                                isNew: existing == null,
+                              ),
+                            );
+                            context.pop();
+                          } catch (error) {
+                            if (!mounted) return;
+                            context.showErrorNotification(
+                              context.resolveError(error),
+                            );
+                          }
                         },
                         child: Text(context.copy.saveExamAction),
                       ),
