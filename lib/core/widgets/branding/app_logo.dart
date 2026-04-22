@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class AppLogo extends StatelessWidget {
   const AppLogo({
@@ -24,11 +23,12 @@ class AppLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final logoGraphic = SvgPicture.asset(
-      'assets/branding/app_logo.svg',
+    final logoGraphic = Image.asset(
+      'assets/branding/app_logo.png',
       width: framed ? size * 0.62 : size,
       height: framed ? size * 0.62 : size,
       fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
     );
 
     if (!framed) {

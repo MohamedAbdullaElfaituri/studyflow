@@ -18,6 +18,7 @@ import '../data/auth_repository.dart';
 import '../data/study_repository.dart';
 import '../data/supabase_study_repository.dart';
 import '../models/app_models.dart';
+import '../utils/auth_issue_codes.dart';
 
 final localStorageServiceProvider = Provider<LocalStorageService>(
   (ref) => throw UnimplementedError(),
@@ -120,6 +121,25 @@ final authNavigationProvider = NotifierProvider<AuthNavigationController, bool>(
   AuthNavigationController.new,
 );
 
+class AuthNoticeController extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void show(String code) {
+    state = code;
+  }
+
+  void clear() {
+    if (state != null) {
+      state = null;
+    }
+  }
+}
+
+final authNoticeProvider = NotifierProvider<AuthNoticeController, String?>(
+  AuthNoticeController.new,
+);
+
 class AuthViewState {
   const AuthViewState({
     required this.user,
@@ -140,16 +160,32 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     final repository = ref.watch(authRepositoryProvider);
     final studyRepository = ref.watch(studyRepositoryProvider);
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
-    final initialAuthState = isCloudSyncEnabled
-        ? await SupabaseService.client.auth.onAuthStateChange.first
-        : null;
+    AuthState? initialAuthState;
+
+    if (isCloudSyncEnabled) {
+      try {
+        initialAuthState = await SupabaseService.client.auth.onAuthStateChange
+            .first;
+      } catch (error) {
+        final noticeCode = authFlowNoticeCodeFrom(error);
+        if (noticeCode != null) {
+          ref.read(authNoticeProvider.notifier).show(noticeCode);
+        }
+      }
+    }
 
     if (isCloudSyncEnabled) {
       final subscription = SupabaseService.client.auth.onAuthStateChange.listen(
         (authState) {
           unawaited(_handleAuthStateChange(authState));
         },
-        onError: (Object _, StackTrace __) {},
+        onError: (Object error, StackTrace __) {
+          final noticeCode = authFlowNoticeCodeFrom(error);
+          if (noticeCode != null) {
+            ref.read(authNoticeProvider.notifier).show(noticeCode);
+          }
+          ref.read(authNavigationProvider.notifier).complete();
+        },
       );
       ref.onDispose(subscription.cancel);
     }
@@ -173,13 +209,12 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     required String email,
     required String password,
   }) async {
-    ref.read(authNavigationProvider.notifier).begin();
+    ref.read(authNoticeProvider.notifier).clear();
     try {
       final repository = ref.read(authRepositoryProvider);
       final user = await repository.signIn(email: email, password: password);
       await _setAuthenticatedUser(user);
     } catch (_) {
-      ref.read(authNavigationProvider.notifier).complete();
       rethrow;
     }
   }
@@ -189,6 +224,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
     required String email,
     required String password,
   }) async {
+    ref.read(authNoticeProvider.notifier).clear();
     try {
       final repository = ref.read(authRepositoryProvider);
       final result = await repository.signUp(
@@ -199,7 +235,6 @@ class AuthController extends AsyncNotifier<AuthViewState> {
 
       final user = result.user;
       if (user != null) {
-        ref.read(authNavigationProvider.notifier).begin();
         await _setAuthenticatedUser(user);
       }
 
@@ -210,6 +245,7 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   }
 
   Future<void> signOut() async {
+    ref.read(authNoticeProvider.notifier).clear();
     ref.read(authNavigationProvider.notifier).complete();
     final repository = ref.read(authRepositoryProvider);
     await repository.signOut();
@@ -230,10 +266,12 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   }
 
   Future<void> sendPasswordReset(String email) async {
+    ref.read(authNoticeProvider.notifier).clear();
     await ref.read(authRepositoryProvider).sendPasswordReset(email);
   }
 
   Future<void> signInWithGoogle() async {
+    ref.read(authNoticeProvider.notifier).clear();
     ref.read(authNavigationProvider.notifier).begin();
     try {
       final repository = ref.read(authRepositoryProvider);
@@ -254,19 +292,18 @@ class AuthController extends AsyncNotifier<AuthViewState> {
   }
 
   Future<void> signInWithDemo() async {
-    ref.read(authNavigationProvider.notifier).begin();
+    ref.read(authNoticeProvider.notifier).clear();
     try {
       final repository = ref.read(authRepositoryProvider);
       final user = await repository.signInWithDemo();
       await _setAuthenticatedUser(user);
     } catch (_) {
-      ref.read(authNavigationProvider.notifier).complete();
       rethrow;
     }
   }
 
   Future<void> updatePassword(String password) async {
-    ref.read(authNavigationProvider.notifier).begin();
+    ref.read(authNoticeProvider.notifier).clear();
     try {
       final repository = ref.read(authRepositoryProvider);
       await repository.updatePassword(password: password);
@@ -276,7 +313,6 @@ class AuthController extends AsyncNotifier<AuthViewState> {
       }
       await _setAuthenticatedUser(user);
     } catch (_) {
-      ref.read(authNavigationProvider.notifier).complete();
       rethrow;
     }
   }
@@ -420,6 +456,9 @@ final goRouterRefreshNotifierProvider =
     notifier.refresh();
   });
   ref.listen<bool>(authNavigationProvider, (_, __) {
+    notifier.refresh();
+  });
+  ref.listen<String?>(authNoticeProvider, (_, __) {
     notifier.refresh();
   });
   ref.listen<bool>(launchSplashCompletedProvider, (_, __) {

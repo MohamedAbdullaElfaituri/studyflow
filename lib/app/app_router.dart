@@ -48,8 +48,12 @@ class AppRouter {
       redirect: (context, state) {
         final authAsync = ref.read(authControllerProvider);
         final authNavigationPending = ref.read(authNavigationProvider);
+        final authNotice = ref.read(authNoticeProvider);
         final launchSplashCompleted = ref.read(launchSplashCompletedProvider);
         final location = state.matchedLocation;
+        final hasRecoveryNotice = authNotice == 'recovery_link_invalid' ||
+            authNotice == 'recovery_link_expired' ||
+            authNotice == 'recovery_session_missing';
 
         if (!launchSplashCompleted) {
           return location == SplashScreen.routePath
@@ -111,6 +115,12 @@ class AppRouter {
         }
 
         if (!authState.isAuthenticated) {
+          if (location == ResetPasswordScreen.routePath ||
+              (location == AuthLoadingScreen.routePath && hasRecoveryNotice)) {
+            return location == ForgotPasswordScreen.routePath
+                ? null
+                : ForgotPasswordScreen.routePath;
+          }
           if (location == AuthLoadingScreen.routePath) {
             return LoginScreen.routePath;
           }

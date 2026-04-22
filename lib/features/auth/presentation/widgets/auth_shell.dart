@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_widgets.dart';
+import '../auth_feedback.dart';
 
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({
@@ -10,6 +12,7 @@ class AuthScaffold extends StatelessWidget {
     required this.child,
     super.key,
     this.footer,
+    this.notice,
     this.canPop = false,
   });
 
@@ -17,6 +20,7 @@ class AuthScaffold extends StatelessWidget {
   final String subtitle;
   final Widget child;
   final Widget? footer;
+  final Widget? notice;
   final bool canPop;
 
   @override
@@ -52,6 +56,10 @@ class AuthScaffold extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (notice != null) ...[
+                        notice!,
+                        const SizedBox(height: AppSpacing.lg),
+                      ],
                       Text(
                         title,
                         style:
@@ -83,6 +91,81 @@ class AuthScaffold extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class AuthMessageBanner extends StatelessWidget {
+  const AuthMessageBanner({
+    required this.title,
+    required this.message,
+    super.key,
+    this.tone = AuthFeedbackTone.error,
+  });
+
+  final String title;
+  final String message;
+  final AuthFeedbackTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = switch (tone) {
+      AuthFeedbackTone.error => scheme.error,
+      AuthFeedbackTone.info => scheme.primary,
+      AuthFeedbackTone.success => AppColors.success,
+    };
+    final icon = switch (tone) {
+      AuthFeedbackTone.error => Icons.error_outline_rounded,
+      AuthFeedbackTone.info => Icons.info_outline_rounded,
+      AuthFeedbackTone.success => Icons.check_circle_outline_rounded,
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accent.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: accent, size: 20),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: accent,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurface,
+                        height: 1.4,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

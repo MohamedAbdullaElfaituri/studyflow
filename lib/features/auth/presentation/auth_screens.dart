@@ -8,6 +8,8 @@ import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_widgets.dart';
 import '../../../shared/extensions/build_context_x.dart';
 import '../../../shared/providers/app_providers.dart';
+import '../../../shared/utils/auth_issue_codes.dart';
+import 'auth_feedback.dart';
 import 'widgets/auth_shell.dart';
 
 String _orLabel(BuildContext context) {
@@ -99,6 +101,18 @@ String _resetPasswordSuccess(BuildContext context) {
     'ar' => 'تم تحديث كلمة المرور بنجاح.',
     _ => 'Your password was updated.',
   };
+}
+
+Widget? _buildAuthNotice(AuthFeedbackMessage? feedback) {
+  if (feedback == null) {
+    return null;
+  }
+
+  return AuthMessageBanner(
+    title: feedback.title,
+    message: feedback.message,
+    tone: feedback.tone,
+  );
 }
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -331,6 +345,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  String? _emailError;
+  String? _passwordError;
+  AuthFeedbackMessage? _feedback;
   bool _obscurePassword = true;
   bool _isSubmitting = false;
   bool _isGoogleSubmitting = false;
@@ -343,7 +360,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  void _clearFeedback({
+    bool clearBanner = true,
+    bool clearEmail = true,
+    bool clearPassword = true,
+    bool clearNotice = true,
+  }) {
+    final shouldUpdate = (clearBanner && _feedback != null) ||
+        (clearEmail && _emailError != null) ||
+        (clearPassword && _passwordError != null);
+
+    if (shouldUpdate) {
+      setState(() {
+        if (clearBanner) {
+          _feedback = null;
+        }
+        if (clearEmail) {
+          _emailError = null;
+        }
+        if (clearPassword) {
+          _passwordError = null;
+        }
+      });
+    }
+
+    if (clearNotice) {
+      ref.read(authNoticeProvider.notifier).clear();
+    }
+  }
+
+  void _applyFeedback(AuthFeedbackMessage feedback) {
+    setState(() {
+      _feedback = feedback;
+      _emailError = feedback.field == AuthFieldTarget.email
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+      _passwordError = feedback.field == AuthFieldTarget.password
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+    });
+  }
+
   Future<void> _submit() async {
+    _clearFeedback();
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -359,7 +418,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.signIn,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -368,6 +433,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
+    _clearFeedback();
     FocusScope.of(context).unfocus();
     setState(() => _isGoogleSubmitting = true);
     try {
@@ -376,7 +442,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.google,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isGoogleSubmitting = false);
@@ -385,6 +457,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signInWithDemo() async {
+    _clearFeedback();
     FocusScope.of(context).unfocus();
     setState(() => _isDemoSubmitting = true);
     try {
@@ -393,7 +466,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.signIn,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isDemoSubmitting = false);
@@ -404,10 +483,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+    final authNoticeCode = ref.watch(authNoticeProvider);
+    final activeFeedback = _feedback ??
+        (authNoticeCode == null
+            ? null
+            : feedbackForAuthNotice(context, authNoticeCode));
 
     return AuthScaffold(
       title: context.l10n.loginTitle,
       subtitle: context.l10n.loginSubtitle,
+      notice: _buildAuthNotice(activeFeedback),
       footer: AuthFooterPrompt(
         prompt: context.l10n.noAccountPrompt,
         actionLabel: context.l10n.signUpAction,
@@ -422,6 +507,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              onChanged: (_) => _clearFeedback(
+                clearEmail: true,
+                clearPassword: true,
+              ),
+              forceErrorText: _emailError,
               decoration: InputDecoration(
                 labelText: context.l10n.emailLabel,
                 prefixIcon: const Icon(Icons.mail_outline_rounded),
@@ -434,7 +524,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.done,
+              onChanged: (_) => _clearFeedback(
+                clearEmail: false,
+                clearPassword: true,
+              ),
               onFieldSubmitted: (_) => _submit(),
+              forceErrorText: _passwordError,
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -509,6 +604,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
+  String? _nameError;
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmError;
+  AuthFeedbackMessage? _feedback;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _isSubmitting = false;
@@ -523,7 +623,65 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     super.dispose();
   }
 
+  void _clearFeedback({
+    bool clearBanner = true,
+    bool clearName = true,
+    bool clearEmail = true,
+    bool clearPassword = true,
+    bool clearConfirm = true,
+    bool clearNotice = true,
+  }) {
+    final shouldUpdate = (clearBanner && _feedback != null) ||
+        (clearName && _nameError != null) ||
+        (clearEmail && _emailError != null) ||
+        (clearPassword && _passwordError != null) ||
+        (clearConfirm && _confirmError != null);
+
+    if (shouldUpdate) {
+      setState(() {
+        if (clearBanner) {
+          _feedback = null;
+        }
+        if (clearName) {
+          _nameError = null;
+        }
+        if (clearEmail) {
+          _emailError = null;
+        }
+        if (clearPassword) {
+          _passwordError = null;
+        }
+        if (clearConfirm) {
+          _confirmError = null;
+        }
+      });
+    }
+
+    if (clearNotice) {
+      ref.read(authNoticeProvider.notifier).clear();
+    }
+  }
+
+  void _applyFeedback(AuthFeedbackMessage feedback) {
+    setState(() {
+      _feedback = feedback;
+      _nameError = feedback.field == AuthFieldTarget.fullName
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+      _emailError = feedback.field == AuthFieldTarget.email
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+      _passwordError = feedback.field == AuthFieldTarget.password
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+      _confirmError = feedback.field == AuthFieldTarget.confirmPassword
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+    });
+  }
+
   Future<void> _submit() async {
+    _clearFeedback();
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -542,15 +700,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       }
 
       if (result.requiresEmailConfirmation) {
-        context.showSuccessNotification(
-          _signupConfirmationMessage(context, result.email),
-        );
+        _applyFeedback(signUpConfirmationFeedback(context, result.email));
       }
     } catch (error) {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.signUp,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -559,6 +721,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
+    _clearFeedback();
     FocusScope.of(context).unfocus();
     setState(() => _isGoogleSubmitting = true);
     try {
@@ -567,7 +730,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.google,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isGoogleSubmitting = false);
@@ -578,10 +747,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final isCloudSyncEnabled = ref.watch(isCloudSyncEnabledProvider);
+    final authNoticeCode = ref.watch(authNoticeProvider);
+    final activeFeedback = _feedback ??
+        (authNoticeCode == null
+            ? null
+            : feedbackForAuthNotice(context, authNoticeCode));
 
     return AuthScaffold(
       title: context.l10n.signUpTitle,
       subtitle: context.l10n.signUpSubtitle,
+      notice: _buildAuthNotice(activeFeedback),
       canPop: true,
       footer: AuthFooterPrompt(
         prompt: _alreadyHaveAccountPrompt(context),
@@ -597,6 +772,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               controller: _nameController,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
+              onChanged: (_) => _clearFeedback(
+                clearName: true,
+                clearEmail: false,
+                clearPassword: false,
+                clearConfirm: false,
+              ),
+              forceErrorText: _nameError,
               decoration: InputDecoration(
                 labelText: context.l10n.fullNameLabel,
                 prefixIcon: const Icon(Icons.person_outline_rounded),
@@ -609,6 +791,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
+              onChanged: (_) => _clearFeedback(
+                clearName: false,
+                clearEmail: true,
+                clearPassword: false,
+                clearConfirm: false,
+              ),
+              forceErrorText: _emailError,
               decoration: InputDecoration(
                 labelText: context.l10n.emailLabel,
                 prefixIcon: const Icon(Icons.mail_outline_rounded),
@@ -621,6 +810,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.next,
+              onChanged: (_) => _clearFeedback(
+                clearName: false,
+                clearEmail: false,
+                clearPassword: true,
+                clearConfirm: true,
+              ),
+              forceErrorText: _passwordError,
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -644,7 +840,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               controller: _confirmController,
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
+              onChanged: (_) => _clearFeedback(
+                clearName: false,
+                clearEmail: false,
+                clearPassword: false,
+                clearConfirm: true,
+              ),
               onFieldSubmitted: (_) => _submit(),
+              forceErrorText: _confirmError,
               decoration: InputDecoration(
                 labelText: context.l10n.confirmPasswordLabel,
                 prefixIcon: const Icon(Icons.verified_user_outlined),
@@ -710,6 +913,8 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  String? _emailError;
+  AuthFeedbackMessage? _feedback;
   bool _isSubmitting = false;
 
   @override
@@ -718,7 +923,41 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     super.dispose();
   }
 
+  void _clearFeedback({
+    bool clearBanner = true,
+    bool clearEmail = true,
+    bool clearNotice = true,
+  }) {
+    final shouldUpdate =
+        (clearBanner && _feedback != null) || (clearEmail && _emailError != null);
+
+    if (shouldUpdate) {
+      setState(() {
+        if (clearBanner) {
+          _feedback = null;
+        }
+        if (clearEmail) {
+          _emailError = null;
+        }
+      });
+    }
+
+    if (clearNotice) {
+      ref.read(authNoticeProvider.notifier).clear();
+    }
+  }
+
+  void _applyFeedback(AuthFeedbackMessage feedback) {
+    setState(() {
+      _feedback = feedback;
+      _emailError = feedback.field == AuthFieldTarget.email
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+    });
+  }
+
   Future<void> _submit() async {
+    _clearFeedback();
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -733,13 +972,23 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       if (!mounted) {
         return;
       }
-      context.showSuccessNotification(context.l10n.resetPasswordSentMessage);
-      context.go(LoginScreen.routePath);
+      _applyFeedback(
+        passwordResetEmailSentFeedback(
+          context,
+          _emailController.text.trim(),
+        ),
+      );
     } catch (error) {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.forgotPassword,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -749,9 +998,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authNoticeCode = ref.watch(authNoticeProvider);
+    final activeFeedback = _feedback ??
+        (authNoticeCode == null
+            ? null
+            : feedbackForAuthNotice(context, authNoticeCode));
+
     return AuthScaffold(
       title: context.l10n.forgotPasswordTitle,
       subtitle: context.l10n.forgotPasswordSubtitle,
+      notice: _buildAuthNotice(activeFeedback),
       canPop: true,
       child: Form(
         key: _formKey,
@@ -762,7 +1018,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
+              onChanged: (_) => _clearFeedback(),
               onFieldSubmitted: (_) => _submit(),
+              forceErrorText: _emailError,
               decoration: InputDecoration(
                 labelText: context.l10n.emailLabel,
                 prefixIcon: const Icon(Icons.mail_outline_rounded),
@@ -800,6 +1058,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
+  String? _passwordError;
+  String? _confirmError;
+  AuthFeedbackMessage? _feedback;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _isSubmitting = false;
@@ -811,7 +1072,49 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     super.dispose();
   }
 
+  void _clearFeedback({
+    bool clearBanner = true,
+    bool clearPassword = true,
+    bool clearConfirm = true,
+    bool clearNotice = true,
+  }) {
+    final shouldUpdate = (clearBanner && _feedback != null) ||
+        (clearPassword && _passwordError != null) ||
+        (clearConfirm && _confirmError != null);
+
+    if (shouldUpdate) {
+      setState(() {
+        if (clearBanner) {
+          _feedback = null;
+        }
+        if (clearPassword) {
+          _passwordError = null;
+        }
+        if (clearConfirm) {
+          _confirmError = null;
+        }
+      });
+    }
+
+    if (clearNotice) {
+      ref.read(authNoticeProvider.notifier).clear();
+    }
+  }
+
+  void _applyFeedback(AuthFeedbackMessage feedback) {
+    setState(() {
+      _feedback = feedback;
+      _passwordError = feedback.field == AuthFieldTarget.password
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+      _confirmError = feedback.field == AuthFieldTarget.confirmPassword
+          ? (feedback.fieldMessage ?? feedback.message)
+          : null;
+    });
+  }
+
   Future<void> _submit() async {
+    _clearFeedback();
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -830,7 +1133,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       if (!mounted) {
         return;
       }
-      context.showErrorNotification(context.resolveError(error));
+      _applyFeedback(
+        resolveAuthFeedback(
+          context,
+          error,
+          intent: AuthErrorContext.resetPassword,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -840,18 +1149,37 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeFeedback = _feedback;
+
     return AuthScaffold(
       title: _resetPasswordTitle(context),
       subtitle: _resetPasswordSubtitle(context),
+      notice: _buildAuthNotice(activeFeedback),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (activeFeedback?.isRecoveryIssue ?? false) ...[
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: () => context.go(ForgotPasswordScreen.routePath),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(requestNewResetLinkLabel(context)),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               textInputAction: TextInputAction.next,
+              onChanged: (_) => _clearFeedback(
+                clearPassword: true,
+                clearConfirm: false,
+              ),
+              forceErrorText: _passwordError,
               decoration: InputDecoration(
                 labelText: context.l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -875,7 +1203,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               controller: _confirmController,
               obscureText: _obscureConfirm,
               textInputAction: TextInputAction.done,
+              onChanged: (_) => _clearFeedback(
+                clearPassword: false,
+                clearConfirm: true,
+              ),
               onFieldSubmitted: (_) => _submit(),
+              forceErrorText: _confirmError,
               decoration: InputDecoration(
                 labelText: context.l10n.confirmPasswordLabel,
                 prefixIcon: const Icon(Icons.verified_user_outlined),
