@@ -164,8 +164,8 @@ class AuthController extends AsyncNotifier<AuthViewState> {
 
     if (isCloudSyncEnabled) {
       try {
-        initialAuthState = await SupabaseService.client.auth.onAuthStateChange
-            .first;
+        initialAuthState =
+            await SupabaseService.client.auth.onAuthStateChange.first;
       } catch (error) {
         final noticeCode = authFlowNoticeCodeFrom(error);
         if (noticeCode != null) {
@@ -563,10 +563,13 @@ class StudyDataState {
     );
   }
 
-  List<TaskModel> get activeTasks =>
-      tasks.where((item) => !item.isArchived).toList()
-        ..sort((a, b) => (a.dueDateTime ?? DateTime(3000))
-            .compareTo(b.dueDateTime ?? DateTime(3000)));
+  List<TaskModel> get activeTasks => tasks
+      .where(
+        (item) => !item.isArchived && item.status != TaskStatus.completed,
+      )
+      .toList()
+    ..sort((a, b) => (a.dueDateTime ?? DateTime(3000))
+        .compareTo(b.dueDateTime ?? DateTime(3000)));
 
   List<TaskModel> get completedTasks =>
       tasks.where((item) => item.status == TaskStatus.completed).toList();

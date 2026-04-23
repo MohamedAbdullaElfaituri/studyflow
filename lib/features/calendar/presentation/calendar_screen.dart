@@ -350,8 +350,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   String _plannerSummarySubtitle(BuildContext context, int totalItems) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' => totalItems == 0
-          ? 'Secili gunde planlanmis bir sey yok.'
-          : 'Secili gun icin planlanan oge sayisi: $totalItems.',
+          ? 'Seçili günde planlanmış bir şey yok.'
+          : 'Seçili gün için planlanan öğe sayısı: $totalItems.',
       'ar' => totalItems == 0
           ? 'لا توجد عناصر مخططة في اليوم المحدد.'
           : 'عدد العناصر المخططة لليوم المحدد: $totalItems.',
@@ -363,7 +363,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _taskLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gorev',
+      'tr' => 'Görev',
       'ar' => 'مهمة',
       _ => 'Task',
     };
@@ -379,7 +379,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _examLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sinav',
+      'tr' => 'Sınav',
       'ar' => 'اختبار',
       _ => 'Exam',
     };
@@ -387,7 +387,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _taskCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gunluk gorevler',
+      'tr' => 'Günlük görevler',
       'ar' => 'مهام اليوم',
       _ => 'Daily tasks',
     };
@@ -395,7 +395,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _focusCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Odak dakikasi',
+      'tr' => 'Odak dakikası',
       'ar' => 'دقائق التركيز',
       _ => 'Focus minutes',
     };
@@ -403,7 +403,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _examCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sinavlar',
+      'tr' => 'Sınavlar',
       'ar' => 'الاختبارات',
       _ => 'Exams',
     };
@@ -411,7 +411,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _taskCardCaption(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Secili gun',
+      'tr' => 'Seçili gün',
       'ar' => 'لليوم المحدد',
       _ => 'Selected day',
     };
@@ -427,7 +427,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _examCardCaption(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yaklasan akademik noktalar',
+      'tr' => 'Yaklaşan akademik noktalar',
       'ar' => 'المواعيد الأكاديمية في هذا اليوم',
       _ => 'Academic milestones for this day',
     };
@@ -435,7 +435,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _agendaSubtitle(BuildContext context, int totalItems) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$totalItems oge zaman sirasina gore listelendi.',
+      'tr' => '$totalItems öğe zaman sırasına göre listelendi.',
       'ar' => 'تم ترتيب $totalItems عنصر حسب الوقت.',
       _ => '$totalItems items sorted by time.',
     };

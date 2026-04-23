@@ -42,7 +42,12 @@ class HabitsScreen extends ConsumerWidget {
 
     return AppPage(
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(HabitEditorScreen.routePath),
+        onPressed: () async {
+          final result = await context.push<bool>(HabitEditorScreen.routePath);
+          if (context.mounted && (result ?? false)) {
+            ref.invalidate(studyDataControllerProvider);
+          }
+        },
         label: Text(context.copy.addHabitAction),
         icon: const Icon(Icons.add_rounded),
       ),
@@ -112,7 +117,13 @@ class HabitsScreen extends ConsumerWidget {
                   description: _emptyHabitsDescription(context),
                   icon: Icons.repeat_rounded,
                   action: FilledButton.tonal(
-                    onPressed: () => context.push(HabitEditorScreen.routePath),
+                    onPressed: () async {
+                      final result =
+                          await context.push<bool>(HabitEditorScreen.routePath);
+                      if (context.mounted && (result ?? false)) {
+                        ref.invalidate(studyDataControllerProvider);
+                      }
+                    },
                     child: Text(_addHabitAction(context)),
                   ),
                 )
@@ -126,9 +137,14 @@ class HabitsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(28),
-                        onTap: () => context.push(
-                          '${HabitEditorScreen.routePath}?habitId=${habit.id}',
-                        ),
+                        onTap: () async {
+                          final saved = await context.push<bool>(
+                            '${HabitEditorScreen.routePath}?habitId=${habit.id}',
+                          );
+                          if (context.mounted && (saved ?? false)) {
+                            ref.invalidate(studyDataControllerProvider);
+                          }
+                        },
                         child: SectionCard(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,7 +410,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             context.showSuccessNotification(
                               context.copy.habitDeletedMessage,
                             );
-                            context.pop();
+                            context.pop(true);
                           } catch (error) {
                             if (!mounted) return;
                             context.showErrorNotification(
@@ -433,7 +449,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                         Column(
                           children: [
                             DropdownButtonFormField<HabitFrequency>(
-                              initialValue: _frequency,
+                              value: _frequency,
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: _habitFrequencyLabel(context),
@@ -455,7 +471,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             ),
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<int>(
-                              initialValue: _goalCount,
+                              value: _goalCount,
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: _habitGoalLabel(context),
@@ -477,7 +493,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<HabitFrequency>(
-                                initialValue: _frequency,
+                                value: _frequency,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: _habitFrequencyLabel(context),
@@ -502,7 +518,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: DropdownButtonFormField<int>(
-                                initialValue: _goalCount,
+                                value: _goalCount,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: _habitGoalLabel(context),
@@ -524,7 +540,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                       Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: Text(
-                          context.l10n.courseColorLabel,
+                          _colorLabel(context),
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
@@ -591,7 +607,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
                                 isNew: existing == null,
                               ),
                             );
-                            context.pop();
+                            context.pop(true);
                           } catch (error) {
                             if (!mounted) return;
                             context.showErrorNotification(
@@ -615,7 +631,7 @@ class _HabitEditorScreenState extends ConsumerState<HabitEditorScreen> {
 
 String _addHabitAction(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Aliskanlik ekle',
+    'tr' => 'Alışkanlık ekle',
     'ar' => 'إضافة عادة',
     _ => 'Add habit',
   };
@@ -623,7 +639,7 @@ String _addHabitAction(BuildContext context) {
 
 String _editHabitTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Aliskanligi duzenle',
+    'tr' => 'Alışkanlığı düzenle',
     'ar' => 'تعديل العادة',
     _ => 'Edit habit',
   };
@@ -631,7 +647,7 @@ String _editHabitTitle(BuildContext context) {
 
 String _saveHabitAction(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Aliskanligi kaydet',
+    'tr' => 'Alışkanlığı kaydet',
     'ar' => 'حفظ العادة',
     _ => 'Save habit',
   };
@@ -639,7 +655,7 @@ String _saveHabitAction(BuildContext context) {
 
 String _habitsTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Aliskanliklar',
+    'tr' => 'Alışkanlıklar',
     'ar' => 'العادات',
     _ => 'Habits',
   };
@@ -647,7 +663,7 @@ String _habitsTitle(BuildContext context) {
 
 String _habitsSubtitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Gununu destekleyen basit rutinleri takip et.',
+    'tr' => 'Gününü destekleyen basit rutinleri takip et.',
     'ar' => 'تابع عادات بسيطة تدعم يومك الدراسي.',
     _ => 'Track simple routines that support your day.',
   };
@@ -655,7 +671,7 @@ String _habitsSubtitle(BuildContext context) {
 
 String _habitsQuickCardTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Gunluk rutinler',
+    'tr' => 'Günlük rutinler',
     'ar' => 'العادات اليومية',
     _ => 'Daily routines',
   };
@@ -679,7 +695,7 @@ String _focusNoteTitle(BuildContext context) {
 
 String _emptyHabitsTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Henuz aliskanlik yok',
+    'tr' => 'Henüz alışkanlık yok',
     'ar' => 'لا توجد عادات بعد',
     _ => 'No habits yet',
   };
@@ -687,7 +703,7 @@ String _emptyHabitsTitle(BuildContext context) {
 
 String _emptyHabitsDescription(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Gunluk ritmine destek olacak basit bir aliskanlik ekle.',
+    'tr' => 'Günlük ritmine destek olacak basit bir alışkanlık ekle.',
     'ar' => 'أضف عادة بسيطة تدعم روتينك اليومي.',
     _ => 'Add a simple habit to support your daily routine.',
   };
@@ -695,7 +711,7 @@ String _emptyHabitsDescription(BuildContext context) {
 
 String _habitFrequencyLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Siklik',
+    'tr' => 'Sıklık',
     'ar' => 'التكرار',
     _ => 'Frequency',
   };
@@ -703,15 +719,23 @@ String _habitFrequencyLabel(BuildContext context) {
 
 String _habitGoalLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Gunluk hedef',
+    'tr' => 'Günlük hedef',
     'ar' => 'الهدف اليومي',
     _ => 'Daily goal',
   };
 }
 
+String _colorLabel(BuildContext context) {
+  return switch (Localizations.localeOf(context).languageCode) {
+    'tr' => 'Renk',
+    'ar' => 'اللون',
+    _ => 'Color',
+  };
+}
+
 String _habitDaily(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Gunluk',
+    'tr' => 'Günlük',
     'ar' => 'يومي',
     _ => 'Daily',
   };
@@ -719,7 +743,7 @@ String _habitDaily(BuildContext context) {
 
 String _habitWeekly(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Haftalik',
+    'tr' => 'Haftalık',
     'ar' => 'أسبوعي',
     _ => 'Weekly',
   };
@@ -727,7 +751,7 @@ String _habitWeekly(BuildContext context) {
 
 String _habitProgress(BuildContext context, int value, int target) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => '$value / $target tamamlandi',
+    'tr' => '$value / $target tamamlandı',
     'ar' => '$value / $target مكتمل',
     _ => '$value / $target complete',
   };
@@ -735,7 +759,7 @@ String _habitProgress(BuildContext context, int value, int target) {
 
 String _habitStreak(BuildContext context, int streak) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => '$streak gun seri',
+    'tr' => '$streak gün seri',
     'ar' => 'سلسلة $streak يوم',
     _ => '$streak day streak',
   };
@@ -751,7 +775,7 @@ String _activeHabitsCaption(BuildContext context, int count) {
 
 String _consistencyLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Tutarlilik',
+    'tr' => 'Tutarlılık',
     'ar' => 'الاتساق',
     _ => 'Consistency',
   };
@@ -759,7 +783,7 @@ String _consistencyLabel(BuildContext context) {
 
 String _habitCompletionCaption(BuildContext context, int completed, int total) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => '$completed / $total tamamlandi',
+    'tr' => '$completed / $total tamamlandı',
     'ar' => '$completed / $total مكتمل',
     _ => '$completed / $total complete',
   };

@@ -223,7 +223,7 @@ class GoalsScreen extends ConsumerWidget {
 
   String _goalsSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gunluk, haftalik ve aylik hedeflerini sade sekilde ayarla.',
+      'tr' => 'Günlük, haftalık ve aylık hedeflerini sade şekilde ayarla.',
       'ar' => 'اضبط أهدافك اليومية والأسبوعية والشهرية بشكل واضح.',
       _ => 'Set your daily, weekly, and monthly targets clearly.',
     };
@@ -231,7 +231,7 @@ class GoalsScreen extends ConsumerWidget {
 
   String _progressOverviewTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Ilerleme ozeti',
+      'tr' => 'İlerleme özeti',
       'ar' => 'ملخص التقدم',
       _ => 'Progress overview',
     };
@@ -239,7 +239,7 @@ class GoalsScreen extends ConsumerWidget {
 
   String _progressOverviewSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Hedefler sade kalsin, ama ne durumda oldugun hemen anlasilsin.',
+      'tr' => 'Hedefler sade kalsın, ama ne durumda olduğun hemen anlaşılsın.',
       'ar' => 'واجهة بسيطة توضح فورًا أين وصلت في أهدافك.',
       _ => 'Keep the goals simple while making your current pace obvious.',
     };
@@ -248,8 +248,8 @@ class GoalsScreen extends ConsumerWidget {
   String _weeklyHint(BuildContext context, int remainingMinutes) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' => remainingMinutes == 0
-          ? 'Bu haftalik hedefinin ustundesin, ayni dengeyi koru.'
-          : 'Bu hafta hedefine ulasmak icin $remainingMinutes dakika kaldi.',
+          ? 'Bu haftalık hedefinin üstündesin, aynı dengeyi koru.'
+          : 'Bu hafta hedefine ulaşmak için $remainingMinutes dakika kaldı.',
       'ar' => remainingMinutes == 0
           ? 'أنت فوق هدف هذا الأسبوع، حافظ على نفس التوازن.'
           : 'تبقى $remainingMinutes دقيقة للوصول إلى هدف هذا الأسبوع.',
@@ -269,7 +269,7 @@ class GoalsScreen extends ConsumerWidget {
 
   String _supportSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Kisa kontrol ve haftalik bakis ritmi korumayi kolaylastirir.',
+      'tr' => 'Kısa kontrol ve haftalık bakış ritmi korumayı kolaylaştırır.',
       'ar' => 'المراجعة السريعة والمنتظمة تجعل الحفاظ على الإيقاع أسهل.',
       _ =>
         'Short check-ins and a weekly view make it easier to stay consistent.',
@@ -362,7 +362,7 @@ class _GoalsEditorState extends State<_GoalsEditor> {
 
   String _editorSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gercekci hedefler belirle ki ekran rehber olsun, baski degil.',
+      'tr' => 'Gerçekçi hedefler belirle ki ekran rehber olsun, baskı değil.',
       'ar' => 'اختر أهدافًا واقعية لتبقى الصفحة مرشدًا هادئًا لا مصدر ضغط.',
       _ =>
         'Choose realistic targets so the screen stays supportive, not noisy.',
@@ -371,7 +371,7 @@ class _GoalsEditorState extends State<_GoalsEditor> {
 
   String _dailyHelper(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Her gun korunabilir bir minimum ritim belirle.',
+      'tr' => 'Her gün korunabilir bir minimum ritim belirle.',
       'ar' => 'حدد حدًا يوميًا يمكن الحفاظ عليه باستمرار.',
       _ => 'Set a daily minimum that feels easy to keep.',
     };
@@ -379,7 +379,7 @@ class _GoalsEditorState extends State<_GoalsEditor> {
 
   String _weeklyHelper(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Haftalik hedef, gunluk dagilimi daha net hale getirir.',
+      'tr' => 'Haftalık hedef, günlük dağılımı daha net hale getirir.',
       'ar' => 'الهدف الأسبوعي يعطيك صورة أوضح لتوزيع الجهد.',
       _ => 'A weekly target makes your effort distribution easier to read.',
     };
@@ -387,7 +387,7 @@ class _GoalsEditorState extends State<_GoalsEditor> {
 
   String _monthlyHelper(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Aylik hedef uzun vadeli dengeyi korumana yardim eder.',
+      'tr' => 'Aylık hedef uzun vadeli dengeyi korumana yardım eder.',
       'ar' => 'الهدف الشهري يساعدك على الحفاظ على توازن أبعد مدى.',
       _ => 'A monthly target helps keep the bigger picture balanced.',
     };

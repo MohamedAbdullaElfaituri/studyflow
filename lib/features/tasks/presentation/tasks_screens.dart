@@ -96,7 +96,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     task.dueDateTime!.isBefore(DateTime.now()),
               )
               .length;
-          final filtered = studyData.activeTasks.where((task) {
+          final visibleTasks =
+              studyData.tasks.where((task) => !task.isArchived).toList();
+          final filtered = visibleTasks.where((task) {
             final matchesSearch = query.isEmpty ||
                 task.title.toLowerCase().contains(query) ||
                 task.description.toLowerCase().contains(query);
@@ -615,7 +617,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
-                        initialValue: selectedCourseId,
+                        value: selectedCourseId,
                         isExpanded: true,
                         decoration: InputDecoration(
                             labelText: context.l10n.courseLabel),
@@ -638,7 +640,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                         Column(
                           children: [
                             DropdownButtonFormField<TaskPriority>(
-                              initialValue: _priority,
+                              value: _priority,
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
@@ -658,7 +660,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             ),
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskStatus>(
-                              initialValue: _status,
+                              value: _status,
                               isExpanded: true,
                               decoration: InputDecoration(
                                   labelText: context.l10n.statusLabel),
@@ -682,7 +684,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<TaskPriority>(
-                                initialValue: _priority,
+                                value: _priority,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.priorityLabel,
@@ -704,7 +706,7 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: DropdownButtonFormField<TaskStatus>(
-                                initialValue: _status,
+                                value: _status,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.statusLabel,
@@ -972,7 +974,11 @@ class _TaskEditorScreenState extends ConsumerState<TaskEditorScreen> {
                                 isNew: existing == null,
                               ),
                             );
-                            context.pop();
+                            if (existing == null) {
+                              context.go(TasksScreen.routePath);
+                            } else {
+                              context.pop();
+                            }
                           } catch (error) {
                             if (!mounted) return;
                             context.showErrorNotification(
@@ -1004,7 +1010,7 @@ String _taskStatusLabel(BuildContext context, TaskStatus status) {
 
 String _openTasksLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Acik gorevler',
+    'tr' => 'Açık görevler',
     'ar' => 'المهام المفتوحة',
     _ => 'Open tasks',
   };
@@ -1012,7 +1018,7 @@ String _openTasksLabel(BuildContext context) {
 
 String _dueTodayLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Bugun',
+    'tr' => 'Bugün',
     'ar' => 'اليوم',
     _ => 'Due today',
   };
@@ -1028,7 +1034,7 @@ String _overdueLabel(BuildContext context) {
 
 String _taskSummaryCaption(BuildContext context, int completed, int total) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => '$completed / $total tamamlandi',
+    'tr' => '$completed / $total tamamlandı',
     'ar' => '$completed / $total مكتمل',
     _ => '$completed / $total complete',
   };
@@ -1037,7 +1043,7 @@ String _taskSummaryCaption(BuildContext context, int completed, int total) {
 String _overdueCaption(BuildContext context, int count) {
   return switch (Localizations.localeOf(context).languageCode) {
     'tr' =>
-      count == 0 ? 'Takvim temiz gorunuyor.' : 'Oncelik sirasina gore duzenle.',
+      count == 0 ? 'Takvim temiz görünüyor.' : 'Öncelik sırasına göre düzenle.',
     'ar' => count == 0 ? 'الجدول يبدو مرتبًا.' : 'رتبها حسب الأولوية أولًا.',
     _ => count == 0
         ? 'Your schedule looks clear.'

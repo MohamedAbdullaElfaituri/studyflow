@@ -12,7 +12,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appName => 'StudyFlow';
 
   @override
-  String get splashSubtitle => 'Gunluk ilerleme icin sade calisma planlamasi.';
+  String get splashSubtitle => 'Günlük ilerleme için sade çalışma planlaması.';
 
   @override
   String get genericNavigationError => 'Bu ekran açılırken bir sorun oluştu.';
@@ -170,13 +170,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get dailyStudyMinutesLabel => 'Bugünkü dakika';
+  String get dailyStudyMinutesLabel => 'Bugünkü çalışma süresi';
 
   @override
-  String get weeklyStudyMinutesLabel => 'Haftalık dakika';
+  String get weeklyStudyMinutesLabel => 'Haftalık çalışma süresi';
 
   @override
-  String get completedTasksLabel => 'Tamamlanan görev';
+  String get completedTasksLabel => 'Tamamlanan görevler';
 
   @override
   String get streakLabel => 'Seri';
@@ -188,7 +188,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get quickActionsSubtitle => 'Şimdi önemli olana hemen geç.';
 
   @override
-  String get quickTaskSubtitle => 'Ödev ekle veya yönet';
+  String get quickTaskSubtitle => 'Görev ekle veya yönet';
 
   @override
   String get quickCourseSubtitle => 'Derslerini düzenle';
@@ -206,7 +206,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get todayPlanSubtitle => 'Gün bitmeden ilgilenmen gerekenler.';
 
   @override
-  String get emptyTodayTitle => 'Bugünün açık görünüyor';
+  String get emptyTodayTitle => 'Bugünün planı açık görünüyor';
 
   @override
   String get emptyTodayDescription =>
@@ -648,7 +648,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get profileFallbackName => 'Ogrenci';
+  String get profileFallbackName => 'Öğrenci';
 
   @override
   String get editProfileAction => 'Profili düzenle';
@@ -706,7 +706,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dailyReminderLabel => 'Günlük hatırlatma';
 
   @override
-  String get notificationPreviewTitle => 'Calisma hatirlatmasi';
+  String get notificationPreviewTitle => 'Çalışma hatırlatması';
 
   @override
   String get notificationPreviewBody =>

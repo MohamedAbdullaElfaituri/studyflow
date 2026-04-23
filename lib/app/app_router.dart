@@ -256,17 +256,17 @@ class AppRouter {
           ),
         ),
         GoRoute(
-          path: TaskDetailScreen.routePath,
-          pageBuilder: (context, state) => _slidePage(
-            state,
-            TaskDetailScreen(taskId: state.pathParameters['taskId']!),
-          ),
-        ),
-        GoRoute(
           path: TaskEditorScreen.routePath,
           pageBuilder: (context, state) => _slidePage(
             state,
             TaskEditorScreen(taskId: state.uri.queryParameters['taskId']),
+          ),
+        ),
+        GoRoute(
+          path: TaskDetailScreen.routePath,
+          pageBuilder: (context, state) => _slidePage(
+            state,
+            TaskDetailScreen(taskId: state.pathParameters['taskId']!),
           ),
         ),
         GoRoute(

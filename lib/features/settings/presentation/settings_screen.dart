@@ -380,7 +380,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _settingsSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sadece gerekli ayarlari tut, dili ve gorunumu rahatca degistir.',
+      'tr' => 'Sadece gerekli ayarları tut, dili ve görünümü rahatça değiştir.',
       'ar' => 'احتفظ بالإعدادات الأساسية فقط، وبدّل اللغة والمظهر بسهولة.',
       _ =>
         'Keep only the essentials here and adjust language and appearance quickly.',
@@ -389,7 +389,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _languageSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Uygulama duzenini bozmadan dili aninda degistir.',
+      'tr' => 'Uygulama düzenini bozmadan dili anında değiştir.',
       'ar' => 'بدّل لغة التطبيق مباشرة من دون التأثير على ترتيب الواجهة.',
       _ => 'Switch the app language instantly without affecting the layout.',
     };
@@ -397,7 +397,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _themeSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Acik, koyu veya sistem gorunumunu sec.',
+      'tr' => 'Açık, koyu veya sistem görünümünü seç.',
       'ar' => 'اختر المظهر الفاتح أو الداكن أو اجعل التطبيق يتبع النظام.',
       _ => 'Choose light, dark, or follow the system appearance.',
     };
@@ -440,7 +440,7 @@ class SettingsScreen extends ConsumerWidget {
 
     if (appEnabled && systemEnabled) {
       return switch (Localizations.localeOf(context).languageCode) {
-        'tr' => 'Odak, gorev ve calisma hatirlatmalari hazir.',
+        'tr' => 'Odak, görev ve çalışma hatırlatmaları hazır.',
         'ar' => 'تم تفعيل تذكيرات التركيز والمهام والدراسة.',
         _ => 'Focus, task, and study reminders are ready to reach you.',
       };
@@ -448,14 +448,14 @@ class SettingsScreen extends ConsumerWidget {
 
     if (appEnabled && !systemEnabled) {
       return switch (Localizations.localeOf(context).languageCode) {
-        'tr' => 'Uygulama acik, ancak sistem izni hala kapali.',
+        'tr' => 'Uygulama açık, ancak sistem izni hâlâ kapalı.',
         'ar' => 'الإعداد داخل التطبيق مفعّل، لكن إذن النظام ما زال مغلقاً.',
         _ => 'The app setting is on, but system permission is still blocked.',
       };
     }
 
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sadece ihtiyac duydugunda ac ve dikkat dagitmadan kullan.',
+      'tr' => 'Sadece ihtiyaç duyduğunda aç ve dikkat dağıtmadan kullan.',
       'ar' => 'فعّلها فقط عندما تحتاج التذكيرات، وأبقِ التجربة هادئة.',
       _ => 'Turn this on only when you want reminders without extra clutter.',
     };
@@ -473,7 +473,7 @@ class SettingsScreen extends ConsumerWidget {
 
     if (appEnabled && systemEnabled) {
       return switch (Localizations.localeOf(context).languageCode) {
-        'tr' => 'Hatirlatmalar etkin.',
+        'tr' => 'Hatırlatmalar etkin.',
         'ar' => 'التذكيرات مفعّلة.',
         _ => 'Reminders are enabled.',
       };
@@ -481,14 +481,14 @@ class SettingsScreen extends ConsumerWidget {
 
     if (appEnabled && !systemEnabled) {
       return switch (Localizations.localeOf(context).languageCode) {
-        'tr' => 'Izni tamamlamak icin sistemi onayla.',
+        'tr' => 'İzni tamamlamak için sistemi onayla.',
         'ar' => 'أكمل إذن النظام ليعمل هذا الخيار.',
         _ => 'Approve the system permission to finish enabling this.',
       };
     }
 
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Hatirlatmalar kapali.',
+      'tr' => 'Hatırlatmalar kapalı.',
       'ar' => 'التذكيرات متوقفة.',
       _ => 'Reminders are off.',
     };
@@ -496,7 +496,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _accessibilitySectionTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Erisilebilirlik',
+      'tr' => 'Erişilebilirlik',
       'ar' => 'إمكانية الوصول',
       _ => 'Accessibility',
     };
@@ -504,7 +504,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _accessibilitySectionSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Okumayi kolaylastir ve gereksiz hareketi azalt.',
+      'tr' => 'Okumayı kolaylaştır ve gereksiz hareketi azalt.',
       'ar' => 'اجعل القراءة أوضح وقلّل الحركة غير الضرورية في الواجهة.',
       _ => 'Make reading easier and reduce unnecessary motion across the app.',
     };
@@ -512,7 +512,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _accessibilityModeTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Erisilebilirlik modu',
+      'tr' => 'Erişilebilirlik modu',
       'ar' => 'وضع إمكانية الوصول',
       _ => 'Accessibility mode',
     };
@@ -520,7 +520,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _accessibilityModeSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Animasyonlari azaltir ve metni biraz daha rahat hale getirir.',
+      'tr' => 'Animasyonları azaltır ve metni biraz daha rahat hale getirir.',
       'ar' => 'يقلّل الحركة ويجعل النص أكثر راحة للقراءة قليلاً.',
       _ => 'Reduces motion and slightly improves reading comfort.',
     };
@@ -528,7 +528,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _notificationsEnabledMessage(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bildirimler acildi.',
+      'tr' => 'Bildirimler açıldı.',
       'ar' => 'تم تفعيل الإشعارات.',
       _ => 'Notifications were enabled.',
     };
@@ -544,7 +544,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _notificationsPausedMessage(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bildirimler uygulama icinde duraklatildi.',
+      'tr' => 'Bildirimler uygulama içinde duraklatıldı.',
       'ar' => 'تم إيقاف الإشعارات من داخل التطبيق.',
       _ => 'Notifications were paused inside the app.',
     };
@@ -552,7 +552,7 @@ class SettingsScreen extends ConsumerWidget {
 
   String _notificationsUnsupportedMessage(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bildirimler bu platformda kullanilamiyor.',
+      'tr' => 'Bildirimler bu platformda kullanılamıyor.',
       'ar' => 'الإشعارات غير متاحة على هذه المنصة.',
       _ => 'Notifications are not available on this platform.',
     };

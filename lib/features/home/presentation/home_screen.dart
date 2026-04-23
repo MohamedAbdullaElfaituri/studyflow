@@ -474,7 +474,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _overviewTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bugunun ozeti',
+      'tr' => 'Bugünün özeti',
       'ar' => 'ملخص اليوم',
       _ => 'Today overview',
     };
@@ -482,7 +482,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _overviewSectionTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Hizli bakis',
+      'tr' => 'Hızlı bakış',
       'ar' => 'نظرة سريعة',
       _ => 'Quick glance',
     };
@@ -490,7 +490,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _overviewSectionSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bugunun ve haftanin en onemli gostergelerini ayni ritimde gor.',
+      'tr' => 'Bugünün ve haftanın en önemli göstergelerini aynı ritimde gör.',
       'ar' => 'راجع أهم مؤشرات اليوم والأسبوع بإيقاع بصري موحد.',
       _ =>
         'See the most important signals for today and this week in one calm view.',
@@ -499,7 +499,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _weeklyGoalShort(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Haftalik',
+      'tr' => 'Haftalık',
       'ar' => 'أسبوعي',
       _ => 'Weekly',
     };
@@ -508,8 +508,8 @@ class HomeScreen extends ConsumerWidget {
   String _weeklyFocusHint(BuildContext context, int remainingMinutes) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' => remainingMinutes == 0
-          ? 'Bu haftalik hedefin yolunda gorunuyor.'
-          : 'Haftalik hedefe ulasmak icin $remainingMinutes dakika kaldi.',
+          ? 'Bu haftalık hedefin yolunda görünüyor.'
+          : 'Haftalık hedefe ulaşmak için $remainingMinutes dakika kaldı.',
       'ar' => remainingMinutes == 0
           ? 'أنت على المسار الصحيح لهدف هذا الأسبوع.'
           : 'تبقى $remainingMinutes دقيقة للوصول إلى هدف هذا الأسبوع.',
@@ -522,7 +522,7 @@ class HomeScreen extends ConsumerWidget {
   String _taskCompletionCaption(
       BuildContext context, int completed, int total) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$completed / $total gorev tamamlandi',
+      'tr' => '$completed / $total görev tamamlandı',
       'ar' => '$completed / $total مهمة مكتملة',
       _ => '$completed / $total tasks complete',
     };
@@ -541,7 +541,7 @@ class HomeScreen extends ConsumerWidget {
   String _habitOverviewCaption(BuildContext context, StudyDataState data) {
     final consistency = (data.habitConsistency * 100).round();
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '%$consistency tutarlilik',
+      'tr' => '%$consistency tutarlılık',
       'ar' => '$consistency% اتساق',
       _ => '$consistency% consistency',
     };
@@ -549,7 +549,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _openTasksCaption(BuildContext context, int count) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$count acik gorev',
+      'tr' => '$count açık görev',
       'ar' => '$count مهمة مفتوحة',
       _ => '$count open tasks',
     };
@@ -557,7 +557,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _dueSoonCaption(BuildContext context, int count) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$count yakin tarih',
+      'tr' => '$count yakın tarih',
       'ar' => '$count موعد قريب',
       _ => '$count due soon',
     };
@@ -565,7 +565,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _streakCaption(BuildContext context, int count) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$count gunluk seri',
+      'tr' => '$count günlük seri',
       'ar' => 'سلسلة $count يوم',
       _ => '$count day streak',
     };
@@ -573,7 +573,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _focusAreasTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Odak alanlari',
+      'tr' => 'Odak alanları',
       'ar' => 'نقاط التركيز',
       _ => 'Focus areas',
     };
@@ -581,7 +581,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _focusAreasSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yaklasan baskilar ve gunluk ritimler tek yerde gorunsun.',
+      'tr' => 'Yaklaşan baskılar ve günlük ritimler tek yerde görünsün.',
       'ar' => 'اجمع المواعيد القريبة والعادات اليومية في مساحة أوضح.',
       _ =>
         'Keep upcoming pressure points and daily routines visible in one place.',
@@ -590,7 +590,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _examsTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sinavlar',
+      'tr' => 'Sınavlar',
       'ar' => 'الاختبارات',
       _ => 'Exams',
     };
@@ -598,7 +598,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _upcomingExamsTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yaklasan sinavlar',
+      'tr' => 'Yaklaşan sınavlar',
       'ar' => 'الاختبارات القادمة',
       _ => 'Upcoming exams',
     };
@@ -606,7 +606,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _emptyExamsTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yaklasan sinav yok',
+      'tr' => 'Yaklaşan sınav yok',
       'ar' => 'لا توجد اختبارات قادمة',
       _ => 'No upcoming exams',
     };
@@ -614,7 +614,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _emptyExamsDescription(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bir sonraki onemli tarihi gorunur tutmak icin sinav ekle.',
+      'tr' => 'Bir sonraki önemli tarihi görünür tutmak için sınav ekle.',
       'ar' => 'أضف اختبارًا ليبقى الموعد القادم واضحًا أمامك.',
       _ => 'Add an exam to keep the next important date visible.',
     };
@@ -623,7 +623,7 @@ class HomeScreen extends ConsumerWidget {
   String _examCountdown(BuildContext context, int days) {
     final safeDays = max(days, 0);
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$safeDays gun kaldi',
+      'tr' => '$safeDays gün kaldı',
       'ar' => 'متبقي $safeDays يوم',
       _ => '$safeDays days left',
     };
@@ -631,7 +631,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _dailyRoutinesTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gunluk rutinler',
+      'tr' => 'Günlük rutinler',
       'ar' => 'العادات اليومية',
       _ => 'Daily routines',
     };
@@ -639,7 +639,7 @@ class HomeScreen extends ConsumerWidget {
 
   String _emptyHabitsDescription(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gunluk ritmine destek olacak basit bir aliskanlik ekle.',
+      'tr' => 'Günlük ritmine destek olacak basit bir alışkanlık ekle.',
       'ar' => 'أضف عادة بسيطة تدعم روتينك اليومي.',
       _ => 'Add a simple habit to support your daily routine.',
     };
@@ -657,7 +657,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Ogrenci',
+      'tr' => 'Öğrenci',
       'ar' => 'طالب',
       _ => 'Student',
     };
@@ -887,7 +887,7 @@ class _ExamPreviewTile extends StatelessWidget {
   String _localizedExamCountdown(BuildContext context, int days) {
     final safeDays = max(days, 0);
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$safeDays gun',
+      'tr' => '$safeDays gün',
       'ar' => '$safeDays يوم',
       _ => '$safeDays d',
     };
@@ -960,7 +960,7 @@ class _HabitPreviewTile extends StatelessWidget {
 
   String _localizedHabitProgress(BuildContext context, int value, int target) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$value / $target tamamlandi',
+      'tr' => '$value / $target tamamlandı',
       'ar' => '$value / $target مكتمل',
       _ => '$value / $target complete',
     };

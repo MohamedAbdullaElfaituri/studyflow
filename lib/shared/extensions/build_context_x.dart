@@ -124,7 +124,7 @@ extension BuildContextX on BuildContext {
   String _emailConfirmationRequiredMessage() {
     return switch (Localizations.localeOf(this).languageCode) {
       'ar' => 'تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول.',
-      'tr' => 'Hesabini onaylamak icin e-postani kontrol et, sonra giris yap.',
+      'tr' => 'Hesabını onaylamak için e-postanı kontrol et, sonra giriş yap.',
       _ => 'Check your email to confirm your account, then sign in.',
     };
   }
@@ -132,7 +132,7 @@ extension BuildContextX on BuildContext {
   String _googleOAuthIncompleteMessage() {
     return switch (Localizations.localeOf(this).languageCode) {
       'ar' => 'تعذّر إكمال تسجيل الدخول عبر Google. حاول مرة أخرى.',
-      'tr' => 'Google ile giris tamamlanamadi. Lutfen tekrar dene.',
+      'tr' => 'Google ile giriş tamamlanamadı. Lütfen tekrar dene.',
       _ => 'Google sign-in could not be completed. Please try again.',
     };
   }

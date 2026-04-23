@@ -30,7 +30,7 @@ String _continueWithGoogleLabel(BuildContext context) {
 
 String _exploreAppLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Uygulamayi kesfet',
+    'tr' => 'Uygulamayı keşfet',
     'ar' => 'استكشف التطبيق',
     _ => 'Explore the app',
   };
@@ -38,7 +38,7 @@ String _exploreAppLabel(BuildContext context) {
 
 String _alreadyHaveAccountPrompt(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Zaten bir hesabin var mi?',
+    'tr' => 'Zaten bir hesabın var mı?',
     'ar' => 'هل لديك حساب بالفعل؟',
     _ => 'Already have an account?',
   };
@@ -46,7 +46,7 @@ String _alreadyHaveAccountPrompt(BuildContext context) {
 
 String _authLoadingTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Hesabin hazirlaniyor',
+    'tr' => 'Hesabın hazırlanıyor',
     'ar' => 'جار تجهيز حسابك',
     _ => 'Preparing your account',
   };
@@ -54,26 +54,15 @@ String _authLoadingTitle(BuildContext context) {
 
 String _authLoadingSubtitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Lutfen bekle, seni dogrudan ana ekrana goturuyoruz.',
+    'tr' => 'Lütfen bekle, seni doğrudan ana ekrana götürüyoruz.',
     'ar' => 'يرجى الانتظار، سيتم نقلك مباشرة إلى الصفحة الرئيسية.',
     _ => 'Please wait while we take you straight to the home screen.',
   };
 }
 
-String _signupConfirmationMessage(BuildContext context, String email) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'tr' =>
-      '$email adresine onay baglantisi gonderildi. E-postani onayladiktan sonra giris yap.',
-    'ar' =>
-      'أرسلنا رابط تأكيد إلى $email. أكّد بريدك الإلكتروني ثم سجّل الدخول.',
-    _ =>
-      'A confirmation link was sent to $email. Verify your email, then sign in.',
-  };
-}
-
 String _resetPasswordTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Yeni bir sifre belirle',
+    'tr' => 'Yeni bir şifre belirle',
     'ar' => 'عيّن كلمة مرور جديدة',
     _ => 'Create a new password',
   };
@@ -81,7 +70,7 @@ String _resetPasswordTitle(BuildContext context) {
 
 String _resetPasswordSubtitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Hesabina tekrar erisebilmek icin yeni sifreni gir.',
+    'tr' => 'Hesabına tekrar erişebilmek için yeni şifreni gir.',
     'ar' => 'أدخل كلمة مرور جديدة لإكمال استعادة الوصول إلى حسابك.',
     _ => 'Enter a new password to finish restoring access to your account.',
   };
@@ -89,7 +78,7 @@ String _resetPasswordSubtitle(BuildContext context) {
 
 String _resetPasswordAction(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sifreyi guncelle',
+    'tr' => 'Şifreyi güncelle',
     'ar' => 'تحديث كلمة المرور',
     _ => 'Update password',
   };
@@ -97,7 +86,7 @@ String _resetPasswordAction(BuildContext context) {
 
 String _resetPasswordSuccess(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sifren guncellendi.',
+    'tr' => 'Şifren güncellendi.',
     'ar' => 'تم تحديث كلمة المرور بنجاح.',
     _ => 'Your password was updated.',
   };
@@ -928,8 +917,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     bool clearEmail = true,
     bool clearNotice = true,
   }) {
-    final shouldUpdate =
-        (clearBanner && _feedback != null) || (clearEmail && _emailError != null);
+    final shouldUpdate = (clearBanner && _feedback != null) ||
+        (clearEmail && _emailError != null);
 
     if (shouldUpdate) {
       setState(() {

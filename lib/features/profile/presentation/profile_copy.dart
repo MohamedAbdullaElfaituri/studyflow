@@ -27,7 +27,7 @@ class ProfileCopy {
 
   String get fallbackUserName => _pick(
         en: 'Student',
-        tr: 'Ogrenci',
+        tr: 'Öğrenci',
         ar: 'طالب',
       );
   String get focusPlanner => _pick(
@@ -52,7 +52,7 @@ class ProfileCopy {
       );
   String get defaultBio => _pick(
         en: 'Keeping study days calm, clear, and easy to manage.',
-        tr: 'Calisma gunlerini sakin, net ve kolay yonetilebilir tutuyorum.',
+        tr: 'Çalışma günlerini sakin, net ve kolay yönetilebilir tutuyorum.',
         ar: 'أحافظ على أيام الدراسة هادئة وواضحة وسهلة الإدارة.',
       );
   String get weeklyFocus => _pick(
@@ -172,12 +172,12 @@ class ProfileCopy {
       );
   String get livePreview => _pick(
         en: 'Live preview',
-        tr: 'Canli onizleme',
+        tr: 'Canlı önizleme',
         ar: 'معاينة مباشرة',
       );
   String get livePreviewSubtitle => _pick(
         en: 'A polished identity card for the rest of your workspace.',
-        tr: 'Calisma alaninin geri kalani icin duzenli bir kimlik karti.',
+        tr: 'Çalışma alanının geri kalanı için düzenli bir kimlik kartı.',
         ar: 'بطاقة هوية مرتبة لبقية مساحة عملك داخل التطبيق.',
       );
   String get coreIdentity => _pick(
@@ -187,22 +187,22 @@ class ProfileCopy {
       );
   String get coreIdentitySubtitle => _pick(
         en: 'Your name and handle stay visible across the app.',
-        tr: 'Adin ve kullanici adin uygulama genelinde gorunur kalir.',
+        tr: 'Adın ve kullanıcı adın uygulama genelinde görünür kalır.',
         ar: 'اسمك واسم المستخدم يبقيان ظاهرين في أنحاء التطبيق.',
       );
   String get academicContext => _pick(
         en: 'Academic context',
-        tr: 'Akademik baglam',
+        tr: 'Akademik bağlam',
         ar: 'السياق الأكاديمي',
       );
   String get academicContextSubtitle => _pick(
         en: 'Department and university help personalize your study flow.',
-        tr: 'Bolum ve universite calisma akisina daha kisisel bir dokunus katar.',
+        tr: 'Bölüm ve üniversite çalışma akışına daha kişisel bir dokunuş katar.',
         ar: 'القسم والجامعة يساعدان في تخصيص تجربتك الدراسية.',
       );
   String get bioSubtitle => _pick(
         en: 'Keep it warm, short, and clear in any language.',
-        tr: 'Her dilde sicak, kisa ve net tut.',
+        tr: 'Her dilde sıcak, kısa ve net tut.',
         ar: 'اجعلها قصيرة وواضحة ومريحة بكل لغة.',
       );
   String get passwordAndSecurity => _pick(
@@ -232,12 +232,12 @@ class ProfileCopy {
       );
   String get changePhoto => _pick(
         en: 'Change photo',
-        tr: 'Fotografi degistir',
+        tr: 'Fotoğrafı değiştir',
         ar: 'تغيير الصورة',
       );
   String get deletePhoto => _pick(
         en: 'Delete photo',
-        tr: 'Fotografi sil',
+        tr: 'Fotoğrafı sil',
         ar: 'حذف الصورة',
       );
   String get deletingPhoto => _pick(
@@ -247,7 +247,7 @@ class ProfileCopy {
       );
   String get profilePhoto => _pick(
         en: 'Profile photo',
-        tr: 'Profil fotografi',
+        tr: 'Profil fotoğrafı',
         ar: 'صورة الملف الشخصي',
       );
   String get uploadHint => _pick(
@@ -282,7 +282,7 @@ class ProfileCopy {
       );
   String get saveProfileHint => _pick(
         en: 'Changes sync to your account and appear across the app.',
-        tr: 'Degisiklikler hesabinla eszamanlanir ve uygulama genelinde gorunur.',
+        tr: 'Değişiklikler hesabınla eşzamanlanır ve uygulama genelinde görünür.',
         ar: 'سيتم مزامنة التغييرات مع حسابك وستظهر في أنحاء التطبيق.',
       );
   String get managePreferences => _pick(
@@ -297,7 +297,7 @@ class ProfileCopy {
       );
   String get photoRemovedMessage => _pick(
         en: 'Profile photo removed',
-        tr: 'Profil fotografi kaldirildi',
+        tr: 'Profil fotoğrafı kaldırıldı',
         ar: 'تم حذف صورة الملف الشخصي',
       );
 

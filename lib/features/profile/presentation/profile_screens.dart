@@ -232,7 +232,7 @@ class ProfileScreen extends ConsumerWidget {
   String _progressSubtitle(BuildContext context, double completionRate) {
     final percent = (completionRate * 100).round();
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Mevcut gorev tamamlama oranin $percent% seviyesinde.',
+      'tr' => 'Mevcut görev tamamlama oranın $percent% seviyesinde.',
       'ar' => 'معدل إكمال المهام الحالي لديك هو $percent٪.',
       _ => 'Your current task completion rate is $percent%.',
     };

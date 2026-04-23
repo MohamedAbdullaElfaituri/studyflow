@@ -159,7 +159,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String?>(
-                      initialValue: selectedCourseId,
+                      value: selectedCourseId,
                       decoration: InputDecoration(
                         labelText: context.l10n.linkCourseOptionalLabel,
                       ),

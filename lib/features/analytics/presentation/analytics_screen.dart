@@ -367,7 +367,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _analyticsSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Haftalik odak, gorevler ve aliskanliklarini tek bakista izle.',
+      'tr' => 'Haftalık odak, görevler ve alışkanlıklarını tek bakışta izle.',
       'ar' => 'راجع التركيز الأسبوعي والمهام والعادات في لوحة أوضح.',
       _ =>
         'Review your weekly focus, tasks, and habits in one calmer dashboard.',
@@ -376,7 +376,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _todayCaption(BuildContext context, int minutes) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Bugun $minutes dakika',
+      'tr' => 'Bugün $minutes dakika',
       'ar' => '$minutes دقيقة اليوم',
       _ => '$minutes minutes today',
     };
@@ -385,7 +385,7 @@ class AnalyticsScreen extends ConsumerWidget {
   String _taskCompletionCaption(
       BuildContext context, int completed, int total) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$completed / $total gorev tamamlandi',
+      'tr' => '$completed / $total görev tamamlandı',
       'ar' => '$completed / $total مهمة مكتملة',
       _ => '$completed / $total tasks complete',
     };
@@ -393,7 +393,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _streakCaption(BuildContext context, int days) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$days gunluk seri',
+      'tr' => '$days günlük seri',
       'ar' => 'سلسلة $days يوم',
       _ => '$days day streak',
     };
@@ -401,7 +401,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _weeklyRhythmSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Her gunun yogunlugunu gorerek ritmini dengele.',
+      'tr' => 'Her günün yoğunluğunu görerek ritmini dengele.',
       'ar' => 'شاهد كثافة كل يوم لتفهم إيقاع الأسبوع بشكل أسرع.',
       _ =>
         'See the intensity of each day so your weekly rhythm is easier to read.',
@@ -410,7 +410,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _weekTotalLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Hafta toplami',
+      'tr' => 'Hafta toplamı',
       'ar' => 'إجمالي الأسبوع',
       _ => 'Week total',
     };
@@ -418,7 +418,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _averageLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gunluk ortalama',
+      'tr' => 'Günlük ortalama',
       'ar' => 'متوسط يومي',
       _ => 'Daily average',
     };
@@ -426,7 +426,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _bestDayLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'En guclu gun',
+      'tr' => 'En güçlü gün',
       'ar' => 'أفضل يوم',
       _ => 'Best day',
     };
@@ -434,7 +434,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _studyBalanceTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Calisma dengesi',
+      'tr' => 'Çalışma dengesi',
       'ar' => 'توازن الدراسة',
       _ => 'Study balance',
     };
@@ -443,7 +443,7 @@ class AnalyticsScreen extends ConsumerWidget {
   String _studyBalanceSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' =>
-        'Hedef, gorev ve aliskanlik taraflarinin ayni anda nasil gittigini gor.',
+        'Hedef, görev ve alışkanlık taraflarının aynı anda nasıl gittiğini gör.',
       'ar' => 'افهم معًا كيف تتحرك الأهداف والمهام والعادات.',
       _ =>
         'Compare goals, tasks, and habits together instead of reading them separately.',
@@ -452,7 +452,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _weeklyGoalLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Haftalik hedef',
+      'tr' => 'Haftalık hedef',
       'ar' => 'هدف أسبوعي',
       _ => 'Weekly goal',
     };
@@ -460,7 +460,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _taskCompletionLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Gorev tamamlama',
+      'tr' => 'Görev tamamlama',
       'ar' => 'إكمال المهام',
       _ => 'Task completion',
     };
@@ -468,7 +468,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _habitConsistencyLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Aliskanlik tutarliligi',
+      'tr' => 'Alışkanlık tutarlılığı',
       'ar' => 'اتساق العادات',
       _ => 'Habit consistency',
     };
@@ -477,7 +477,7 @@ class AnalyticsScreen extends ConsumerWidget {
   String _habitConsistencyCaption(
       BuildContext context, int completed, int total) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$completed / $total aliskanlik tamamlandi',
+      'tr' => '$completed / $total alışkanlık tamamlandı',
       'ar' => '$completed / $total عادة مكتملة',
       _ => '$completed / $total habits complete',
     };
@@ -485,7 +485,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   String _emptyCourseDistribution(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Ders dagilimi gormek icin oturumlarini derslerle bagla.',
+      'tr' => 'Ders dağılımını görmek için oturumlarını derslerle bağla.',
       'ar' => 'اربط جلساتك بالمواد لتظهر خريطة التوزيع بشكل أوضح.',
       _ =>
         'Link sessions to courses to make the study distribution more meaningful.',
@@ -495,7 +495,7 @@ class AnalyticsScreen extends ConsumerWidget {
   String _courseDistributionSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' =>
-        'Hangi derslerin daha fazla zaman aldigini oranlarla karsilastir.',
+        'Hangi derslerin daha fazla zaman aldığını oranlarla karşılaştır.',
       'ar' => 'قارن أين يذهب وقتك فعلًا بدل الاكتفاء بعدد الجلسات.',
       _ =>
         'Compare where your time really goes instead of relying on session counts alone.',
@@ -510,12 +510,12 @@ class AnalyticsScreen extends ConsumerWidget {
   }) {
     return switch (Localizations.localeOf(context).languageCode) {
       'tr' => weeklyGoalProgress >= 1
-          ? 'Haftalik hedefin tamamlanmis gorunuyor. Simdi ayni sakin dengeyi korumak yeterli.'
+          ? 'Haftalık hedefin tamamlanmış görünüyor. Şimdi aynı sakin dengeyi korumak yeterli.'
           : taskCompletionRate < 0.35
-              ? 'Calisma suresi var ama gorev bitirme hizi daha dusuk. Kucuk ve net gorevler daha iyi denge kurabilir.'
+              ? 'Çalışma süresi var ama görev bitirme hızı daha düşük. Küçük ve net görevler daha iyi denge kurabilir.'
               : habitConsistency < 0.4
-                  ? 'Odak dakikalari iyi gidiyor. Simdi bunlari destekleyecek iki basit rutine ihtiyacin var.'
-                  : 'Ilerlemen dengeli gorunuyor. Ayni ritmi korursan hafta sonu daha rahat olur.',
+                  ? 'Odak dakikaları iyi gidiyor. Şimdi bunları destekleyecek iki basit rutine ihtiyacın var.'
+                  : 'İlerlemen dengeli görünüyor. Aynı ritmi korursan hafta sonu daha rahat olur.',
       'ar' => weeklyGoalProgress >= 1
           ? 'يبدو أنك أنهيت هدف الأسبوع، والآن يكفي الحفاظ على نفس الهدوء والتوازن.'
           : taskCompletionRate < 0.35

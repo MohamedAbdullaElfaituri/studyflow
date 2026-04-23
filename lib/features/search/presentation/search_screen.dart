@@ -192,7 +192,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   String _searchSubtitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Dersleri, gorevleri, notlari ve sinavlari tek yerden ara.',
+      'tr' => 'Dersleri, görevleri, notları ve sınavları tek yerden ara.',
       'ar' => 'ابحث في المواد والمهام والملاحظات والاختبارات من مكان واحد.',
       _ => 'Search courses, tasks, notes, and exams from one place.',
     };
@@ -200,7 +200,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   String _searchHint(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Calisma iceriginde ara',
+      'tr' => 'Çalışma içeriğinde ara',
       'ar' => 'ابحث في محتوى الدراسة',
       _ => 'Search your study content',
     };
@@ -208,7 +208,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   String _searchEmptyDescription(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yazdikca sonuclar burada gorunecek.',
+      'tr' => 'Yazdıkça sonuçlar burada görünecek.',
       'ar' => 'ستظهر النتائج هنا أثناء الكتابة.',
       _ => 'Results will appear here as you type.',
     };

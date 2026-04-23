@@ -325,7 +325,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String?>(
-                        initialValue: selectedCourseId,
+                        value: selectedCourseId,
                         isExpanded: true,
                         decoration: InputDecoration(
                             labelText: context.l10n.courseLabel),
@@ -348,7 +348,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                         Column(
                           children: [
                             DropdownButtonFormField<ExamType>(
-                              initialValue: _type,
+                              value: _type,
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.copy.examTypeLabel,
@@ -367,7 +367,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             ),
                             const SizedBox(height: AppSpacing.md),
                             DropdownButtonFormField<TaskPriority>(
-                              initialValue: _priority,
+                              value: _priority,
                               isExpanded: true,
                               decoration: InputDecoration(
                                 labelText: context.l10n.priorityLabel,
@@ -391,7 +391,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                           children: [
                             Expanded(
                               child: DropdownButtonFormField<ExamType>(
-                                initialValue: _type,
+                                value: _type,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.copy.examTypeLabel,
@@ -412,7 +412,7 @@ class _ExamEditorScreenState extends ConsumerState<ExamEditorScreen> {
                             const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: DropdownButtonFormField<TaskPriority>(
-                                initialValue: _priority,
+                                value: _priority,
                                 isExpanded: true,
                                 decoration: InputDecoration(
                                   labelText: context.l10n.priorityLabel,
@@ -548,7 +548,7 @@ String _priorityLabel(BuildContext context, TaskPriority priority) {
 
 String _addExamAction(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sinav ekle',
+    'tr' => 'Sınav ekle',
     'ar' => 'إضافة اختبار',
     _ => 'Add exam',
   };
@@ -556,7 +556,7 @@ String _addExamAction(BuildContext context) {
 
 String _editExamTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sinavi duzenle',
+    'tr' => 'Sınavı düzenle',
     'ar' => 'تعديل الاختبار',
     _ => 'Edit exam',
   };
@@ -564,7 +564,7 @@ String _editExamTitle(BuildContext context) {
 
 String _examsTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sinavlar',
+    'tr' => 'Sınavlar',
     'ar' => 'الاختبارات',
     _ => 'Exams',
   };
@@ -572,7 +572,7 @@ String _examsTitle(BuildContext context) {
 
 String _examsSubtitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Onemli tarihlerini ve yaklasan sinavlarini tek ekranda gor.',
+    'tr' => 'Önemli tarihlerini ve yaklaşan sınavlarını tek ekranda gör.',
     'ar' => 'راجع اختباراتك القادمة ومواعيدك المهمة من شاشة واحدة.',
     _ => 'See upcoming exams and important dates in one place.',
   };
@@ -580,7 +580,7 @@ String _examsSubtitle(BuildContext context) {
 
 String _examsQuickCardTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Yaklasan sinavlar',
+    'tr' => 'Yaklaşan sınavlar',
     'ar' => 'الاختبارات القادمة',
     _ => 'Upcoming exams',
   };
@@ -597,8 +597,8 @@ String _criticalLabel(BuildContext context) {
 String _criticalCaption(BuildContext context, int count) {
   return switch (Localizations.localeOf(context).languageCode) {
     'tr' => count == 0
-        ? 'Yakin baski gorunmuyor.'
-        : 'Onceligi yuksek tarihler one cikiyor.',
+        ? 'Yakın baskı görünmüyor.'
+        : 'Önceliği yüksek tarihler öne çıkıyor.',
     'ar' => count == 0
         ? 'لا توجد ضغوط قريبة الآن.'
         : 'المواعيد ذات الأولوية تظهر أولًا.',
@@ -618,7 +618,7 @@ String _nextExamLabel(BuildContext context) {
 
 String _calendarHint(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sinavlari derslerle birlikte takip et.',
+    'tr' => 'Sınavları derslerle birlikte takip et.',
     'ar' => 'تابع الاختبارات مع المواد في نفس المسار.',
     _ => 'Keep exams tied to courses for clearer planning.',
   };
@@ -626,7 +626,7 @@ String _calendarHint(BuildContext context) {
 
 String _linkedCoursesLabel(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Bagli dersler',
+    'tr' => 'Bağlı dersler',
     'ar' => 'المواد المرتبطة',
     _ => 'Linked courses',
   };
@@ -634,7 +634,7 @@ String _linkedCoursesLabel(BuildContext context) {
 
 String _examsQuickCardSubtitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Bir sonraki onemli tarihi yaklasmadan once kontrol et.',
+    'tr' => 'Bir sonraki önemli tarihi yaklaşmadan önce kontrol et.',
     'ar' => 'راجع الموعد المهم القادم قبل أن يقترب كثيرًا.',
     _ => 'Review the next important date before it gets too close.',
   };
@@ -642,7 +642,7 @@ String _examsQuickCardSubtitle(BuildContext context) {
 
 String _emptyExamsTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Yaklasan sinav yok',
+    'tr' => 'Yaklaşan sınav yok',
     'ar' => 'لا توجد اختبارات قادمة',
     _ => 'No upcoming exams',
   };
@@ -650,7 +650,7 @@ String _emptyExamsTitle(BuildContext context) {
 
 String _emptyExamsDescription(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Bir sonraki onemli tarihi gorunur tutmak icin sinav ekle.',
+    'tr' => 'Bir sonraki önemli tarihi görünür tutmak için sınav ekle.',
     'ar' => 'أضف اختبارًا لإبقاء الموعد القادم واضحًا أمامك.',
     _ => 'Add an exam to keep the next important date visible.',
   };
@@ -658,7 +658,7 @@ String _emptyExamsDescription(BuildContext context) {
 
 String _examCountdown(BuildContext context, int days) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => '$days gun kaldi',
+    'tr' => '$days gün kaldı',
     'ar' => 'متبقي $days يوم',
     _ => '$days days left',
   };
@@ -666,7 +666,7 @@ String _examCountdown(BuildContext context, int days) {
 
 String _examTypeExam(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Sinav',
+    'tr' => 'Sınav',
     'ar' => 'اختبار',
     _ => 'Exam',
   };
@@ -674,7 +674,7 @@ String _examTypeExam(BuildContext context) {
 
 String _examTypeAssignment(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Odev',
+    'tr' => 'Ödev',
     'ar' => 'واجب',
     _ => 'Assignment',
   };
@@ -682,7 +682,7 @@ String _examTypeAssignment(BuildContext context) {
 
 String _examTypeQuiz(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Kisa sinav',
+    'tr' => 'Kısa sınav',
     'ar' => 'اختبار قصير',
     _ => 'Quiz',
   };
