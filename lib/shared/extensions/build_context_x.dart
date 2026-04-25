@@ -15,7 +15,7 @@ extension BuildContextX on BuildContext {
     AppNotificationTone tone = AppNotificationTone.info,
     AppNotificationPosition? position,
     String? title,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(milliseconds: 2400),
   }) {
     AppNotificationController.show(
       context: this,
@@ -30,7 +30,7 @@ extension BuildContextX on BuildContext {
   void showSuccessNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(milliseconds: 2400),
   }) {
     showAppSnackBar(
       message,
@@ -43,7 +43,7 @@ extension BuildContextX on BuildContext {
   void showErrorNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(seconds: 5),
+    Duration duration = const Duration(milliseconds: 3200),
   }) {
     showAppSnackBar(
       message,
@@ -56,7 +56,7 @@ extension BuildContextX on BuildContext {
   void showInfoNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(milliseconds: 2400),
   }) {
     showAppSnackBar(
       message,

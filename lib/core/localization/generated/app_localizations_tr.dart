@@ -547,6 +547,54 @@ class AppLocalizationsTr extends AppLocalizations {
   String get breakModeLabel => 'Mola oturumu';
 
   @override
+  String get focusStatusReady => 'Hazır olduğunda başlayalım';
+
+  @override
+  String get focusStatusRunning => 'Odak aktif';
+
+  @override
+  String get focusStatusPaused => 'Niyet korunuyor';
+
+  @override
+  String get focusStatusBreak => 'Toparlanma sürüyor';
+
+  @override
+  String get focusHumanName => 'Sen';
+
+  @override
+  String get focusComputerName => 'StudyFlow';
+
+  @override
+  String get focusConnectionLabel => 'senkron';
+
+  @override
+  String get focusComputerPromptReady =>
+      'Niyetini yaz, ritmini seç; süreyi seninle birlikte tutacağım.';
+
+  @override
+  String get focusComputerPromptRunning =>
+      'Süre bende. Dikkatini sadece bir sonraki küçük adıma ver.';
+
+  @override
+  String get focusComputerPromptPaused =>
+      'Durakladı. Duruşunu düzelt, bir nefes al ve hazır olduğunda sürdür.';
+
+  @override
+  String get focusComputerPromptBreak =>
+      'Mola modu açık. Gözlerini dinlendir, omuzlarını gevşet ve taze dön.';
+
+  @override
+  String get focusIntentionLabel => 'Niyetin';
+
+  @override
+  String get focusIntentionHint => 'Neye odaklanacaksın?';
+
+  @override
+  String focusIntentionResponse(String intention) {
+    return 'Sen $intention konusuna odaklanırken süreyi ben tutacağım.';
+  }
+
+  @override
   String get startAction => 'Başlat';
 
   @override

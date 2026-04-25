@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../theme/app_colors.dart';
@@ -108,11 +109,11 @@ class ReminderService {
   }) {
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        'studyflow_general',
+        'studyflow_instant',
         'StudyFlow',
-        channelDescription: 'StudyFlow reminders and progress updates',
-        importance: Importance.high,
-        priority: Priority.high,
+        channelDescription: 'Fast StudyFlow reminders and progress updates',
+        importance: Importance.max,
+        priority: Priority.max,
         category: AndroidNotificationCategory.reminder,
         color: AppColors.seed,
         colorized: true,
@@ -146,12 +147,20 @@ class ReminderService {
     required String title,
     required String body,
   }) async {
-    if (!isSupported || !await areNotificationsAllowed()) {
+    if (!isSupported) {
       return;
     }
 
-    await _notifications.show(
-        id, title, body, _details(title: title, body: body));
+    try {
+      await _notifications.show(
+        id,
+        title,
+        body,
+        _details(title: title, body: body),
+      );
+    } on PlatformException {
+      return;
+    }
   }
 
   Future<void> showPreview({

@@ -233,6 +233,27 @@
   "focusSubtitle": "Pomodoro tarzı oturumlarla bilinçli ve enerjik kal.",
   "focusModeLabel": "Odak oturumu",
   "breakModeLabel": "Mola oturumu",
+  "focusStatusReady": "Hazır olduğunda başlayalım",
+  "focusStatusRunning": "Odak aktif",
+  "focusStatusPaused": "Niyet korunuyor",
+  "focusStatusBreak": "Toparlanma sürüyor",
+  "focusHumanName": "Sen",
+  "focusComputerName": "StudyFlow",
+  "focusConnectionLabel": "senkron",
+  "focusComputerPromptReady": "Niyetini yaz, ritmini seç; süreyi seninle birlikte tutacağım.",
+  "focusComputerPromptRunning": "Süre bende. Dikkatini sadece bir sonraki küçük adıma ver.",
+  "focusComputerPromptPaused": "Durakladı. Duruşunu düzelt, bir nefes al ve hazır olduğunda sürdür.",
+  "focusComputerPromptBreak": "Mola modu açık. Gözlerini dinlendir, omuzlarını gevşet ve taze dön.",
+  "focusIntentionLabel": "Niyetin",
+  "focusIntentionHint": "Neye odaklanacaksın?",
+  "focusIntentionResponse": "Sen {intention} konusuna odaklanırken süreyi ben tutacağım.",
+  "@focusIntentionResponse": {
+    "placeholders": {
+      "intention": {
+        "type": "String"
+      }
+    }
+  },
   "startAction": "Başlat",
   "pauseAction": "Duraklat",
   "resumeAction": "Sürdür",

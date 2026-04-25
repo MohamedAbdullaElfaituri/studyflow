@@ -1084,6 +1084,90 @@ abstract class AppLocalizations {
   /// **'Break session'**
   String get breakModeLabel;
 
+  /// No description provided for @focusStatusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready when you are'**
+  String get focusStatusReady;
+
+  /// No description provided for @focusStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus is active'**
+  String get focusStatusRunning;
+
+  /// No description provided for @focusStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused with intention'**
+  String get focusStatusPaused;
+
+  /// No description provided for @focusStatusBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery in progress'**
+  String get focusStatusBreak;
+
+  /// No description provided for @focusHumanName.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get focusHumanName;
+
+  /// No description provided for @focusComputerName.
+  ///
+  /// In en, this message translates to:
+  /// **'StudyFlow'**
+  String get focusComputerName;
+
+  /// No description provided for @focusConnectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'in sync'**
+  String get focusConnectionLabel;
+
+  /// No description provided for @focusComputerPromptReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your intention, choose a rhythm, and I will hold the timer with you.'**
+  String get focusComputerPromptReady;
+
+  /// No description provided for @focusComputerPromptRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'I am keeping time. Keep your attention on the next small step.'**
+  String get focusComputerPromptRunning;
+
+  /// No description provided for @focusComputerPromptPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused. Reset your posture, breathe once, then continue when you are ready.'**
+  String get focusComputerPromptPaused;
+
+  /// No description provided for @focusComputerPromptBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Break mode is on. Rest your eyes, loosen your shoulders, and come back fresh.'**
+  String get focusComputerPromptBreak;
+
+  /// No description provided for @focusIntentionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your intention'**
+  String get focusIntentionLabel;
+
+  /// No description provided for @focusIntentionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What will you focus on?'**
+  String get focusIntentionHint;
+
+  /// No description provided for @focusIntentionResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'I will keep the clock while you focus on {intention}.'**
+  String focusIntentionResponse(String intention);
+
   /// No description provided for @startAction.
   ///
   /// In en, this message translates to:

@@ -539,6 +539,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String get breakModeLabel => 'جلسة استراحة';
 
   @override
+  String get focusStatusReady => 'جاهز عندما تكون جاهزًا';
+
+  @override
+  String get focusStatusRunning => 'التركيز نشط';
+
+  @override
+  String get focusStatusPaused => 'توقف مقصود';
+
+  @override
+  String get focusStatusBreak => 'استعادة النشاط جارية';
+
+  @override
+  String get focusHumanName => 'أنت';
+
+  @override
+  String get focusComputerName => 'StudyFlow';
+
+  @override
+  String get focusConnectionLabel => 'بتناغم';
+
+  @override
+  String get focusComputerPromptReady =>
+      'اكتب نيتك، اختر الإيقاع، وسأحافظ على المؤقت معك.';
+
+  @override
+  String get focusComputerPromptRunning =>
+      'أنا أتابع الوقت. وجّه انتباهك إلى الخطوة الصغيرة التالية.';
+
+  @override
+  String get focusComputerPromptPaused =>
+      'تم الإيقاف مؤقتًا. عدّل جلستك، خذ نفسًا، ثم تابع عندما تكون جاهزًا.';
+
+  @override
+  String get focusComputerPromptBreak =>
+      'وضع الاستراحة يعمل. أرح عينيك، أرخ كتفيك، ثم عد بنشاط.';
+
+  @override
+  String get focusIntentionLabel => 'نيتك';
+
+  @override
+  String get focusIntentionHint => 'على ماذا ستركز؟';
+
+  @override
+  String focusIntentionResponse(String intention) {
+    return 'سأحافظ على الوقت بينما تركز على $intention.';
+  }
+
+  @override
   String get startAction => 'ابدأ';
 
   @override

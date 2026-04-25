@@ -233,6 +233,27 @@
   "focusSubtitle": "استخدم جلسات بومودورو لتبقى مقصودًا ومتحفزًا.",
   "focusModeLabel": "جلسة تركيز",
   "breakModeLabel": "جلسة استراحة",
+  "focusStatusReady": "جاهز عندما تكون جاهزًا",
+  "focusStatusRunning": "التركيز نشط",
+  "focusStatusPaused": "توقف مقصود",
+  "focusStatusBreak": "استعادة النشاط جارية",
+  "focusHumanName": "أنت",
+  "focusComputerName": "StudyFlow",
+  "focusConnectionLabel": "بتناغم",
+  "focusComputerPromptReady": "اكتب نيتك، اختر الإيقاع، وسأحافظ على المؤقت معك.",
+  "focusComputerPromptRunning": "أنا أتابع الوقت. وجّه انتباهك إلى الخطوة الصغيرة التالية.",
+  "focusComputerPromptPaused": "تم الإيقاف مؤقتًا. عدّل جلستك، خذ نفسًا، ثم تابع عندما تكون جاهزًا.",
+  "focusComputerPromptBreak": "وضع الاستراحة يعمل. أرح عينيك، أرخ كتفيك، ثم عد بنشاط.",
+  "focusIntentionLabel": "نيتك",
+  "focusIntentionHint": "على ماذا ستركز؟",
+  "focusIntentionResponse": "سأحافظ على الوقت بينما تركز على {intention}.",
+  "@focusIntentionResponse": {
+    "placeholders": {
+      "intention": {
+        "type": "String"
+      }
+    }
+  },
   "startAction": "ابدأ",
   "pauseAction": "إيقاف مؤقت",
   "resumeAction": "استئناف",

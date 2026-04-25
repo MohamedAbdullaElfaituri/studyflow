@@ -19,7 +19,7 @@ class AppNotificationController {
     required AppNotificationTone tone,
     required AppNotificationPosition position,
     String? title,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(milliseconds: 2400),
   }) {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
@@ -83,12 +83,17 @@ class _AppNotificationOverlay extends StatefulWidget {
 
 class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
   Timer? _timer;
-  var _visible = true;
+  var _visible = false;
   var _dismissed = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_dismissed) {
+        setState(() => _visible = true);
+      }
+    });
     _timer = Timer(widget.duration, _dismiss);
   }
 
@@ -106,7 +111,7 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
     _timer?.cancel();
     setState(() => _visible = false);
     Timer(
-      const Duration(milliseconds: 140),
+      const Duration(milliseconds: 80),
       widget.onDismissed,
     );
   }
@@ -136,13 +141,13 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
               child: AnimatedSlide(
-                duration: const Duration(milliseconds: 140),
-                curve: Curves.easeOutCubic,
+                duration: const Duration(milliseconds: 90),
+                curve: Curves.easeOutQuad,
                 offset:
-                    _visible ? Offset.zero : Offset(0, isTop ? -0.16 : 0.16),
+                    _visible ? Offset.zero : Offset(0, isTop ? -0.08 : 0.08),
                 child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 120),
-                  curve: Curves.easeOut,
+                  duration: const Duration(milliseconds: 70),
+                  curve: Curves.easeOutQuad,
                   opacity: _visible ? 1 : 0,
                   child: Material(
                     color: Colors.transparent,
@@ -216,7 +221,7 @@ class _AppNotificationCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(

@@ -551,6 +551,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get breakModeLabel => 'Break session';
 
   @override
+  String get focusStatusReady => 'Ready when you are';
+
+  @override
+  String get focusStatusRunning => 'Focus is active';
+
+  @override
+  String get focusStatusPaused => 'Paused with intention';
+
+  @override
+  String get focusStatusBreak => 'Recovery in progress';
+
+  @override
+  String get focusHumanName => 'You';
+
+  @override
+  String get focusComputerName => 'StudyFlow';
+
+  @override
+  String get focusConnectionLabel => 'in sync';
+
+  @override
+  String get focusComputerPromptReady =>
+      'Set your intention, choose a rhythm, and I will hold the timer with you.';
+
+  @override
+  String get focusComputerPromptRunning =>
+      'I am keeping time. Keep your attention on the next small step.';
+
+  @override
+  String get focusComputerPromptPaused =>
+      'Paused. Reset your posture, breathe once, then continue when you are ready.';
+
+  @override
+  String get focusComputerPromptBreak =>
+      'Break mode is on. Rest your eyes, loosen your shoulders, and come back fresh.';
+
+  @override
+  String get focusIntentionLabel => 'Your intention';
+
+  @override
+  String get focusIntentionHint => 'What will you focus on?';
+
+  @override
+  String focusIntentionResponse(String intention) {
+    return 'I will keep the clock while you focus on $intention.';
+  }
+
+  @override
   String get startAction => 'Start';
 
   @override

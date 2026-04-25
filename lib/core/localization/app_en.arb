@@ -233,6 +233,27 @@
   "focusSubtitle": "Use Pomodoro-style sessions to stay intentional and energized.",
   "focusModeLabel": "Focus session",
   "breakModeLabel": "Break session",
+  "focusStatusReady": "Ready when you are",
+  "focusStatusRunning": "Focus is active",
+  "focusStatusPaused": "Paused with intention",
+  "focusStatusBreak": "Recovery in progress",
+  "focusHumanName": "You",
+  "focusComputerName": "StudyFlow",
+  "focusConnectionLabel": "in sync",
+  "focusComputerPromptReady": "Set your intention, choose a rhythm, and I will hold the timer with you.",
+  "focusComputerPromptRunning": "I am keeping time. Keep your attention on the next small step.",
+  "focusComputerPromptPaused": "Paused. Reset your posture, breathe once, then continue when you are ready.",
+  "focusComputerPromptBreak": "Break mode is on. Rest your eyes, loosen your shoulders, and come back fresh.",
+  "focusIntentionLabel": "Your intention",
+  "focusIntentionHint": "What will you focus on?",
+  "focusIntentionResponse": "I will keep the clock while you focus on {intention}.",
+  "@focusIntentionResponse": {
+    "placeholders": {
+      "intention": {
+        "type": "String"
+      }
+    }
+  },
   "startAction": "Start",
   "pauseAction": "Pause",
   "resumeAction": "Resume",
