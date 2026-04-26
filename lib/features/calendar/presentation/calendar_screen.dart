@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -106,30 +107,126 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             locale,
           );
           final totalItems = agendaEntries.length;
+          final selectedDayKey = DateTimeUtils.startOfDay(_selectedDay);
 
           return ListView(
             children: [
               PageHeader(
                 leading: const AppLogo(size: 44, radius: 18),
                 title: context.l10n.calendarTitle,
-                subtitle: context.l10n.calendarSubtitle,
+                trailing: IconButton.filledTonal(
+                  tooltip: _todayLabel(context),
+                  onPressed: _selectToday,
+                  icon: const Icon(Icons.today_rounded),
+                ),
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
               SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.l10n.dailyAgendaTitle(selectedDateLabel),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _plannerSummarySubtitle(context, totalItems),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                    TableCalendar<Object>(
+                      locale: locale,
+                      firstDay: DateTime.utc(2020),
+                      lastDay: DateTime.utc(2035),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) =>
+                          DateTimeUtils.isSameDay(day, _selectedDay),
+                      calendarFormat: _format,
+                      startingDayOfWeek: StartingDayOfWeek.monday,
+                      availableGestures: AvailableGestures.horizontalSwipe,
+                      rowHeight: 58,
+                      daysOfWeekHeight: 28,
+                      availableCalendarFormats: {
+                        CalendarFormat.month: context.l10n.monthFormatLabel,
+                        CalendarFormat.week: context.l10n.weekFormatLabel,
+                      },
+                      eventLoader: (day) => _eventsForDay(studyData, day),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                      onPageChanged: (focusedDay) {
+                        setState(() => _focusedDay = focusedDay);
+                      },
+                      onFormatChanged: (format) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _format = format);
+                      },
+                      headerStyle: HeaderStyle(
+                        titleCentered: false,
+                        formatButtonVisible: true,
+                        titleTextStyle:
+                            Theme.of(context).textTheme.titleMedium!,
+                        formatButtonTextStyle:
+                            Theme.of(context).textTheme.labelMedium!,
+                        formatButtonPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        formatButtonDecoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        leftChevronIcon: Icon(
+                          Icons.chevron_left_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        rightChevronIcon: Icon(
+                          Icons.chevron_right_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      calendarStyle: CalendarStyle(
+                        outsideDaysVisible: false,
+                        isTodayHighlighted: false,
+                        selectedDecoration: const BoxDecoration(),
+                        todayDecoration: const BoxDecoration(),
+                        defaultDecoration: const BoxDecoration(),
+                        weekendDecoration: const BoxDecoration(),
+                        markerDecoration: const BoxDecoration(),
+                        selectedTextStyle:
+                            Theme.of(context).textTheme.labelLarge!,
+                        todayTextStyle: Theme.of(context).textTheme.labelLarge!,
+                        weekendTextStyle:
+                            Theme.of(context).textTheme.bodyMedium!,
+                        defaultTextStyle:
+                            Theme.of(context).textTheme.bodyMedium!,
+                        canMarkersOverflow: false,
+                        markersMaxCount: 0,
+                      ),
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        weekdayStyle: Theme.of(context).textTheme.labelMedium!,
+                        weekendStyle: Theme.of(context).textTheme.labelMedium!,
+                      ),
+                      calendarBuilders: CalendarBuilders(
+                        selectedBuilder: (context, day, focusedDay) =>
+                            _PlannerDayCell(
+                          day: day,
+                          load: _dayLoadFor(studyData, day),
+                          selected: true,
+                          today: DateTimeUtils.isSameDay(day, DateTime.now()),
+                        ),
+                        todayBuilder: (context, day, focusedDay) =>
+                            _PlannerDayCell(
+                          day: day,
+                          load: _dayLoadFor(studyData, day),
+                          today: true,
+                        ),
+                        defaultBuilder: (context, day, focusedDay) =>
+                            _PlannerDayCell(
+                          day: day,
+                          load: _dayLoadFor(studyData, day),
+                        ),
+                        markerBuilder: (context, day, events) =>
+                            const SizedBox.shrink(),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Wrap(
@@ -154,192 +251,70 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              AdaptiveCardGrid(
-                minItemWidth: 150,
-                maxColumns: 3,
-                children: [
-                  DashboardStatCard(
-                    label: _taskCardTitle(context),
-                    value: '${tasksForDay.length}',
-                    caption: _taskCardCaption(context),
-                    icon: Icons.check_circle_outline_rounded,
-                    accent: Theme.of(context).colorScheme.primary,
-                    minHeight: 132,
-                  ),
-                  DashboardStatCard(
-                    label: _focusCardTitle(context),
-                    value: '$focusMinutes',
-                    caption: _minutesCaption(context),
-                    icon: Icons.timer_outlined,
-                    accent: Theme.of(context).colorScheme.secondary,
-                    minHeight: 132,
-                  ),
-                  DashboardStatCard(
-                    label: _examCardTitle(context),
-                    value: '${examsForDay.length}',
-                    caption: _examCardCaption(context),
-                    icon: Icons.school_outlined,
-                    accent: Theme.of(context).colorScheme.tertiary,
-                    minHeight: 132,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SectionCard(
-                child: TableCalendar<Object>(
-                  locale: locale,
-                  firstDay: DateTime.utc(2020),
-                  lastDay: DateTime.utc(2035),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) =>
-                      DateTimeUtils.isSameDay(day, _selectedDay),
-                  calendarFormat: _format,
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  availableCalendarFormats: {
-                    CalendarFormat.month: context.l10n.monthFormatLabel,
-                    CalendarFormat.week: context.l10n.weekFormatLabel,
-                  },
-                  eventLoader: (day) {
-                    final items = <Object>[];
-                    items.addAll(
-                      studyData.tasks.where(
-                        (task) =>
-                            task.dueDateTime != null &&
-                            DateTimeUtils.isSameDay(task.dueDateTime!, day),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: Column(
+                  key: ValueKey(selectedDayKey),
+                  children: [
+                    AdaptiveCardGrid(
+                      minItemWidth: 150,
+                      maxColumns: 3,
+                      children: [
+                        DashboardStatCard(
+                          label: _taskCardTitle(context),
+                          value: '${tasksForDay.length}',
+                          icon: Icons.check_circle_outline_rounded,
+                          accent: Theme.of(context).colorScheme.primary,
+                          minHeight: 118,
+                        ),
+                        DashboardStatCard(
+                          label: _focusCardTitle(context),
+                          value: '$focusMinutes',
+                          icon: Icons.timer_outlined,
+                          accent: Theme.of(context).colorScheme.secondary,
+                          minHeight: 118,
+                        ),
+                        DashboardStatCard(
+                          label: _examCardTitle(context),
+                          value: '${examsForDay.length}',
+                          icon: Icons.school_outlined,
+                          accent: Theme.of(context).colorScheme.tertiary,
+                          minHeight: 118,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    if (agendaEntries.isEmpty)
+                      EmptyState(
+                        title: selectedDateLabel,
+                        description: context.l10n.emptyAgendaDescription,
+                        icon: Icons.event_busy_rounded,
+                      )
+                    else ...[
+                      SectionHeader(
+                        title: selectedDateLabel,
+                        action: StatusPill(
+                          label: _agendaCountLabel(context, totalItems),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                    );
-                    items.addAll(
-                      studyData.sessions.where(
-                        (session) =>
-                            DateTimeUtils.isSameDay(session.startTime, day),
-                      ),
-                    );
-                    items.addAll(
-                      studyData.exams.where(
-                        (exam) => DateTimeUtils.isSameDay(exam.dateTime, day),
-                      ),
-                    );
-                    return items;
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      _selectedDay = selectedDay;
-                      _focusedDay = focusedDay;
-                    });
-                  },
-                  onFormatChanged: (format) => setState(() => _format = format),
-                  headerStyle: HeaderStyle(
-                    titleCentered: false,
-                    formatButtonVisible: true,
-                    titleTextStyle: Theme.of(context).textTheme.titleMedium!,
-                    formatButtonTextStyle:
-                        Theme.of(context).textTheme.labelMedium!,
-                    formatButtonDecoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    leftChevronIcon: Icon(
-                      Icons.chevron_left_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    rightChevronIcon: Icon(
-                      Icons.chevron_right_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  calendarStyle: CalendarStyle(
-                    outsideDaysVisible: false,
-                    isTodayHighlighted: true,
-                    selectedDecoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    todayDecoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 1.6,
-                      ),
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.10),
-                    ),
-                    selectedTextStyle: Theme.of(context)
-                        .textTheme
-                        .labelLarge!
-                        .copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary),
-                    todayTextStyle: Theme.of(context).textTheme.labelLarge!,
-                    weekendTextStyle: Theme.of(context).textTheme.bodyMedium!,
-                    defaultTextStyle: Theme.of(context).textTheme.bodyMedium!,
-                    canMarkersOverflow: false,
-                  ),
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: Theme.of(context).textTheme.labelMedium!,
-                    weekendStyle: Theme.of(context).textTheme.labelMedium!,
-                  ),
-                  calendarBuilders: CalendarBuilders(
-                    markerBuilder: (context, day, events) {
-                      final markers = <Widget>[
-                        if (events.any((event) => event is TaskModel))
-                          _PlannerMarkerDot(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        if (events.any((event) => event is StudySessionModel))
-                          _PlannerMarkerDot(
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        if (events.any((event) => event is ExamModel))
-                          _PlannerMarkerDot(
-                            color: Theme.of(context).colorScheme.tertiary,
-                          ),
-                      ];
-
-                      if (markers.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Wrap(
-                            spacing: 4,
-                            children: markers,
+                      const SizedBox(height: AppSpacing.md),
+                      ...agendaEntries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _PlannerAgendaCard(
+                            entry: entry,
+                            locale: locale,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              if (agendaEntries.isEmpty)
-                EmptyState(
-                  title: context.l10n.dailyAgendaTitle(selectedDateLabel),
-                  description: context.l10n.emptyAgendaDescription,
-                  icon: Icons.event_busy_rounded,
-                )
-              else ...[
-                SectionHeader(
-                  title: context.l10n.dailyAgendaTitle(selectedDateLabel),
-                  subtitle: _agendaSubtitle(context, totalItems),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                ...agendaEntries.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: _PlannerAgendaCard(
-                      entry: entry,
-                      locale: locale,
-                    ),
-                  ),
-                ),
-              ],
+              const SizedBox(height: AppSpacing.sm),
             ],
           );
         },
@@ -347,17 +322,59 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  String _plannerSummarySubtitle(BuildContext context, int totalItems) {
+  void _selectToday() {
+    HapticFeedback.selectionClick();
+    final today = DateTime.now();
+    setState(() {
+      _selectedDay = today;
+      _focusedDay = today;
+    });
+  }
+
+  List<Object> _eventsForDay(StudyDataState studyData, DateTime day) {
+    final items = <Object>[];
+    items.addAll(
+      studyData.tasks.where(
+        (task) =>
+            task.dueDateTime != null &&
+            DateTimeUtils.isSameDay(task.dueDateTime!, day),
+      ),
+    );
+    items.addAll(
+      studyData.sessions.where(
+        (session) => DateTimeUtils.isSameDay(session.startTime, day),
+      ),
+    );
+    items.addAll(
+      studyData.exams.where(
+        (exam) => DateTimeUtils.isSameDay(exam.dateTime, day),
+      ),
+    );
+    return items;
+  }
+
+  _PlannerDayLoad _dayLoadFor(StudyDataState studyData, DateTime day) {
+    final events = _eventsForDay(studyData, day);
+    return _PlannerDayLoad(
+      tasks: events.whereType<TaskModel>().length,
+      sessions: events.whereType<StudySessionModel>().length,
+      exams: events.whereType<ExamModel>().length,
+    );
+  }
+
+  String _todayLabel(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => totalItems == 0
-          ? 'Seçili günde planlanmış bir şey yok.'
-          : 'Seçili gün için planlanan öğe sayısı: $totalItems.',
-      'ar' => totalItems == 0
-          ? 'لا توجد عناصر مخططة في اليوم المحدد.'
-          : 'عدد العناصر المخططة لليوم المحدد: $totalItems.',
-      _ => totalItems == 0
-          ? 'Nothing is planned for the selected day yet.'
-          : 'Planned items for the selected day: $totalItems.',
+      'tr' => 'Bugün',
+      'ar' => 'اليوم',
+      _ => 'Today',
+    };
+  }
+
+  String _agendaCountLabel(BuildContext context, int totalItems) {
+    return switch (Localizations.localeOf(context).languageCode) {
+      'tr' => '$totalItems öğe',
+      'ar' => '$totalItems عنصر',
+      _ => '$totalItems items',
     };
   }
 
@@ -387,59 +404,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   String _taskCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Günlük görevler',
-      'ar' => 'مهام اليوم',
-      _ => 'Daily tasks',
+      'tr' => 'Görev',
+      'ar' => 'مهام',
+      _ => 'Tasks',
     };
   }
 
   String _focusCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Odak dakikası',
-      'ar' => 'دقائق التركيز',
-      _ => 'Focus minutes',
+      'tr' => 'Odak dk',
+      'ar' => 'دقائق',
+      _ => 'Focus min',
     };
   }
 
   String _examCardTitle(BuildContext context) {
     return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Sınavlar',
-      'ar' => 'الاختبارات',
+      'tr' => 'Sınav',
+      'ar' => 'اختبارات',
       _ => 'Exams',
     };
   }
+}
 
-  String _taskCardCaption(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Seçili gün',
-      'ar' => 'لليوم المحدد',
-      _ => 'Selected day',
-    };
-  }
+class _PlannerDayLoad {
+  const _PlannerDayLoad({
+    required this.tasks,
+    required this.sessions,
+    required this.exams,
+  });
 
-  String _minutesCaption(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Toplam dakika',
-      'ar' => 'إجمالي الدقائق',
-      _ => 'Total minutes',
-    };
-  }
+  final int tasks;
+  final int sessions;
+  final int exams;
 
-  String _examCardCaption(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Yaklaşan akademik noktalar',
-      'ar' => 'المواعيد الأكاديمية في هذا اليوم',
-      _ => 'Academic milestones for this day',
-    };
-  }
-
-  String _agendaSubtitle(BuildContext context, int totalItems) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => '$totalItems öğe zaman sırasına göre listelendi.',
-      'ar' => 'تم ترتيب $totalItems عنصر حسب الوقت.',
-      _ => '$totalItems items sorted by time.',
-    };
-  }
+  int get total => tasks + sessions + exams;
+  bool get hasItems => total > 0;
 }
 
 class _PlannerAgendaEntry {
@@ -469,63 +469,211 @@ class _PlannerAgendaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SectionCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 330;
-          final timeLabel = DateTimeUtils.time(entry.time, locale);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(26),
+        onTap: HapticFeedback.lightImpact,
+        child: SectionCard(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 330;
+              final timeLabel = DateTimeUtils.time(entry.time, locale);
 
-          final details = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              StatusPill(
-                label: entry.label,
-                color: entry.accent,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                entry.title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              if (compact) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  timeLabel,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: entry.accent,
-                      ),
-                ),
-              ],
-            ],
-          );
+              final details = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  StatusPill(
+                    label: entry.label,
+                    color: entry.accent,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    entry.title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (compact) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      timeLabel,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: entry.accent,
+                          ),
+                    ),
+                  ],
+                ],
+              );
 
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: entry.accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(entry.icon, color: entry.accent),
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: entry.accent.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(entry.icon, color: entry.accent),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: details),
+                  if (!compact) ...[
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      timeLabel,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: entry.accent,
+                          ),
+                    ),
+                  ],
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlannerDayCell extends StatelessWidget {
+  const _PlannerDayCell({
+    required this.day,
+    required this.load,
+    this.selected = false,
+    this.today = false,
+  });
+
+  final DateTime day;
+  final _PlannerDayLoad load;
+  final bool selected;
+  final bool today;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final foreground = selected ? scheme.onPrimary : scheme.onSurface;
+    final borderColor = selected
+        ? scheme.primary
+        : today
+            ? scheme.primary.withValues(alpha: 0.58)
+            : scheme.outlineVariant.withValues(alpha: 0.22);
+    final fillColor = selected
+        ? scheme.primary
+        : load.hasItems
+            ? scheme.primaryContainer.withValues(alpha: 0.24)
+            : Colors.transparent;
+
+    return Center(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        width: 44,
+        height: 50,
+        decoration: BoxDecoration(
+          color: fillColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.22),
+                    blurRadius: 14,
+                    offset: const Offset(0, 7),
+                  ),
+                ]
+              : null,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Center(
+              child: Text(
+                '${day.day}',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: foreground,
+                      fontWeight:
+                          selected || today ? FontWeight.w800 : FontWeight.w600,
+                    ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(child: details),
-              if (!compact) ...[
-                const SizedBox(width: AppSpacing.md),
-                Text(
-                  timeLabel,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: entry.accent,
-                      ),
+            ),
+            if (load.hasItems)
+              PositionedDirectional(
+                top: 4,
+                end: 5,
+                child: _PlannerCountBadge(
+                  count: load.total,
+                  selected: selected,
                 ),
-              ],
-            ],
-          );
-        },
+              ),
+            if (load.hasItems)
+              PositionedDirectional(
+                bottom: 6,
+                start: 0,
+                end: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (load.tasks > 0)
+                      _PlannerMarkerDot(
+                        color: selected ? scheme.onPrimary : scheme.primary,
+                      ),
+                    if (load.sessions > 0) ...[
+                      const SizedBox(width: 3),
+                      _PlannerMarkerDot(
+                        color: selected ? scheme.onPrimary : scheme.secondary,
+                      ),
+                    ],
+                    if (load.exams > 0) ...[
+                      const SizedBox(width: 3),
+                      _PlannerMarkerDot(
+                        color: selected ? scheme.onPrimary : scheme.tertiary,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlannerCountBadge extends StatelessWidget {
+  const _PlannerCountBadge({
+    required this.count,
+    required this.selected,
+  });
+
+  final int count;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final label = count > 9 ? '9+' : '$count';
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+      decoration: BoxDecoration(
+        color: selected ? scheme.onPrimary : scheme.primary,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: selected ? scheme.primary : scheme.onPrimary,
+              fontSize: 9,
+              height: 1.1,
+              fontWeight: FontWeight.w800,
+            ),
       ),
     );
   }
