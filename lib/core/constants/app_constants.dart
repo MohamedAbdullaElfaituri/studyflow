@@ -29,6 +29,7 @@ class AppConstants {
   static const authSessionKey = 'auth_session_user_id';
   static const onboardingKey = 'has_completed_onboarding';
   static const localePreferenceKey = 'app_locale_preference';
+  static const themePreferenceKey = 'app_theme_preference';
   static const profilesKey = 'profiles_collection';
   static const authCredentialsKey = 'auth_credentials_collection';
 

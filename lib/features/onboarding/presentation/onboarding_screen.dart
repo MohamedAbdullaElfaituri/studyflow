@@ -82,6 +82,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onPressed: _finish,
                 child: Text(context.l10n.skipAction),
               ),
+              const SizedBox(width: AppSpacing.xs),
+              const ThemeModeIconButton(),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),

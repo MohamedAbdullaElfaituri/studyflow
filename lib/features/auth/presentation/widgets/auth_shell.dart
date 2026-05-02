@@ -35,20 +35,26 @@ class AuthScaffold extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (canPop)
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: IconButton.filledTonal(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                SizedBox(
+                  height: 76,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const AppLogo(size: 76),
+                      if (canPop)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: IconButton.filledTonal(
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                          ),
+                        ),
+                      const Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: ThemeModeIconButton(),
                       ),
-                    ),
+                    ],
                   ),
-                const Align(
-                  alignment: Alignment.center,
-                  child: AppLogo(size: 76),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 SectionCard(

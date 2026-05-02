@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../core/localization/generated/app_localizations.dart';
 import '../core/theme/app_theme.dart';
+import '../core/widgets/app_widgets.dart';
 import '../shared/providers/app_providers.dart';
 
 class StudyFlowApp extends ConsumerWidget {
@@ -13,6 +14,7 @@ class StudyFlowApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final themePreference = ref.watch(effectiveThemePreferenceProvider);
     final locale = ref.watch(localeProvider);
     final accessibilityMode = ref.watch(accessibilityModeProvider);
 
@@ -42,10 +44,33 @@ class StudyFlowApp extends ConsumerWidget {
                 ? const TextScaler.linear(1.05)
                 : mediaQuery.textScaler,
           ),
-          child: appChild,
+          child: ThemeToggleScope(
+            themeMode: themePreference,
+            onToggle: () => _toggleThemeMode(context, ref),
+            child: appChild,
+          ),
         );
       },
     );
+  }
+
+  Future<void> _toggleThemeMode(BuildContext context, WidgetRef ref) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nextTheme = isDark ? 'light' : 'dark';
+    final studyData = ref.read(studyDataControllerProvider).valueOrNull;
+    final currentUser = ref.read(currentUserProvider);
+
+    if (studyData != null && currentUser != null) {
+      await ref.read(studyDataControllerProvider.notifier).updateSettings(
+            studyData.settings.copyWith(
+              themeMode: nextTheme,
+              updatedAt: DateTime.now(),
+            ),
+          );
+      return;
+    }
+
+    await ref.read(appThemePreferenceProvider.notifier).setTheme(nextTheme);
   }
 }
 

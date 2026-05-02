@@ -18,6 +18,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(studyDataControllerProvider);
     final explicitLanguagePreference = ref.watch(appLocalePreferenceProvider);
+    final explicitThemePreference = ref.watch(appThemePreferenceProvider);
     final notificationPermission = ref.watch(notificationPermissionProvider);
     final reminderService = ref.watch(reminderServiceProvider);
 
@@ -42,11 +43,12 @@ class SettingsScreen extends ConsumerWidget {
               : supportedLanguages.contains(studyData.settings.languageCode)
                   ? studyData.settings.languageCode
                   : 'en';
-          final selectedTheme = supportedThemes.contains(
-            studyData.settings.themeMode,
-          )
-              ? studyData.settings.themeMode
-              : 'system';
+          final selectedTheme =
+              supportedThemes.contains(explicitThemePreference)
+                  ? explicitThemePreference!
+                  : supportedThemes.contains(studyData.settings.themeMode)
+                      ? studyData.settings.themeMode
+                      : 'system';
           final systemNotificationsEnabled =
               notificationPermission.valueOrNull ??
                   studyData.settings.notificationsEnabled;
@@ -284,9 +286,6 @@ class SettingsScreen extends ConsumerWidget {
               updatedAt: DateTime.now(),
             ),
           );
-      if (context.mounted) {
-        context.showSuccessNotification(context.copy.themeUpdatedMessage);
-      }
     } catch (error) {
       if (context.mounted) {
         context.showErrorNotification(context.resolveError(error));

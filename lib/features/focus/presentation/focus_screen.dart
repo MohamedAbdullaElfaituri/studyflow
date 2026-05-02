@@ -79,7 +79,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
               ? context.l10n.breakModeLabel
               : context.l10n.focusModeLabel;
           final statusLabel = _statusLabel(context, isPaused: isPaused);
-          final prompt = _computerPrompt(context, isPaused: isPaused);
           final minutes =
               _remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
           final seconds =
@@ -90,7 +89,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
               PageHeader(
                 leading: const AppLogo(size: 44, radius: 18),
                 title: context.l10n.focusTitle,
-                subtitle: context.l10n.focusSubtitle,
                 trailing: _FocusStatusBadge(
                   label: statusLabel,
                   active: _isRunning,
@@ -105,7 +103,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
                   seconds: seconds,
                   modeLabel: modeLabel,
                   statusLabel: statusLabel,
-                  prompt: prompt,
                   progress: progress,
                   isRunning: _isRunning,
                   isBreak: _isBreak,
@@ -186,7 +183,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
               const SizedBox(height: AppSpacing.lg),
               SectionHeader(
                 title: context.l10n.focusHistoryTitle,
-                subtitle: context.l10n.focusHistorySubtitle,
               ),
               const SizedBox(height: AppSpacing.md),
               if (studyData.sessions.isEmpty)
@@ -245,23 +241,6 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
       return context.l10n.focusStatusPaused;
     }
     return context.l10n.focusStatusReady;
-  }
-
-  String _computerPrompt(BuildContext context, {required bool isPaused}) {
-    final intention = _intentionController.text.trim();
-    if (_isBreak) {
-      return context.l10n.focusComputerPromptBreak;
-    }
-    if (_isRunning && intention.isNotEmpty) {
-      return context.l10n.focusIntentionResponse(intention);
-    }
-    if (_isRunning) {
-      return context.l10n.focusComputerPromptRunning;
-    }
-    if (isPaused) {
-      return context.l10n.focusComputerPromptPaused;
-    }
-    return context.l10n.focusComputerPromptReady;
   }
 
   void _startTimer() {
@@ -356,7 +335,6 @@ class _FocusCommandCenter extends StatelessWidget {
     required this.seconds,
     required this.modeLabel,
     required this.statusLabel,
-    required this.prompt,
     required this.progress,
     required this.isRunning,
     required this.isBreak,
@@ -373,7 +351,6 @@ class _FocusCommandCenter extends StatelessWidget {
   final String seconds;
   final String modeLabel;
   final String statusLabel;
-  final String prompt;
   final double progress;
   final bool isRunning;
   final bool isBreak;
@@ -419,9 +396,7 @@ class _FocusCommandCenter extends StatelessWidget {
             );
             final panel = _HumanComputerPanel(
               statusLabel: statusLabel,
-              prompt: prompt,
               isRunning: isRunning,
-              isBreak: isBreak,
               intentionController: intentionController,
               onIntentionChanged: onIntentionChanged,
             );
@@ -464,63 +439,28 @@ class _FocusCommandCenter extends StatelessWidget {
 class _HumanComputerPanel extends StatelessWidget {
   const _HumanComputerPanel({
     required this.statusLabel,
-    required this.prompt,
     required this.isRunning,
-    required this.isBreak,
     required this.intentionController,
     required this.onIntentionChanged,
   });
 
   final String statusLabel;
-  final String prompt;
   final bool isRunning;
-  final bool isBreak;
   final TextEditingController intentionController;
   final ValueChanged<String> onIntentionChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final accent = isBreak ? AppColors.secondary : scheme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            _ConnectionChip(
-              icon: Icons.person_rounded,
-              label: context.l10n.focusHumanName,
-              color: AppColors.tertiary,
-            ),
-            _ConnectionChip(
-              icon: Icons.sync_alt_rounded,
-              label: context.l10n.focusConnectionLabel,
-              color: accent,
-            ),
-            _ConnectionChip(
-              icon: Icons.computer_rounded,
-              label: context.l10n.focusComputerName,
-              color: AppColors.secondary,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
         Text(
           statusLabel,
           style: theme.textTheme.headlineSmall,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          prompt,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
         ),
         const SizedBox(height: AppSpacing.lg),
         TextField(
@@ -741,43 +681,6 @@ class _FocusStatusBadge extends StatelessWidget {
             : Theme.of(context).colorScheme.primary;
 
     return StatusPill(label: label, color: color);
-  }
-}
-
-class _ConnectionChip extends StatelessWidget {
-  const _ConnectionChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsetsDirectional.fromSTEB(10, 8, 12, 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.20)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: color,
-                ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

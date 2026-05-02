@@ -14,6 +14,53 @@ import '../../shared/models/app_models.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
+class ThemeToggleScope extends InheritedWidget {
+  const ThemeToggleScope({
+    required this.themeMode,
+    required this.onToggle,
+    required super.child,
+    super.key,
+  });
+
+  final String themeMode;
+  final VoidCallback onToggle;
+
+  static ThemeToggleScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<ThemeToggleScope>();
+  }
+
+  @override
+  bool updateShouldNotify(ThemeToggleScope oldWidget) {
+    return oldWidget.themeMode != themeMode || oldWidget.onToggle != onToggle;
+  }
+}
+
+class ThemeModeIconButton extends StatelessWidget {
+  const ThemeModeIconButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = ThemeToggleScope.maybeOf(context);
+    if (scope == null) {
+      return const SizedBox.shrink();
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded;
+    final tooltip = isDark ? 'Light mode' : 'Dark mode';
+
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: IconButton.filledTonal(
+        tooltip: tooltip,
+        onPressed: scope.onToggle,
+        icon: Icon(icon),
+      ),
+    );
+  }
+}
+
 class AppPage extends StatelessWidget {
   const AppPage({
     required this.child,
@@ -91,6 +138,7 @@ class PageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final headerActions = _PageHeaderActions(trailing: trailing);
 
     final titleBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +177,9 @@ class PageHeader extends StatelessWidget {
                 ),
             const SizedBox(width: AppSpacing.md),
             Expanded(child: titleBlock),
-            if (!stackTrailing && trailing != null) ...[
+            if (!stackTrailing) ...[
               const SizedBox(width: AppSpacing.sm),
-              trailing!,
+              headerActions,
             ],
           ],
         );
@@ -147,11 +195,33 @@ class PageHeader extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: AlignmentDirectional.centerEnd,
-              child: trailing!,
+              child: headerActions,
             ),
           ],
         );
       },
+    );
+  }
+}
+
+class _PageHeaderActions extends StatelessWidget {
+  const _PageHeaderActions({this.trailing});
+
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    if (trailing == null) {
+      return const ThemeModeIconButton();
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        trailing!,
+        const SizedBox(width: AppSpacing.xs),
+        const ThemeModeIconButton(),
+      ],
     );
   }
 }

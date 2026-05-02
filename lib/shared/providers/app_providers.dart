@@ -80,6 +80,30 @@ final appLocalePreferenceProvider =
   AppLocalePreferenceController.new,
 );
 
+class AppThemePreferenceController extends Notifier<String?> {
+  @override
+  String? build() {
+    return _normalizeThemePreference(
+      ref
+          .watch(localStorageServiceProvider)
+          .readString(AppConstants.themePreferenceKey),
+    );
+  }
+
+  Future<void> setTheme(String themeMode) async {
+    final normalized = _normalizeThemePreference(themeMode) ?? 'system';
+    state = normalized;
+    await ref
+        .read(localStorageServiceProvider)
+        .writeString(AppConstants.themePreferenceKey, normalized);
+  }
+}
+
+final appThemePreferenceProvider =
+    NotifierProvider<AppThemePreferenceController, String?>(
+  AppThemePreferenceController.new,
+);
+
 class LaunchSplashController extends Notifier<bool> {
   @override
   bool build() => false;
@@ -999,6 +1023,10 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
         previousState?.settings.languageCode ??
         currentUser?.preferredLanguage ??
         'en';
+    final previousThemeMode = ref.read(appThemePreferenceProvider) ??
+        previousState?.settings.themeMode ??
+        currentUser?.themeMode ??
+        'system';
 
     if (previousState != null) {
       state = AsyncData(previousState.copyWith(settings: settings));
@@ -1007,6 +1035,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
     await ref
         .read(appLocalePreferenceProvider.notifier)
         .setLocale(settings.languageCode);
+    await ref
+        .read(appThemePreferenceProvider.notifier)
+        .setTheme(settings.themeMode);
 
     try {
       await repository.saveUserSettings(settings);
@@ -1020,6 +1051,9 @@ class StudyDataController extends AsyncNotifier<StudyDataState> {
       await ref
           .read(appLocalePreferenceProvider.notifier)
           .setLocale(previousLocaleCode);
+      await ref
+          .read(appThemePreferenceProvider.notifier)
+          .setTheme(previousThemeMode);
       rethrow;
     }
 
@@ -1078,14 +1112,28 @@ String _normalizeLocaleCode(String? code) {
   };
 }
 
-final themeModeProvider = Provider<ThemeMode>((ref) {
-  final theme = ref.watch(
+String? _normalizeThemePreference(String? value) {
+  return switch (value?.trim().toLowerCase()) {
+    'light' => 'light',
+    'dark' => 'dark',
+    'system' => 'system',
+    _ => null,
+  };
+}
+
+final effectiveThemePreferenceProvider = Provider<String>((ref) {
+  return ref.watch(appThemePreferenceProvider) ??
+      ref.watch(
         studyDataControllerProvider.select(
           (value) => value.valueOrNull?.settings.themeMode,
         ),
       ) ??
       ref.watch(currentUserProvider)?.themeMode ??
       'system';
+});
+
+final themeModeProvider = Provider<ThemeMode>((ref) {
+  final theme = ref.watch(effectiveThemePreferenceProvider);
   return switch (theme) {
     'light' => ThemeMode.light,
     'dark' => ThemeMode.dark,
