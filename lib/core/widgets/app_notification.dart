@@ -10,6 +10,10 @@ enum AppNotificationTone { success, error, info, warning }
 
 enum AppNotificationPosition { top, bottom }
 
+const _notificationEnterDuration = Duration(milliseconds: 55);
+const _notificationFadeDuration = Duration(milliseconds: 45);
+const _notificationDismissDelay = Duration(milliseconds: 50);
+
 class AppNotificationController {
   static OverlayEntry? _activeEntry;
 
@@ -110,10 +114,7 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
     _dismissed = true;
     _timer?.cancel();
     setState(() => _visible = false);
-    Timer(
-      const Duration(milliseconds: 80),
-      widget.onDismissed,
-    );
+    Timer(_notificationDismissDelay, widget.onDismissed);
   }
 
   @override
@@ -141,12 +142,12 @@ class _AppNotificationOverlayState extends State<_AppNotificationOverlay> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 560),
               child: AnimatedSlide(
-                duration: const Duration(milliseconds: 90),
+                duration: _notificationEnterDuration,
                 curve: Curves.easeOutQuad,
                 offset:
                     _visible ? Offset.zero : Offset(0, isTop ? -0.08 : 0.08),
                 child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 70),
+                  duration: _notificationFadeDuration,
                   curve: Curves.easeOutQuad,
                   opacity: _visible ? 1 : 0,
                   child: Material(

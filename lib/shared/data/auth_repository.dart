@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -468,13 +469,6 @@ class SupabaseAuthRepository implements AuthRepository {
     final objectPath =
         '${user.id}/${DateTime.now().millisecondsSinceEpoch}.$extension';
 
-    final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
-    if (previousObjectPath != null) {
-      try {
-        await _client.storage.from('avatars').remove([previousObjectPath]);
-      } catch (_) {}
-    }
-
     await _client.storage.from('avatars').uploadBinary(
           objectPath,
           bytes,
@@ -489,6 +483,11 @@ class SupabaseAuthRepository implements AuthRepository {
       ),
     );
 
+    final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
+    if (previousObjectPath != null) {
+      unawaited(_removeAvatarObject(previousObjectPath));
+    }
+
     return updated;
   }
 
@@ -496,9 +495,7 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<AppUserModel> deleteAvatar(AppUserModel user) async {
     final previousObjectPath = _extractAvatarObjectPath(user.avatarUrl);
     if (previousObjectPath != null) {
-      try {
-        await _client.storage.from('avatars').remove([previousObjectPath]);
-      } catch (_) {}
+      await _removeAvatarObject(previousObjectPath);
     }
 
     final existingProfile = await _fetchExistingProfile(user.id);
@@ -518,6 +515,12 @@ class SupabaseAuthRepository implements AuthRepository {
     await _syncAuthMetadata(normalized, clearAvatar: true);
 
     return normalized;
+  }
+
+  Future<void> _removeAvatarObject(String objectPath) async {
+    try {
+      await _client.storage.from('avatars').remove([objectPath]);
+    } catch (_) {}
   }
 
   Future<AppUserModel> _ensureProfile(User user) async {

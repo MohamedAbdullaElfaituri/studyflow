@@ -6,6 +6,9 @@ import '../../core/localization/app_copy.dart';
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/widgets/app_notification.dart';
 
+const _standardNotificationDuration = Duration(milliseconds: 1500);
+const _errorNotificationDuration = Duration(milliseconds: 2200);
+
 extension BuildContextX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this)!;
   AppCopy get copy => AppCopy.of(Localizations.localeOf(this));
@@ -15,7 +18,7 @@ extension BuildContextX on BuildContext {
     AppNotificationTone tone = AppNotificationTone.info,
     AppNotificationPosition? position,
     String? title,
-    Duration duration = const Duration(milliseconds: 2400),
+    Duration duration = _standardNotificationDuration,
   }) {
     AppNotificationController.show(
       context: this,
@@ -30,7 +33,7 @@ extension BuildContextX on BuildContext {
   void showSuccessNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(milliseconds: 2400),
+    Duration duration = _standardNotificationDuration,
   }) {
     showAppSnackBar(
       message,
@@ -43,7 +46,7 @@ extension BuildContextX on BuildContext {
   void showErrorNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(milliseconds: 3200),
+    Duration duration = _errorNotificationDuration,
   }) {
     showAppSnackBar(
       message,
@@ -56,7 +59,7 @@ extension BuildContextX on BuildContext {
   void showInfoNotification(
     String message, {
     String? title,
-    Duration duration = const Duration(milliseconds: 2400),
+    Duration duration = _standardNotificationDuration,
   }) {
     showAppSnackBar(
       message,

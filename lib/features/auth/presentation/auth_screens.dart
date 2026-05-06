@@ -46,17 +46,9 @@ String _alreadyHaveAccountPrompt(BuildContext context) {
 
 String _authLoadingTitle(BuildContext context) {
   return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Hesabın hazırlanıyor',
-    'ar' => 'جار تجهيز حسابك',
-    _ => 'Preparing your account',
-  };
-}
-
-String _authLoadingSubtitle(BuildContext context) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'tr' => 'Lütfen bekle, seni doğrudan ana ekrana götürüyoruz.',
-    'ar' => 'يرجى الانتظار، سيتم نقلك مباشرة إلى الصفحة الرئيسية.',
-    _ => 'Please wait while we take you straight to the home screen.',
+    'tr' => 'Lütfen bekle',
+    'ar' => 'يرجى الانتظار',
+    _ => 'Please wait',
   };
 }
 
@@ -293,14 +285,6 @@ class AuthLoadingScreen extends StatelessWidget {
               Text(
                 _authLoadingTitle(context),
                 style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _authLoadingSubtitle(context),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
                 textAlign: TextAlign.center,
               ),
             ],

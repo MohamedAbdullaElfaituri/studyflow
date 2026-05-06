@@ -208,24 +208,6 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              _SettingsPanel(
-                title: _accessibilitySectionTitle(context),
-                subtitle: _accessibilitySectionSubtitle(context),
-                child: _SettingsToggleTile(
-                  icon: Icons.accessibility_new_rounded,
-                  title: _accessibilityModeTitle(context),
-                  subtitle: _accessibilityModeSubtitle(context),
-                  value: studyData.settings.accessibilityMode,
-                  onChanged: (value) => _toggleAccessibility(
-                    context,
-                    ref,
-                    studyData,
-                    selectedLanguage,
-                    value,
-                  ),
-                ),
-              ),
               const SizedBox(height: AppSpacing.xl),
               SectionCard(
                 child: OutlinedButton.icon(
@@ -305,6 +287,9 @@ class SettingsScreen extends ConsumerWidget {
 
     try {
       if (!enabled) {
+        if (context.mounted) {
+          context.showAppSnackBar(_notificationsPausedMessage(context));
+        }
         await reminderService.cancelAll();
         await notifier.updateSettings(
           studyData.settings.copyWith(
@@ -313,14 +298,23 @@ class SettingsScreen extends ConsumerWidget {
           ),
         );
         ref.invalidate(notificationPermissionProvider);
-        if (context.mounted) {
-          context.showAppSnackBar(_notificationsPausedMessage(context));
-        }
         return;
       }
 
       final granted =
           systemEnabled ? true : await reminderService.requestPermissions();
+      if (context.mounted) {
+        if (granted) {
+          context.showSuccessNotification(_notificationsEnabledMessage(context));
+        } else {
+          context.showErrorNotification(
+            reminderService.isSupported
+                ? _notificationsDeniedMessage(context)
+                : _notificationsUnsupportedMessage(context),
+          );
+        }
+      }
+
       await notifier.updateSettings(
         studyData.settings.copyWith(
           notificationsEnabled: granted,
@@ -328,48 +322,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
       );
       ref.invalidate(notificationPermissionProvider);
-
-      if (!context.mounted) {
-        return;
-      }
-
-      if (granted) {
-        context.showSuccessNotification(_notificationsEnabledMessage(context));
-        return;
-      }
-
-      context.showErrorNotification(
-        reminderService.isSupported
-            ? _notificationsDeniedMessage(context)
-            : _notificationsUnsupportedMessage(context),
-      );
-    } catch (error) {
-      if (context.mounted) {
-        context.showErrorNotification(context.resolveError(error));
-      }
-    }
-  }
-
-  Future<void> _toggleAccessibility(
-    BuildContext context,
-    WidgetRef ref,
-    StudyDataState studyData,
-    String languageCode,
-    bool value,
-  ) async {
-    try {
-      await ref.read(studyDataControllerProvider.notifier).updateSettings(
-            studyData.settings.copyWith(
-              languageCode: languageCode,
-              accessibilityMode: value,
-              updatedAt: DateTime.now(),
-            ),
-          );
-      if (context.mounted) {
-        context.showSuccessNotification(
-          context.copy.accessibilityUpdatedMessage(enabled: value),
-        );
-      }
     } catch (error) {
       if (context.mounted) {
         context.showErrorNotification(context.resolveError(error));
@@ -490,38 +442,6 @@ class SettingsScreen extends ConsumerWidget {
       'tr' => 'Hatırlatmalar kapalı.',
       'ar' => 'التذكيرات متوقفة.',
       _ => 'Reminders are off.',
-    };
-  }
-
-  String _accessibilitySectionTitle(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Erişilebilirlik',
-      'ar' => 'إمكانية الوصول',
-      _ => 'Accessibility',
-    };
-  }
-
-  String _accessibilitySectionSubtitle(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Okumayı kolaylaştır ve gereksiz hareketi azalt.',
-      'ar' => 'اجعل القراءة أوضح وقلّل الحركة غير الضرورية في الواجهة.',
-      _ => 'Make reading easier and reduce unnecessary motion across the app.',
-    };
-  }
-
-  String _accessibilityModeTitle(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Erişilebilirlik modu',
-      'ar' => 'وضع إمكانية الوصول',
-      _ => 'Accessibility mode',
-    };
-  }
-
-  String _accessibilityModeSubtitle(BuildContext context) {
-    return switch (Localizations.localeOf(context).languageCode) {
-      'tr' => 'Animasyonları azaltır ve metni biraz daha rahat hale getirir.',
-      'ar' => 'يقلّل الحركة ويجعل النص أكثر راحة للقراءة قليلاً.',
-      _ => 'Reduces motion and slightly improves reading comfort.',
     };
   }
 

@@ -92,11 +92,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     children: [
                       FilledButton.tonal(
                         onPressed: _uploadingAvatar ? null : _pickAvatar,
-                        child: Text(
-                          user.avatarUrl?.isEmpty != false
-                              ? copy.uploadPhoto
-                              : copy.changePhoto,
-                        ),
+                        child: _avatarUploadButtonLabel(copy, user),
                       ),
                       if (user.avatarUrl?.isEmpty == false) ...[
                         const SizedBox(height: AppSpacing.sm),
@@ -113,11 +109,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                       Expanded(
                         child: FilledButton.tonal(
                           onPressed: _uploadingAvatar ? null : _pickAvatar,
-                          child: Text(
-                            user.avatarUrl?.isEmpty != false
-                                ? copy.uploadPhoto
-                                : copy.changePhoto,
-                          ),
+                          child: _avatarUploadButtonLabel(copy, user),
                         ),
                       ),
                       if (user.avatarUrl?.isEmpty == false) ...[
@@ -284,6 +276,28 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     );
   }
 
+  Widget _avatarUploadButtonLabel(ProfileCopy copy, AppUserModel user) {
+    if (!_uploadingAvatar) {
+      return Text(
+        user.avatarUrl?.isEmpty != false ? copy.uploadPhoto : copy.changePhoto,
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(copy.uploading),
+      ],
+    );
+  }
+
   Future<void> _saveProfile(AppUserModel user) async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -335,8 +349,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     final picker = ImagePicker();
     final image = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 84,
-      maxWidth: 1200,
+      imageQuality: 72,
+      maxWidth: 720,
     );
     if (image == null) {
       return;
