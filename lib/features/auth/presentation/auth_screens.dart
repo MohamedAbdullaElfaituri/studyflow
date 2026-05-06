@@ -227,15 +227,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  context.l10n.splashSubtitle,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        height: 1.45,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
                 const SizedBox(height: AppSpacing.xl),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(999),
